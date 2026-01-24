@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const BASE_WALKING_SPEED := 120.0
+const BASE_WALKING_SPEED := 100.0
 
 var last_direction: String = "down"
 var body_type: String = "cat0"
@@ -41,7 +41,7 @@ func _process_input(delta: float) -> void:
 		play_idle_animation()
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	move_and_slide()
-
+	global_position = round(global_position/ 2) * 2
 
 func _physics_process(delta: float) -> void:
 	_process_input(delta)

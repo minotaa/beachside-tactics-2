@@ -1,6 +1,7 @@
-[gd_scene load_steps=44 format=3 uid="uid://iwd3tf65vrso"]
+[gd_scene load_steps=45 format=3 uid="uid://iwd3tf65vrso"]
 
 [ext_resource type="Script" uid="uid://d11mqcsaje06h" path="res://scripts/player.gd" id="1_qlg0r"]
+[ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_fjrip"]
 [ext_resource type="Texture2D" uid="uid://ddi1l1bmljwoa" path="res://assets/sprites/cat0-down.png" id="2_tuyoq"]
 [ext_resource type="Texture2D" uid="uid://c1ycdrbox871u" path="res://assets/sprites/cat0-left.png" id="3_fjrip"]
 [ext_resource type="Texture2D" uid="uid://b653i1ri51e5h" path="res://assets/sprites/cat0-right.png" id="4_smehm"]
@@ -309,14 +310,18 @@ texture_filter = 1
 motion_mode = 1
 script = ExtResource("1_qlg0r")
 
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 11)
+texture = ExtResource("2_fjrip")
+
 [node name="Base" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_holxr")
-animation = &"cat0_walk_right"
+animation = &"cat0_idle_down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 7)
+position = Vector2(0, 9)
 shape = SubResource("RectangleShape2D_mx1m4")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(3.5, 3.5)
-position_smoothing_speed = 12.0
+position_smoothing_enabled = true
