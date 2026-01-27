@@ -79,25 +79,7 @@ func _process_input(delta: float) -> void:
 			play_idle_animation()
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	
-	if Input.is_action_pressed("fish"):
-		if not $FishPowerBar.visible:
-			$FishPowerBar.visible = true
-			$FishPowerBar.value = 0
-			hantenjutsushiki = false
-		if hantenjutsushiki:
-			$FishPowerBar.value -= randi_range(1, 3)
-			if $FishPowerBar.value <= 0:
-				hantenjutsushiki = false
-		else:
-			$FishPowerBar.value += randi_range(1, 3)
-			if $FishPowerBar.value >= 100:
-				hantenjutsushiki = true
-				
-	if Input.is_action_just_released("fish"):
-		$FishPowerBar.visible = false
-		$FishPowerBar.value = 0
-		hantenjutsushiki = false
-		
+	if Input.is_action_pressed("fish"):		
 		var mouse_pos = get_global_mouse_position()
 		var direction_vec = (mouse_pos - global_position).normalized()
 		var fish_dir := ""
@@ -154,12 +136,12 @@ func _on_base_animation_finished() -> void:
 		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
 		add_child(bobber)
 		var dir = DIRECTIONS[get_fishing_direction()]
-		var power = min(100.0, $FishPowerBar.value) / 100.0
+		#var power = min(100.0, $FishPowerBar.value) / 100.0
 
 		if abs(dir.x) > 0.1:
 			dir = (dir + Vector2(0, 0.15)).normalized()
 
-		var mult = 100.0 + (power * 550.0)
+		var mult = 120.0 #+ (power * 550.0)
 		bobber.apply_impulse(dir * mult)
 
 		await get_tree().create_timer(0.95).timeout
