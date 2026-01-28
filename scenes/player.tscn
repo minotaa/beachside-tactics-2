@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://iwd3tf65vrso"]
+[gd_scene load_steps=70 format=3 uid="uid://iwd3tf65vrso"]
 
 [ext_resource type="Script" uid="uid://d11mqcsaje06h" path="res://scripts/player.gd" id="1_qlg0r"]
 [ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_fjrip"]
@@ -11,7 +11,12 @@
 [ext_resource type="Texture2D" uid="uid://d0dlnvo4237xh" path="res://assets/sprites/cat0-up.png" id="5_ur7pv"]
 [ext_resource type="Texture2D" uid="uid://c1v3nyw4pc8s2" path="res://assets/sprites/cat0-fish-up.png" id="6_jej6c"]
 [ext_resource type="Texture2D" uid="uid://bg4e05eq83m7c" path="res://assets/sprites/under.png" id="11_jej6c"]
+[ext_resource type="Texture2D" uid="uid://buxh8vd6jesgi" path="res://assets/sprites/minigame-minigame-bar-empty.png" id="13_a8ls1"]
+[ext_resource type="Texture2D" uid="uid://dgbpnv06el6bi" path="res://assets/sprites/minigame-progress-bar-empty.png" id="13_f1ej7"]
 [ext_resource type="Texture2D" uid="uid://it176hjsau23" path="res://assets/sprites/progress.png" id="13_oprun"]
+[ext_resource type="Texture2D" uid="uid://doantlsit6s6j" path="res://assets/sprites/minigame-progress-bar.png" id="14_oprun"]
+[ext_resource type="Texture2D" uid="uid://dpi0maofy08ke" path="res://assets/sprites/minigame-hook-icon.png" id="16_a8ls1"]
+[ext_resource type="Texture2D" uid="uid://c3jtqk8gu3svq" path="res://assets/sprites/caught_fish_common.png" id="17_qfm1y"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_holxr"]
 atlas = ExtResource("3_y4r1p")
@@ -415,6 +420,16 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mx1m4"]
 size = Vector2(6, 14)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qfm1y"]
+size = Vector2(8, 17)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fulsm"]
+particle_flag_disable_z = true
+gravity = Vector3(0, -98, 0)
+scale_min = 0.7
+scale_max = 0.7
+color = Color(0.8901961, 1, 1, 1)
+
 [node name="Player" type="CharacterBody2D"]
 texture_filter = 1
 motion_mode = 1
@@ -448,5 +463,52 @@ fill_mode = 4
 nine_patch_stretch = true
 texture_under = ExtResource("11_jej6c")
 texture_progress = ExtResource("13_oprun")
+
+[node name="Minigame" type="Control" parent="."]
+z_index = 1
+layout_mode = 3
+anchors_preset = 0
+offset_left = -52.0
+offset_top = -52.0
+offset_right = -52.0
+offset_bottom = -52.0
+
+[node name="Progress" type="TextureProgressBar" parent="Minigame"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = -43.0
+offset_right = 37.0
+offset_bottom = 43.0
+max_value = 1000.0
+value = 50.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_under = ExtResource("13_a8ls1")
+texture_progress = ExtResource("14_oprun")
+
+[node name="Column" type="Sprite2D" parent="Minigame"]
+position = Vector2(22, 0)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("13_f1ej7")
+
+[node name="Hook" type="Node2D" parent="Minigame"]
+position = Vector2(22, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="Minigame/Hook"]
+texture = ExtResource("16_a8ls1")
+
+[node name="Area2D" type="Area2D" parent="Minigame/Hook"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Minigame/Hook/Area2D"]
+shape = SubResource("RectangleShape2D_qfm1y")
+
+[node name="Exclaim" type="GPUParticles2D" parent="."]
+position = Vector2(0, -24)
+emitting = false
+amount = 1
+texture = ExtResource("17_qfm1y")
+lifetime = 1.5
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_fulsm")
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]

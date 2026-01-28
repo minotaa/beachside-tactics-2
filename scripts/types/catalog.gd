@@ -17,6 +17,16 @@ enum Category {
 	UPGRADES
 }
 
+func get_fish(location: Game.Location, rod_power: int) -> Fish:
+	var catchable_fish = []
+	for item in items:
+		if item is Fish:
+			if item.location == location and rod_power >= item.power_needed:
+				catchable_fish.append(item)
+	if catchable_fish.is_empty():
+		return null
+	return catchable_fish[randi() % catchable_fish.size()]
+
 var items = []
 
 func _enter_tree() -> void:
@@ -34,3 +44,14 @@ func _enter_tree() -> void:
 	basic_fishing_rod.sell_price = 10.0
 	basic_fishing_rod.baitable = false
 	items.append(basic_fishing_rod)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
+	var cod = Fish.new(1, "Cod", atlas) # IDs must iterate no matter what, even if they're on a different list, but they probably won't.
+	cod.description = "A common fish very popular as a food choice."
+	cod.sell_price = 20.0
+	cod.power_needed = 0.0
+	cod.location = Game.Location.Crystalwater_Beach
+	cod.difficulty = Game.Difficulty.EASY
+	items.append(cod)

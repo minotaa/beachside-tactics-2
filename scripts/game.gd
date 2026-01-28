@@ -1,5 +1,23 @@
 extends Node
 
+enum Location {
+	Crystalwater_Beach
+}
+
+enum Difficulty {
+	EASY,
+	MEDIUM,
+	HARD,
+	VERY_DIFFICULT,
+	INSANE,
+	IMPOSSIBLE,
+	SUPREME
+}
+
+var catches: int = 0
+var whiffs: int = 0
+var balance: float = 0.0
+var bag = Inventory.new()
 var game_loaded: bool = false
 
 func is_mobile() -> bool:
@@ -24,11 +42,22 @@ func load_game() -> void:
 			print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
 			continue
 		var data = json.get_data()
+		if data.has("bag"):
+			bag.set_list_from_save(data["bag"])
+		if data.has("balance"):
+			balance = data["balance"]
+		if data.has("whiffs"):
+			whiffs = data["whiffs"]
+		if data.has("catches"):
+			catches = data["catches"]
 	print("Loaded save data.")
 		
 func get_save_data() -> Dictionary:
 	return {
-
+		"bag": bag.to_list(),
+		"balance": balance,
+		"whiffs": whiffs,
+		"catches": catches
 	}
 
 func _notification(what: int) -> void:
