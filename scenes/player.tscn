@@ -1,4 +1,4 @@
-[gd_scene load_steps=70 format=3 uid="uid://iwd3tf65vrso"]
+[gd_scene format=3 uid="uid://iwd3tf65vrso"]
 
 [ext_resource type="Script" uid="uid://d11mqcsaje06h" path="res://scripts/player.gd" id="1_qlg0r"]
 [ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_fjrip"]
@@ -430,29 +430,31 @@ scale_min = 0.7
 scale_max = 0.7
 color = Color(0.8901961, 1, 1, 1)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" unique_id=855136150]
 texture_filter = 1
 motion_mode = 1
 script = ExtResource("1_qlg0r")
 
-[node name="Shadow" type="Sprite2D" parent="."]
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1695943233]
 position = Vector2(0, 11)
 texture = ExtResource("2_fjrip")
 
-[node name="Base" type="AnimatedSprite2D" parent="."]
+[node name="Base" type="AnimatedSprite2D" parent="." unique_id=1003239099]
 position = Vector2(0, 3)
 sprite_frames = SubResource("SpriteFrames_holxr")
 animation = &"cat0_fish_down"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=139562197]
 position = Vector2(0, 9)
 shape = SubResource("RectangleShape2D_mx1m4")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1080039269]
 zoom = Vector2(3.5, 3.5)
+process_callback = 0
+limit_enabled = false
 position_smoothing_enabled = true
 
-[node name="FishPowerBar" type="TextureProgressBar" parent="."]
+[node name="FishPowerBar" type="TextureProgressBar" parent="." unique_id=1018385252]
 visible = false
 offset_left = -7.0
 offset_top = -20.0
@@ -464,8 +466,8 @@ nine_patch_stretch = true
 texture_under = ExtResource("11_jej6c")
 texture_progress = ExtResource("13_oprun")
 
-[node name="Minigame" type="Control" parent="."]
-z_index = 1
+[node name="Minigame" type="Control" parent="." unique_id=1517156467]
+z_index = 128
 layout_mode = 3
 anchors_preset = 0
 offset_left = -52.0
@@ -473,7 +475,7 @@ offset_top = -52.0
 offset_right = -52.0
 offset_bottom = -52.0
 
-[node name="Progress" type="TextureProgressBar" parent="Minigame"]
+[node name="Progress" type="TextureProgressBar" parent="Minigame" unique_id=1094552000]
 layout_mode = 0
 offset_left = 30.0
 offset_top = -43.0
@@ -486,23 +488,23 @@ nine_patch_stretch = true
 texture_under = ExtResource("13_a8ls1")
 texture_progress = ExtResource("14_oprun")
 
-[node name="Column" type="Sprite2D" parent="Minigame"]
+[node name="Column" type="Sprite2D" parent="Minigame" unique_id=864662850]
 position = Vector2(22, 0)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("13_f1ej7")
 
-[node name="Hook" type="Node2D" parent="Minigame"]
+[node name="Hook" type="Node2D" parent="Minigame" unique_id=354041404]
 position = Vector2(22, 0)
 
-[node name="Sprite2D" type="Sprite2D" parent="Minigame/Hook"]
+[node name="Sprite2D" type="Sprite2D" parent="Minigame/Hook" unique_id=794713038]
 texture = ExtResource("16_a8ls1")
 
-[node name="Area2D" type="Area2D" parent="Minigame/Hook"]
+[node name="Area2D" type="Area2D" parent="Minigame/Hook" unique_id=880474768]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Minigame/Hook/Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Minigame/Hook/Area2D" unique_id=316947869]
 shape = SubResource("RectangleShape2D_qfm1y")
 
-[node name="Exclaim" type="GPUParticles2D" parent="."]
+[node name="Exclaim" type="GPUParticles2D" parent="." unique_id=333409775]
 position = Vector2(0, -24)
 emitting = false
 amount = 1

@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://cu1ayr5nxkvog"]
+[gd_scene format=3 uid="uid://cu1ayr5nxkvog"]
 
 [ext_resource type="Texture2D" uid="uid://d4jmtgjd4em2i" path="res://assets/sprites/fish.png" id="1_0rql6"]
 
