@@ -108,7 +108,12 @@ func _process_input(delta: float) -> void:
 			if ($Minigame/Progress.value >= 999):
 				print("Caught the fish.")
 				if bobber != null:
-					print(bobber.get_node("Bobber Fish").get_meta("fish_id")) # ACTUALLY ADD FISH TO INVENTORY
+					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
+					if Game.bag.total_size() > Game.get_max_inventory_size():
+						Toast.add("Your inventory is full! Sell some stuff.")
+					else:
+						Game.bag.add_item(stack)
+						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 				state = FishState.REELING_BACK
 				Game.catches += 1
 				#_show_ui()
@@ -244,6 +249,8 @@ func _process_ui(delta: float) -> void:
 func _fishing_timer(location: Game.Location) -> void:
 	var odds = randi_range(250, 850)
 	var your_odds = 0
+	if Game.bag.total_size() > Game.get_max_inventory_size():
+		Toast.add("Your inventory is full, you will release anything you catch.")
 	
 	var rod_power = 0 # FIXME
 

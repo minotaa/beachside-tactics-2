@@ -23,7 +23,6 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 	return 100.0  # fallback
 
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
-	# Build list of catchable fish
 	var catchable_fish = []
 	for item in items:
 		if item is Fish:
@@ -32,26 +31,25 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 	
 	if catchable_fish.is_empty():
 		return null
-	
-	# Calculate total weight
 	var total_weight = 0.0
 	for fish in catchable_fish:
 		total_weight += get_rarity_weight(fish.rarity)
-	
-	# Weighted random selection
 	var random_value = randf() * total_weight
 	var current_weight = 0.0
-	
 	catchable_fish.shuffle()
-	
 	for fish in catchable_fish:
 		current_weight += get_rarity_weight(fish.rarity)
 		if random_value < current_weight:
 			return fish
-	
 	return null
 
 var items = []
+
+func get_item(id: int) -> ItemType:
+	for item in items:
+		if item.id == id:
+			return item
+	return null
 
 func _enter_tree() -> void:
 	var atlas = AtlasTexture.new()

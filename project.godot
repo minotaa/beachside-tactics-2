@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
 
+Toast="*uid://bwuwrg2up5rs6"
 Catalog="*res://scripts/types/catalog.gd"
 Game="*res://scripts/game.gd"
 

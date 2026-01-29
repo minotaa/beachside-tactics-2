@@ -37,6 +37,9 @@ var balance: float = 0.0
 var bag = Inventory.new()
 var game_loaded: bool = false
 
+func get_max_inventory_size() -> int:
+	return 25
+
 func is_mobile() -> bool:
 	return OS.get_name() == "Android" or OS.get_name() == "iOS"
 

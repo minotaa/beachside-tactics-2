@@ -4,14 +4,14 @@ class_name ItemType
 var name: String
 var id: int
 var description: String
-var rarity: Catalog.Rarity = Catalog.Rarity.COMMON
+var rarity: Game.Rarity = Game.Rarity.COMMON
 var texture: Texture
 
 var single_purchase: bool = false
 var purchasable: bool = false
 var price: float = 0.0
 var sell_price: float = 0.0
-var category: Catalog.Category
+var category: Game.Category
 
 func _init(id: int, name: String, texture: Texture) -> void:
 	self.id = id

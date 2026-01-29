@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://blv1gynriog5y"]
+
+[ext_resource type="Script" uid="uid://cap3eftdsb2vh" path="res://scripts/toast/resource.gd" id="1_4iex2"]
+[ext_resource type="Texture2D" uid="uid://c68b28kjm3u6v" path="res://assets/sprites/box.png" id="2_vkair"]
+[ext_resource type="FontFile" uid="uid://l3853frrj62o" path="res://assets/fonts/at01.ttf" id="3_bycar"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kx06n"]
+texture = ExtResource("2_vkair")
+texture_margin_left = 32.0
+texture_margin_top = 16.0
+texture_margin_right = 32.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_k46ej"]
+line_spacing = 0.0
+font = ExtResource("3_bycar")
+font_size = 32
+shadow_size = 3
+shadow_color = Color(0, 0, 0, 0.8666667)
+
+[node name="Toast" type="Control" unique_id=560652174]
+texture_filter = 1
+layout_mode = 3
+anchor_right = 0.4
+anchor_bottom = 0.078
+offset_bottom = -0.15999985
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4iex2")
+
+[node name="Label" type="Label" parent="." unique_id=1966266460]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_kx06n")
+text = "Your inventory is full!"
+label_settings = SubResource("LabelSettings_k46ej")
+vertical_alignment = 1
+autowrap_mode = 2
