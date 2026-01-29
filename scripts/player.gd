@@ -13,6 +13,8 @@ var last_direction: String = "down"
 var body_type: String = "cat0"
 var state: FishState = FishState.INACTIVE
 var bobber: RigidBody2D
+var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
+var fish_control_safe: bool = false # Makes it so that you can't fish until you release the fish keybind.
 
 var hookVelocity = 0
 var hookAcceleration = .001
@@ -21,11 +23,11 @@ var maxVelocity = 2.0
 var bounce = .6
 
 enum FishState {
-	FISHING,
-	FOUND_FISH,
-	REELING,
-	REELING_BACK,
-	INACTIVE
+	FISHING, # When your bobber is out in the water, haven't found a fish.
+	FOUND_FISH, # When your bobber is out in the water, you found a fish, the brief moment when the exclamation mark is on screen.
+	REELING, # You're currently in the reeling minigame.
+	REELING_BACK, # You're currently reeling the fish back in.
+	INACTIVE # You're not doing anything.
 }
 
 func _ready() -> void:
@@ -72,11 +74,41 @@ func play_animation(name: String, backwards: bool = false, speed: float = 1) -> 
 func _process_input(delta: float) -> void:
 	# Movement controls
 	velocity = Input.get_vector("left", "right", "up", "down", 0.1)
-	if state == FishState.REELING:
+	if state == FishState.REELING or state == FishState.FISHING:
 		velocity = Vector2.ZERO
 	var velocity_length = velocity.length_squared()
 	var is_moving = velocity_length > 0
 
+
+	# Reel back in bobber if you're fishing.
+	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
+		if bobber != null:
+			bobber.global_position = bobber.global_position.move_toward(
+				get_rod_tip(get_fishing_direction()), 
+				40.0 * delta
+			)
+			var tile_map = get_parent().get_node("Ground") as TileMapLayer
+			var bobber_position = tile_map.to_local(bobber.global_position)
+			var data = tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_position))
+			if data and data.get_custom_data("water"):
+				pass
+			else:
+				state = FishState.INACTIVE
+				bobber_safe = true
+				fish_control_safe = false
+				print("The bobber landed on an invalid location.")
+				if bobber != null:
+					bobber.queue_free()
+				play_idle_animation()
+			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
+				print("Player reeled in their bobber.")
+				state = FishState.INACTIVE
+				bobber_safe = true
+				fish_control_safe = false
+				play_idle_animation()
+				bobber.queue_free()
+
+	# Hook minigame
 	if (Input.is_action_pressed("fish")):
 		if hookVelocity > -maxVelocity:
 			hookVelocity -= hookAcceleration
@@ -110,7 +142,7 @@ func _process_input(delta: float) -> void:
 				if bobber != null:
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					if Game.bag.total_size() > Game.get_max_inventory_size():
-						Toast.add("Your inventory is full! Sell some stuff.")
+						Toast.add("Your inventory is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
 						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
@@ -122,6 +154,7 @@ func _process_input(delta: float) -> void:
 			$Minigame/Progress.value -= 85 * delta
 			if ($Minigame/Progress.value <= 0):
 				state = FishState.INACTIVE
+				bobber_safe = true
 				play_idle_animation()
 				print("Lost the fish.")
 				Game.whiffs += 1
@@ -131,7 +164,10 @@ func _process_input(delta: float) -> void:
 		for children in $Minigame/Column.get_children():
 			children.queue_free()
 
+	# Movement animations
 	if is_moving:
+		fish_control_safe = true
+		bobber_safe = true
 		state = FishState.INACTIVE
 		if bobber != null:
 			bobber.queue_free()
@@ -156,6 +192,7 @@ func _process_input(delta: float) -> void:
 			play_idle_animation()
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	
+	# Confirm catch & start minigame
 	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH:
 		state = FishState.REELING
 		$Minigame.visible = true
@@ -163,7 +200,8 @@ func _process_input(delta: float) -> void:
 		$Minigame.scale = Vector2(0.1, 0.1)
 		add_fish(30, 80, 3, 3)
 	
-	if Input.is_action_pressed("fish") and state == FishState.INACTIVE:
+	# Charge up cast
+	if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
 		if not $FishPowerBar.visible:
 			$FishPowerBar.visible = true
 			$FishPowerBar.value = 0
@@ -177,7 +215,8 @@ func _process_input(delta: float) -> void:
 			if $FishPowerBar.value >= 100:
 				hantenjutsushiki = true
 				
-	if Input.is_action_just_released("fish") and state == FishState.INACTIVE:
+	# Cast out charged up cast
+	if Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe:
 		$FishPowerBar.visible = false
 		hantenjutsushiki = false
 		
@@ -195,13 +234,19 @@ func _process_input(delta: float) -> void:
 				fish_dir = "down"
 			else:
 				fish_dir = "up"
+		bobber_safe = true
 		play_animation(body_type + "_fish_" + fish_dir)
 		state = FishState.FISHING
 		if bobber != null:
 			bobber.queue_free()
 	
+	# Make it so you can fish after releasing the fish button, helpful for when you're reeling your line and don't want to immediately fish again.
+	# This logic should also be RIGHT after the casting out the charged up cast.
+	if Input.is_action_just_released("fish"):
+		fish_control_safe = true
+	
 	move_and_slide()
-	global_position = round(global_position/ 2) * 2
+	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
 
 func _process_ui(delta: float) -> void:
 	if bobber != null:
@@ -214,6 +259,8 @@ func _process_ui(delta: float) -> void:
 			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
 				state = FishState.INACTIVE
+				bobber_safe = true
+				print("Player reeled in bobber.")
 				if bobber != null:
 					bobber.queue_free()
 				play_idle_animation()
@@ -245,7 +292,7 @@ func _process_ui(delta: float) -> void:
 	else:
 		$Camera2D.global_position = lerp($Camera2D.global_position, global_position, 0.05)
 		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(3.5, 3.5), 0.05)
-	
+	 
 func _fishing_timer(location: Game.Location) -> void:
 	var odds = randi_range(250, 850)
 	var your_odds = 0
@@ -270,11 +317,11 @@ func _fishing_timer(location: Game.Location) -> void:
 				if bobber != null and bobber_fish != null:
 					bobber_fish.queue_free()
 				state = FishState.FISHING
-				print("User decided not to catch fish, continuing loop.")
+				print("Player decided not to catch fish, continuing loop.")
 				your_odds = 0
 				odds = randi_range(250, 850)
 			else:
-				print("User decided to catch fish, ending loop.")
+				print("Player decided to catch fish, ending loop.")
 				return
 			
 		await get_tree().create_timer(0.75).timeout
@@ -305,6 +352,7 @@ func _on_base_animation_finished() -> void:
 		bobber.apply_impulse(dir * mult) 
 
 		await get_tree().create_timer(0.95).timeout
+		bobber_safe = false
 		if bobber != null:
 			bobber.sleeping = true
 			var tile_map = get_parent().get_node("Ground") as TileMapLayer
@@ -317,6 +365,7 @@ func _on_base_animation_finished() -> void:
 			else:
 				print("Invalid tile to fish on, stopping fishing")
 				state = FishState.INACTIVE
+				bobber_safe = true
 				if bobber != null:
 					bobber.queue_free()
 					bobber = null

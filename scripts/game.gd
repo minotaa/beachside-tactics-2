@@ -35,6 +35,7 @@ var catches: int = 0
 var whiffs: int = 0
 var balance: float = 0.0
 var bag = Inventory.new()
+var upgrades = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 
 func get_max_inventory_size() -> int:
@@ -64,6 +65,8 @@ func load_game() -> void:
 		var data = json.get_data()
 		if data.has("bag"):
 			bag.set_list_from_save(data["bag"])
+		if data.has("upgrades"):
+			upgrades.set_list_from_save(data["upgrades"])
 		if data.has("balance"):
 			balance = data["balance"]
 		if data.has("whiffs"):
@@ -75,6 +78,7 @@ func load_game() -> void:
 func get_save_data() -> Dictionary:
 	return {
 		"bag": bag.to_list(),
+		"upgrades": upgrades.to_list(),
 		"balance": balance,
 		"whiffs": whiffs,
 		"catches": catches
