@@ -85,7 +85,7 @@ func _process_input(delta: float) -> void:
 			hookVelocity += hookDeceleration
 
 	if (Input.is_action_pressed("fish")):
-		hookVelocity -= .3
+		hookVelocity -= .2
 
 	var target = $Minigame/Hook.position.y + hookVelocity
 	if (target >= 33.5):
@@ -215,8 +215,8 @@ func _process_ui(delta: float) -> void:
 
 
 		$Camera2D.global_position = (bobber.global_position + global_position) / 2
-		var z1 = abs(bobber.global_position.x - global_position.x) / (1280-25)
-		var z2 = abs(bobber.global_position.y - global_position.y) / (720-25)
+		var z1 = abs(bobber.global_position.x - global_position.x) / (get_viewport_rect().size.x-25)
+		var z2 = abs(bobber.global_position.y - global_position.y) / (get_viewport_rect().size.y-25)
 		var zoom_factor = max(max(z1, z2), 3.5)
 		$Camera2D.zoom = Vector2(zoom_factor, zoom_factor) 
 	
