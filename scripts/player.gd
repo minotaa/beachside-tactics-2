@@ -130,6 +130,8 @@ func _process_input(delta: float) -> void:
 
 	if state == FishState.REELING:
 		$Minigame.visible = true
+		if bobber != null and not bobber.get_node("Splashes").emitting:
+			bobber.get_node("Splashes").emitting = true
 			
 		# Adjust Value
 		if (len($Minigame/Hook/Area2D.get_overlapping_areas()) > 0):
@@ -148,6 +150,8 @@ func _process_input(delta: float) -> void:
 						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 				state = FishState.REELING_BACK
 				Game.catches += 1
+				var added_xp = 10.0
+				Game.add_xp(added_xp)
 				#_show_ui()
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
@@ -166,7 +170,6 @@ func _process_input(delta: float) -> void:
 
 	# Movement animations
 	if is_moving:
-		fish_control_safe = true
 		bobber_safe = true
 		state = FishState.INACTIVE
 		if bobber != null:
@@ -257,6 +260,7 @@ func _process_ui(delta: float) -> void:
 
 		if state == FishState.REELING_BACK:
 			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
+			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
 				state = FishState.INACTIVE
 				bobber_safe = true
@@ -302,12 +306,15 @@ func _fishing_timer(location: Game.Location) -> void:
 	var rod_power = 0 # FIXME
 
 	while (state == FishState.FISHING):
+		if bobber != null and not bobber.get_node("Ripple").emitting:
+			bobber.get_node("Ripple").emitting = true
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
-			var fish = Catalog.get_fish(location, rod_power)
+			var fish = Catalog.get_fish_drop(location, rod_power)
 			var bobber_fish = preload("res://scenes/bobber_fish.tscn").instantiate()
 			bobber_fish.set_meta("fish_id", fish.id)
 			bobber_fish.get_node("Sprite2D").texture = fish.texture
+			bobber_fish.get_node("Sprite2D").visible = false
 			if bobber != null:
 				bobber.add_child(bobber_fish)
 			$Exclaim.emitting = true

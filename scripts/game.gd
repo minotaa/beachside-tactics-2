@@ -31,12 +31,35 @@ enum Difficulty {
 	SUPREME
 }
 
+var level: int = 0
+var xp: float = 0.0
 var catches: int = 0
 var whiffs: int = 0
 var balance: float = 0.0
 var bag = Inventory.new()
 var upgrades = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
+
+
+func calculate_xp_for_level(level: int) -> float:
+	var xp_scaling: float = 1.5
+	# Formula: base_xp * (scaling ^ (level - 1))
+	# Level 1->2: 100 XP
+	# Level 2->3: 150 XP
+	# Level 3->4: 225 XP, etc.
+	return 100.0 * pow(xp_scaling, level - 1)
+
+func level_up():
+	xp -= calculate_xp_for_level(level)
+	level += 1
+	Toast.add("You leveled up! You are now Level %f!" % [level])
+	print("Level up! Now level ", level)
+
+@rpc("authority", "call_local")
+func add_xp(amount: float) -> void:
+	xp += amount
+	while xp >= calculate_xp_for_level(level):
+		level_up()
 
 func get_max_inventory_size() -> int:
 	return 25
