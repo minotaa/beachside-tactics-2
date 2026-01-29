@@ -1,5 +1,22 @@
 extends Node
 
+enum Rarity {
+	COMMON,
+	UNCOMMON,
+	RARE,
+	EPIC,
+	LEGENDARY,
+	MYTHIC,
+	DIVINE,
+	SUPREME,
+	SECRET
+}
+
+enum Category {
+	RODS,
+	UPGRADES
+}
+
 enum Location {
 	Crystalwater_Beach
 }

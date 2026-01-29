@@ -1,31 +1,55 @@
 extends Node
 
-enum Rarity {
-	COMMON,
-	UNCOMMON,
-	RARE,
-	EPIC,
-	LEGENDARY,
-	MYTHIC,
-	DIVINE,
-	SUPREME,
-	SECRET
-}
-
-enum Category {
-	RODS,
-	UPGRADES
-}
+func get_rarity_weight(rarity: Game.Rarity) -> float:
+	match rarity:
+		Game.Rarity.COMMON:
+			return 1000.0
+		Game.Rarity.UNCOMMON:
+			return 500.0
+		Game.Rarity.RARE:
+			return 200.0
+		Game.Rarity.EPIC:
+			return 75.0
+		Game.Rarity.LEGENDARY:
+			return 25.0
+		Game.Rarity.MYTHIC:
+			return 10.0
+		Game.Rarity.DIVINE:
+			return 3.0
+		Game.Rarity.SUPREME:
+			return 1.0
+		Game.Rarity.SECRET:
+			return 0.1
+	return 100.0  # fallback
 
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
+	# Build list of catchable fish
 	var catchable_fish = []
 	for item in items:
 		if item is Fish:
 			if item.location == location and rod_power >= item.power_needed:
 				catchable_fish.append(item)
+	
 	if catchable_fish.is_empty():
 		return null
-	return catchable_fish[randi() % catchable_fish.size()]
+	
+	# Calculate total weight
+	var total_weight = 0.0
+	for fish in catchable_fish:
+		total_weight += get_rarity_weight(fish.rarity)
+	
+	# Weighted random selection
+	var random_value = randf() * total_weight
+	var current_weight = 0.0
+	
+	catchable_fish.shuffle()
+	
+	for fish in catchable_fish:
+		current_weight += get_rarity_weight(fish.rarity)
+		if random_value < current_weight:
+			return fish
+	
+	return null
 
 var items = []
 
@@ -38,7 +62,8 @@ func _enter_tree() -> void:
 	basic_fishing_rod.description = "The most basic fishing rod ever. You couldn't get more boring than this."
 	basic_fishing_rod.single_purchase = true
 	basic_fishing_rod.purchasable = true
-	basic_fishing_rod.category = Category.RODS
+	basic_fishing_rod.rarity = Game.Rarity.COMMON
+	basic_fishing_rod.category = Game.Category.RODS
 	basic_fishing_rod.junk_chance = 20.0
 	basic_fishing_rod.price = 100.0
 	basic_fishing_rod.sell_price = 10.0
@@ -52,6 +77,7 @@ func _enter_tree() -> void:
 	cod.description = "A common fish very popular as a food choice."
 	cod.sell_price = 20.0
 	cod.power_needed = 0.0
+	cod.rarity = Game.Rarity.COMMON
 	cod.location = Game.Location.Crystalwater_Beach
 	cod.difficulty = Game.Difficulty.EASY
 	items.append(cod)
