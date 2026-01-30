@@ -23,8 +23,8 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 	return 100.0  # fallback
 
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
-	# 75% chance to get junk instead of fish
-	if randf() < 0.90:
+	# 10% chance to get junk instead of fish
+	if randf() > 0.90:
 		return get_junk(location, rod_power)
 	else:
 		return get_fish(location, rod_power)

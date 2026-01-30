@@ -14,7 +14,7 @@ var body_type: String = "cat0"
 var state: FishState = FishState.INACTIVE
 var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
-var fish_control_safe: bool = false # Makes it so that you can't fish until you release the fish keybind.
+var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
 
 var hookVelocity = 0
 var hookAcceleration = .001
@@ -61,15 +61,15 @@ func get_rod_tip(fish_dir: String) -> Vector2:
 func play_idle_animation() -> void:
 	play_animation(body_type + "_idle_" + last_direction)
 
-func play_animation(name: String, backwards: bool = false, speed: float = 1) -> void:
+func play_animation(_name: String, backwards: bool = false, speed: float = 1) -> void:
 	if backwards == false:
-		$Base.play(name, speed)
-		if name == body_type + "_fish_down":
+		$Base.play(_name, speed)
+		if _name == body_type + "_fish_down":
 			$Base.position = Vector2(0, 3)
 		else:
 			$Base.position = Vector2(0, 0)
 	else:
-		$Base.play(name, speed * -1, true)
+		$Base.play(_name, speed * -1, true)
 
 func _process_input(delta: float) -> void:
 	# Movement controls
@@ -78,7 +78,6 @@ func _process_input(delta: float) -> void:
 		velocity = Vector2.ZERO
 	var velocity_length = velocity.length_squared()
 	var is_moving = velocity_length > 0
-
 
 	# Reel back in bobber if you're fishing.
 	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
@@ -131,7 +130,7 @@ func _process_input(delta: float) -> void:
 	if state == FishState.REELING:
 		$Minigame.visible = true
 		if bobber != null and not bobber.get_node("Splashes").emitting:
-			bobber.get_node("Splashes").emitting = true
+			bobber.get_node("Splashes").restart()
 			
 		# Adjust Value
 		if (len($Minigame/Hook/Area2D.get_overlapping_areas()) > 0):
@@ -251,7 +250,7 @@ func _process_input(delta: float) -> void:
 	move_and_slide()
 	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
 
-func _process_ui(delta: float) -> void:
+func _process_ui(_delta: float) -> void:
 	if bobber != null:
 		var line = bobber.get_node("Line2D")
 		var rod_tip_global := get_rod_tip(get_fishing_direction())
@@ -303,11 +302,11 @@ func _fishing_timer(location: Game.Location) -> void:
 	if Game.bag.total_size() > Game.get_max_inventory_size():
 		Toast.add("Your inventory is full, you will release anything you catch.")
 	
-	var rod_power = 0 # FIXME
+	var rod_power = Game.get_fishing_power()
 
 	while (state == FishState.FISHING):
 		if bobber != null and not bobber.get_node("Ripple").emitting:
-			bobber.get_node("Ripple").emitting = true
+			bobber.get_node("Ripple").restart()
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
 			var fish = Catalog.get_fish_drop(location, rod_power)
@@ -318,7 +317,10 @@ func _fishing_timer(location: Game.Location) -> void:
 			if bobber != null:
 				bobber.add_child(bobber_fish)
 			$Exclaim.emitting = true
-			state = FishState.FOUND_FISH
+			if fish is Junk or rod_power >= fish.power_needed * 2.0:
+				state = FishState.REELING_BACK
+			else:
+				state = FishState.FOUND_FISH
 			await get_tree().create_timer(1.5).timeout
 			if state == FishState.FOUND_FISH:
 				if bobber != null and bobber_fish != null:
@@ -326,7 +328,7 @@ func _fishing_timer(location: Game.Location) -> void:
 				state = FishState.FISHING
 				print("Player decided not to catch fish, continuing loop.")
 				your_odds = 0
-				odds = randi_range(250, 850)
+				odds = randi_range(250, 750)
 			else:
 				print("Player decided to catch fish, ending loop.")
 				return

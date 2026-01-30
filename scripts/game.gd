@@ -36,18 +36,23 @@ var xp: float = 0.0
 var catches: int = 0
 var whiffs: int = 0
 var balance: float = 0.0
+var equipped_fishing_rod: FishingRod = Catalog.get_item(0) as FishingRod
 var bag = Inventory.new()
 var upgrades = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 
+func get_fishing_power() -> float:
+	var fishing_power = 0.0
+	fishing_power += equipped_fishing_rod.fishing_power
+	return fishing_power
 
-func calculate_xp_for_level(level: int) -> float:
+func calculate_xp_for_level(_level: int) -> float:
 	var xp_scaling: float = 1.5
 	# Formula: base_xp * (scaling ^ (level - 1))
 	# Level 1->2: 100 XP
 	# Level 2->3: 150 XP
 	# Level 3->4: 225 XP, etc.
-	return 100.0 * pow(xp_scaling, level - 1)
+	return 100.0 * pow(xp_scaling, _level - 1)
 
 func level_up():
 	xp -= calculate_xp_for_level(level)
@@ -75,9 +80,9 @@ func _enter_tree() -> void:
 	
 func load_game() -> void:
 	game_loaded = true
-	if not FileAccess.file_exists("user://game.april"):
+	if not FileAccess.file_exists("user://save.april"):
 		return
-	var save_file: FileAccess = FileAccess.open("user://game.april", FileAccess.READ)
+	var save_file: FileAccess = FileAccess.open("user://save.april", FileAccess.READ)
 	while save_file.get_position() < save_file.get_length():
 		var json_string = save_file.get_line()
 		var json = JSON.new()
@@ -88,6 +93,8 @@ func load_game() -> void:
 		var data = json.get_data()
 		if data.has("bag"):
 			bag.set_list_from_save(data["bag"])
+		if data.has("equipped_fishing_rod"):
+			equipped_fishing_rod = Catalog.get_item(data["equipped_fishing_rod"])
 		if data.has("upgrades"):
 			upgrades.set_list_from_save(data["upgrades"])
 		if data.has("balance"):
@@ -104,7 +111,8 @@ func get_save_data() -> Dictionary:
 		"upgrades": upgrades.to_list(),
 		"balance": balance,
 		"whiffs": whiffs,
-		"catches": catches
+		"catches": catches,
+		"equipped_fishing_rod": equipped_fishing_rod.id
 	}
 
 func _notification(what: int) -> void:
