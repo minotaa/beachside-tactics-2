@@ -202,50 +202,54 @@ func _process_input(delta: float) -> void:
 		$Minigame.scale = Vector2(0.1, 0.1)
 		add_fish(30, 80, 3, 3)
 	
-	# Charge up cast
-	if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
-		if not $FishPowerBar.visible:
-			$FishPowerBar.visible = true
-			$FishPowerBar.value = 0
-			hantenjutsushiki = false
-		if hantenjutsushiki:
-			$FishPowerBar.value -= randi_range(1, 3)
-			if $FishPowerBar.value <= 0:
+	if Game.equipped_fishing_rod != null:
+		# Charge up cast
+		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+			if not $FishPowerBar.visible:
+				$FishPowerBar.visible = true
+				$FishPowerBar.value = 0
 				hantenjutsushiki = false
-		else:
-			$FishPowerBar.value += randi_range(1, 3)
-			if $FishPowerBar.value >= 100:
-				hantenjutsushiki = true
-				
-	# Cast out charged up cast
-	if Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe:
-		$FishPowerBar.visible = false
-		hantenjutsushiki = false
-		
-		var mouse_pos = get_global_mouse_position()
-		var direction_vec = (mouse_pos - global_position).normalized()
-		var fish_dir := ""
-		
-		if abs(direction_vec.x) > abs(direction_vec.y):
-			if direction_vec.x > 0.0:
-				fish_dir = "right"
+			if hantenjutsushiki:
+				$FishPowerBar.value -= randi_range(1, 3)
+				if $FishPowerBar.value <= 0:
+					hantenjutsushiki = false
 			else:
-				fish_dir = "left"
-		else:
-			if direction_vec.y > 0.0:
-				fish_dir = "down"
+				$FishPowerBar.value += randi_range(1, 3)
+				if $FishPowerBar.value >= 100:
+					hantenjutsushiki = true
+					
+		# Cast out charged up cast
+		if Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe:
+			$FishPowerBar.visible = false
+			hantenjutsushiki = false
+			
+			var mouse_pos = get_global_mouse_position()
+			var direction_vec = (mouse_pos - global_position).normalized()
+			var fish_dir := ""
+			
+			if abs(direction_vec.x) > abs(direction_vec.y):
+				if direction_vec.x > 0.0:
+					fish_dir = "right"
+				else:
+					fish_dir = "left"
 			else:
-				fish_dir = "up"
-		bobber_safe = true
-		play_animation(body_type + "_fish_" + fish_dir)
-		state = FishState.FISHING
-		if bobber != null:
-			bobber.queue_free()
-	
-	# Make it so you can fish after releasing the fish button, helpful for when you're reeling your line and don't want to immediately fish again.
-	# This logic should also be RIGHT after the casting out the charged up cast.
-	if Input.is_action_just_released("fish"):
-		fish_control_safe = true
+				if direction_vec.y > 0.0:
+					fish_dir = "down"
+				else:
+					fish_dir = "up"
+			bobber_safe = true
+			play_animation(body_type + "_fish_" + fish_dir)
+			state = FishState.FISHING
+			if bobber != null:
+				bobber.queue_free()
+		
+		# Make it so you can fish after releasing the fish button, helpful for when you're reeling your line and don't want to immediately fish again.
+		# This logic should also be RIGHT after the casting out the charged up cast.
+		if Input.is_action_just_released("fish"):
+			fish_control_safe = true
+	else:
+		if Input.is_action_just_pressed("fish"):
+			Toast.add("You can't fish without a [img center region=0,0,16,16 width=32 height=32]res://assets/sprites/items.png[/img] Fishing Rod.")
 	
 	move_and_slide()
 	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement

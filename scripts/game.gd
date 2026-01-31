@@ -36,14 +36,15 @@ var xp: float = 0.0
 var catches: int = 0
 var whiffs: int = 0
 var balance: float = 0.0
-var equipped_fishing_rod: FishingRod = Catalog.get_item(0) as FishingRod
+var equipped_fishing_rod: FishingRod
 var bag = Inventory.new()
 var upgrades = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 
 func get_fishing_power() -> float:
 	var fishing_power = 0.0
-	fishing_power += equipped_fishing_rod.fishing_power
+	if equipped_fishing_rod != null:
+		fishing_power += equipped_fishing_rod.fishing_power
 	return fishing_power
 
 func calculate_xp_for_level(_level: int) -> float:
@@ -75,7 +76,7 @@ func is_mobile() -> bool:
 func is_desktop() -> bool:
 	return not is_mobile()
 	
-func _enter_tree() -> void:
+func _ready() -> void:
 	load_game()
 	
 func load_game() -> void:
@@ -94,7 +95,9 @@ func load_game() -> void:
 		if data.has("bag"):
 			bag.set_list_from_save(data["bag"])
 		if data.has("equipped_fishing_rod"):
-			equipped_fishing_rod = Catalog.get_item(data["equipped_fishing_rod"])
+			var rod_id = data["equipped_fishing_rod"]
+			if rod_id != null:  # null means no rod equipped
+				equipped_fishing_rod = Catalog.get_item(rod_id)
 		if data.has("upgrades"):
 			upgrades.set_list_from_save(data["upgrades"])
 		if data.has("balance"):
@@ -112,7 +115,7 @@ func get_save_data() -> Dictionary:
 		"balance": balance,
 		"whiffs": whiffs,
 		"catches": catches,
-		"equipped_fishing_rod": equipped_fishing_rod.id
+		"equipped_fishing_rod": equipped_fishing_rod.id if equipped_fishing_rod else null
 	}
 
 func _notification(what: int) -> void:

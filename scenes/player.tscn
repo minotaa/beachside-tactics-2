@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://doantlsit6s6j" path="res://assets/sprites/minigame-progress-bar.png" id="14_oprun"]
 [ext_resource type="Texture2D" uid="uid://dpi0maofy08ke" path="res://assets/sprites/minigame-hook-icon.png" id="16_a8ls1"]
 [ext_resource type="Texture2D" uid="uid://c3jtqk8gu3svq" path="res://assets/sprites/caught_fish_common.png" id="17_qfm1y"]
+[ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="18_fulsm"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_holxr"]
 atlas = ExtResource("3_y4r1p")
@@ -512,5 +513,44 @@ texture = ExtResource("17_qfm1y")
 lifetime = 1.5
 one_shot = true
 process_material = SubResource("ParticleProcessMaterial_fulsm")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1683135539]
+
+[node name="Main" type="Control" parent="UI" unique_id=70878643]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="UI/Main" unique_id=2127030442]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -120.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="UI/Main" unique_id=2053358555]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -104.0
+offset_top = -104.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = ExtResource("18_fulsm")
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]
