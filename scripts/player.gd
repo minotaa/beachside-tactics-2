@@ -323,7 +323,7 @@ func _fishing_timer(location: Game.Location) -> void:
 			if bobber != null:
 				bobber.add_child(bobber_fish)
 			$Exclaim.emitting = true
-			if fish is Junk or rod_power >= fish.power_needed * 2.0:
+			if fish is Junk or rod_power >= fish.power_needed * 10.0:
 				state = FishState.REELING_BACK
 			else:
 				state = FishState.FOUND_FISH
@@ -350,8 +350,8 @@ func peek_hud() -> void:
 func _physics_process(delta: float) -> void:
 	_process_input(delta)
 	_process_ui(delta)
-	hud_hide_timer -= delta
 	if hud_hide_timer > 0.0:
+		hud_hide_timer -= delta
 		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 1.0, 0.1)
 	else:
 		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 0.0, 0.1)
