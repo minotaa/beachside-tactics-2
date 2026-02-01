@@ -30,6 +30,7 @@ enum FishState {
 	INACTIVE # You're not doing anything.
 }
 
+
 func _ready() -> void:
 	play_idle_animation()
 	
@@ -249,6 +250,7 @@ func _process_input(delta: float) -> void:
 			fish_control_safe = true
 	else:
 		if Input.is_action_just_pressed("fish"):
+			peek_hud()
 			Toast.add("You can't fish without a [img center region=0,0,16,16 width=32 height=32]res://assets/sprites/items.png[/img] Fishing Rod.")
 	
 	move_and_slide()
@@ -340,9 +342,19 @@ func _fishing_timer(location: Game.Location) -> void:
 		await get_tree().create_timer(0.75).timeout
 		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25)
 	
+var hud_hide_timer: float = 0.0
+	
+func peek_hud() -> void:
+	hud_hide_timer = 2.5
+	
 func _physics_process(delta: float) -> void:
 	_process_input(delta)
 	_process_ui(delta)
+	hud_hide_timer -= delta
+	if hud_hide_timer > 0.0:
+		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 1.0, 0.1)
+	else:
+		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 0.0, 0.1)
 
 func get_fishing_direction() -> String:
 	var prefix := body_type + "_fish_"

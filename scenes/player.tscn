@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://dpi0maofy08ke" path="res://assets/sprites/minigame-hook-icon.png" id="16_a8ls1"]
 [ext_resource type="Texture2D" uid="uid://c3jtqk8gu3svq" path="res://assets/sprites/caught_fish_common.png" id="17_qfm1y"]
 [ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="18_fulsm"]
+[ext_resource type="FontFile" uid="uid://l3853frrj62o" path="res://assets/fonts/at01.ttf" id="19_4r5pv"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_holxr"]
 atlas = ExtResource("3_y4r1p")
@@ -431,6 +432,10 @@ scale_min = 0.7
 scale_max = 0.7
 color = Color(0.8901961, 1, 1, 1)
 
+[sub_resource type="LabelSettings" id="LabelSettings_60mlk"]
+font = ExtResource("19_4r5pv")
+font_size = 40
+
 [node name="Player" type="CharacterBody2D" unique_id=855136150]
 texture_filter = 1
 motion_mode = 1
@@ -514,9 +519,9 @@ lifetime = 1.5
 one_shot = true
 process_material = SubResource("ParticleProcessMaterial_fulsm")
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=1683135539]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1683135539]
 
-[node name="Main" type="Control" parent="UI" unique_id=70878643]
+[node name="Main" type="Control" parent="HUD" unique_id=70878643]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -524,33 +529,40 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="UI/Main" unique_id=2127030442]
+[node name="Panel" type="Panel" parent="HUD/Main" unique_id=2127030442]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -120.0
-offset_top = -120.0
-offset_right = -24.0
-offset_bottom = -24.0
+offset_left = -256.0
+offset_top = -80.0
+offset_right = -16.0
+offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="UI/Main" unique_id=2053358555]
+[node name="TextureRect" type="TextureRect" parent="HUD/Main/Panel" unique_id=2053358555]
 layout_mode = 1
-anchors_preset = 3
+anchors_preset = 1
 anchor_left = 1.0
-anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -104.0
-offset_top = -104.0
-offset_right = -40.0
-offset_bottom = -40.0
+offset_left = -232.0
+offset_top = 8.0
+offset_right = -184.0
+offset_bottom = 56.0
 grow_horizontal = 0
-grow_vertical = 0
 texture = ExtResource("18_fulsm")
+
+[node name="Label" type="Label" parent="HUD/Main/Panel" unique_id=1791772496]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 10.0
+offset_right = 232.0
+offset_bottom = 50.0
+text = "No fishing rod"
+label_settings = SubResource("LabelSettings_60mlk")
+vertical_alignment = 1
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]
