@@ -257,6 +257,26 @@ func _process_input(delta: float) -> void:
 	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
 
 func _process_ui(_delta: float) -> void:
+	$InteractionMark.visible = false
+	for child in $InteractionMark.get_children():
+		child.visible = false
+	for body in $Interaction.get_overlapping_areas():
+		if body.is_in_group("shop"):
+			$InteractionMark.visible = true
+			$InteractionMark/Coin.visible = true
+	
+	if Input.is_action_pressed("inventory"):
+		$HUD/Inventory.show()
+		for child in $HUD/Inventory/ScrollContainer/VBoxContainer.get_children():
+			child.queue_free()
+		$HUD/Inventory/Title.text = "Your inventory (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + ")"
+		for item in Game.bag.list:
+			var inventory_entry = preload("res://scenes/inventory_entry.tscn").instantiate()
+			inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
+			inventory_entry.get_node("TextureRect").texture = item.type.texture
+	else:
+		$HUD/Inventory.hide()
+	
 	if bobber != null:
 		var line = bobber.get_node("Line2D")
 		var rod_tip_global := get_rod_tip(get_fishing_direction())
