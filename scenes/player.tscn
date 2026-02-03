@@ -534,9 +534,9 @@ anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 32.0
-offset_top = -216.0
+offset_top = -276.0
 offset_right = 328.0
-offset_bottom = 216.0
+offset_bottom = 276.0
 grow_vertical = 2
 
 [node name="Title" type="Label" parent="HUD/Inventory" unique_id=1082717389]
@@ -559,18 +559,22 @@ custom_minimum_size = Vector2(264, 360)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.054
-anchor_top = 0.13000001
-anchor_right = 0.919
+anchor_top = 0.109000005
+anchor_right = 0.94600004
 anchor_bottom = 0.96300006
 offset_left = 0.015999794
-offset_top = -0.16000366
-offset_right = 7.9759827
-offset_bottom = -0.016021729
+offset_top = -0.16801071
+offset_right = -0.016021729
+offset_bottom = -0.015991211
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HUD/Inventory/ScrollContainer" unique_id=90214479]
 layout_mode = 2
+theme_override_constants/separation = 12
 
 [node name="Inventory Entry" parent="HUD/Inventory/ScrollContainer/VBoxContainer" unique_id=1700963795 instance=ExtResource("20_a38lo")]
+layout_mode = 2
+
+[node name="Inventory Entry2" parent="HUD/Inventory/ScrollContainer/VBoxContainer" unique_id=1045497956 instance=ExtResource("20_a38lo")]
 layout_mode = 2
 
 [node name="Main" type="Control" parent="HUD" unique_id=70878643]
