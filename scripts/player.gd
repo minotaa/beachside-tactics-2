@@ -266,16 +266,22 @@ func _process_ui(_delta: float) -> void:
 			$InteractionMark/Coin.visible = true
 	
 	if Input.is_action_pressed("inventory"):
-		$HUD/Inventory.show()
-		for child in $HUD/Inventory/ScrollContainer/VBoxContainer.get_children():
-			child.queue_free()
-		$HUD/Inventory/Title.text = "Your inventory (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + ")"
-		for item in Game.bag.list:
-			var inventory_entry = preload("res://scenes/inventory_entry.tscn").instantiate()
-			inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
-			inventory_entry.get_node("TextureRect").texture = item.type.texture
+		$HUD/Inventory.position.x = lerp($HUD/Inventory.position.x, 32.0, 0.2)
+		if not $HUD/Inventory.visible:
+			$HUD/Inventory.show()
+			for child in $HUD/Inventory/ScrollContainer/VBoxContainer.get_children():
+				child.queue_free()
+			$HUD/Inventory/Title.text = "Your inventory (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + ")"
+			for item in Game.bag.list:
+				var inventory_entry = preload("res://scenes/inventory_entry.tscn").instantiate()
+				inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
+				inventory_entry.get_node("TextureRect").texture = item.type.texture
+				$HUD/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 	else:
-		$HUD/Inventory.hide()
+		$HUD/Inventory.position.x = lerp($HUD/Inventory.position.x, -400.0, 0.2)
+		
+		if $HUD/Inventory.position.x < -390:
+			$HUD/Inventory.hide()
 	
 	if bobber != null:
 		var line = bobber.get_node("Line2D")
