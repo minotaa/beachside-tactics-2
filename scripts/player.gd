@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 const BASE_WALKING_SPEED := 100.0
+const BASE_TRAP_PLACE_DISTANCE = 50.0
 const DIRECTIONS = {
 	"left": Vector2.LEFT,
 	"right": Vector2.RIGHT,
@@ -15,6 +16,7 @@ var state: FishState = FishState.INACTIVE
 var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
+var holding_trap: bool = false
 
 var hookVelocity = 0
 var hookAcceleration = .001
@@ -29,7 +31,6 @@ enum FishState {
 	REELING_BACK, # You're currently reeling the fish back in.
 	INACTIVE # You're not doing anything.
 }
-
 
 func _ready() -> void:
 	play_idle_animation()
@@ -72,13 +73,36 @@ func play_animation(_name: String, backwards: bool = false, speed: float = 1) ->
 	else:
 		$Base.play(_name, speed * -1, true)
 
+func update_catalog() -> void:
+	for children in $"HUD/Shop/Rods/ScrollContainer/HBoxContainer".get_children():
+		children.queue_free()
+	for item in Catalog.items:
+		if (item as ItemType).category == Game.Category.RODS:
+			var shop_entry = preload("res://scenes/shop_entry.tscn").instantiate()
+			shop_entry.get_node("TextureRect").texture = item.texture
+			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
+			$"HUD/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
+
 func _process_input(delta: float) -> void:
 	# Movement controls
 	velocity = Input.get_vector("left", "right", "up", "down", 0.1)
-	if state == FishState.REELING or state == FishState.FISHING:
+	if (state == FishState.REELING or state == FishState.FISHING) or $HUD/Shop.visible:
 		velocity = Vector2.ZERO
 	var velocity_length = velocity.length_squared()
 	var is_moving = velocity_length > 0
+
+	if Input.is_action_just_released("interact"):
+		if not $HUD/Shop.visible:
+			for body in $Interaction.get_overlapping_areas():
+				if body.is_in_group("shop"):
+					$HUD/Shop.visible = true
+					$HUD/Inventory.visible = false
+					$HUD/Main.visible = false
+					update_catalog()
+		else:
+			$HUD/Shop.visible = false
+			$HUD/Inventory.visible = true
+			$HUD/Main.visible = true
 
 	# Reel back in bobber if you're fishing.
 	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
@@ -139,7 +163,7 @@ func _process_input(delta: float) -> void:
 			$Minigame/Progress.value += 145 * delta
 			$Minigame/Column.get_children()[0].set_vibrate(true)
 			Input.vibrate_handheld(10)
-			if ($Minigame/Progress.value >= 999):
+			if ($Minigame/Progress.value >= $Minigame/Progress.max_value):
 				print("Caught the fish.")
 				if bobber != null:
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
@@ -149,6 +173,7 @@ func _process_input(delta: float) -> void:
 						Game.bag.add_item(stack)
 						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 				state = FishState.REELING_BACK
+				bobber.get_node("Splashes").amount = 64
 				Game.catches += 1
 				var added_xp = 10.0
 				Game.add_xp(added_xp)
@@ -167,6 +192,19 @@ func _process_input(delta: float) -> void:
 		$Minigame.visible = false
 		for children in $Minigame/Column.get_children():
 			children.queue_free()
+
+	# Highlight tiles for placing traps.
+	if holding_trap:
+		$Trap.show()
+		var tilemap = get_parent().get_node("Ground") as TileMapLayer
+		var mouse_tile = tilemap.local_to_map(tilemap.get_local_mouse_position())
+		var data = tilemap.get_cell_tile_data(mouse_tile)
+		if data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
+			$Trap.global_position = tilemap.map_to_local(mouse_tile)
+		else:
+			$Trap.hide()	
+	else:
+		$Trap.hide()
 
 	# Movement animations
 	if is_moving:
@@ -196,14 +234,19 @@ func _process_input(delta: float) -> void:
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	
 	# Confirm catch & start minigame
-	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH:
+	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $HUD/Shop.visible:
 		state = FishState.REELING
 		$Minigame.visible = true
 		$Minigame.position = Vector2(0, 0)
 		$Minigame.scale = Vector2(0.1, 0.1)
-		add_fish(30, 80, 3, 3)
+		var fish: Fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
+		if fish.difficulty == Game.Difficulty.EASY:
+			add_fish(30, 80, 1.2, 3)
+		else: # TODO: FIX ME!
+			print("Unsupported fish difficulty.")
+		
 	
-	if Game.equipped_fishing_rod != null:
+	if Game.equipped_fishing_rod != null and not $HUD/Shop.visible:
 		# Charge up cast
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
 			if not $FishPowerBar.visible:
@@ -240,7 +283,6 @@ func _process_input(delta: float) -> void:
 					fish_dir = "up"
 			bobber_safe = true
 			play_animation(body_type + "_fish_" + fish_dir)
-			state = FishState.FISHING
 			if bobber != null:
 				bobber.queue_free()
 		
@@ -249,8 +291,7 @@ func _process_input(delta: float) -> void:
 		if Input.is_action_just_released("fish"):
 			fish_control_safe = true
 	else:
-		if Input.is_action_just_pressed("fish"):
-			peek_hud()
+		if Input.is_action_just_pressed("fish") and not $HUD/Shop.visible:
 			Toast.add("You can't fish without a [img center region=0,0,16,16 width=32 height=32]res://assets/sprites/items.png[/img] Fishing Rod.")
 	
 	move_and_slide()
@@ -264,9 +305,25 @@ func _process_ui(_delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
+	debug_text += "Balance: " + str(Game.balance) + "\n"
+	debug_text += "Inventory: " + str(Game.bag.list.size()) + "\n"
+	debug_text += "Level: " + str(Game.level) + "\n"
+	debug_text += "XP: " + str(Game.xp) + "\n"
+	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + "\n"
+	debug_text += "Day: " + str(Game.days) + "\n"
+	if state == FishState.FISHING:
+		debug_text += "\n"
+		debug_text += "Num until catch: " + str(odds) + "\n"
+		debug_text += "Your num: " + str(your_odds) + "\n"
+		debug_text += "Rod power: " + str(Game.get_fishing_power()) + "\n"
+	if state == FishState.REELING:
+		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
+	$HUD/Main/Debug.text = debug_text
 	
-	if Input.is_action_pressed("inventory"):
+	if Input.is_action_pressed("inventory") and not $HUD/Shop.visible:
 		$HUD/Inventory.position.x = lerp($HUD/Inventory.position.x, 32.0, 0.2)
+		$HUD/Main/Debug.hide()
 		if not $HUD/Inventory.visible:
 			$HUD/Inventory.show()
 			for child in $HUD/Inventory/ScrollContainer/VBoxContainer.get_children():
@@ -278,6 +335,7 @@ func _process_ui(_delta: float) -> void:
 				inventory_entry.get_node("TextureRect").texture = item.type.texture
 				$HUD/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 	else:
+		$HUD/Main/Debug.show()
 		$HUD/Inventory.position.x = lerp($HUD/Inventory.position.x, -400.0, 0.2)
 		
 		if $HUD/Inventory.position.x < -390:
@@ -292,6 +350,7 @@ func _process_ui(_delta: float) -> void:
 		if state == FishState.REELING_BACK:
 			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
+			bobber.get_node("Splashes").restart()
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
 				state = FishState.INACTIVE
 				bobber_safe = true
@@ -328,9 +387,13 @@ func _process_ui(_delta: float) -> void:
 		$Camera2D.global_position = lerp($Camera2D.global_position, global_position, 0.05)
 		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(3.5, 3.5), 0.05)
 	 
+var odds: int
+var your_odds: int
+	
 func _fishing_timer(location: Game.Location) -> void:
-	var odds = randi_range(250, 850)
-	var your_odds = 0
+	odds = randi_range(250, 850)
+	your_odds = 0
+	state = FishState.FISHING
 	if Game.bag.total_size() > Game.get_max_inventory_size():
 		Toast.add("Your inventory is full, you will release anything you catch.")
 	
@@ -348,10 +411,20 @@ func _fishing_timer(location: Game.Location) -> void:
 			bobber_fish.get_node("Sprite2D").visible = false
 			if bobber != null:
 				bobber.add_child(bobber_fish)
-			$Exclaim.emitting = true
-			if fish is Junk or rod_power >= fish.power_needed * 10.0:
+			if fish is Junk or rod_power >= fish.threshold:
+				Game.add_xp(3)
 				state = FishState.REELING_BACK
+				if bobber != null:
+					bobber.get_node("Splashes").amount = 64
+					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
+					if Game.bag.total_size() > Game.get_max_inventory_size():
+						Toast.add("Your inventory is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+					else:
+						Game.bag.add_item(stack)
+						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+				return
 			else:
+				$Exclaim.emitting = true
 				state = FishState.FOUND_FISH
 			await get_tree().create_timer(1.5).timeout
 			if state == FishState.FOUND_FISH:
@@ -368,20 +441,10 @@ func _fishing_timer(location: Game.Location) -> void:
 		await get_tree().create_timer(0.75).timeout
 		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25)
 	
-var hud_hide_timer: float = 0.0
-	
-func peek_hud() -> void:
-	hud_hide_timer = 2.5
-	
 func _physics_process(delta: float) -> void:
 	_process_input(delta)
 	_process_ui(delta)
-	if hud_hide_timer > 0.0:
-		hud_hide_timer -= delta
-		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 1.0, 0.1)
-	else:
-		$HUD/Main.modulate.a = lerp($HUD/Main.modulate.a, 0.0, 0.1)
-
+	
 func get_fishing_direction() -> String:
 	var prefix := body_type + "_fish_"
 	if $Base.animation.begins_with(prefix):

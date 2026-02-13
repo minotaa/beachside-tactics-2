@@ -111,7 +111,9 @@ func _enter_tree() -> void:
 	cod.description = "A common fish very popular as a food choice."
 	cod.sell_price = 20.0
 	cod.power_needed = 0.0
+	cod.threshold = 10.0
 	cod.rarity = Game.Rarity.COMMON
+	cod.category = Game.Category.FISH
 	cod.location = Game.Location.Crystalwater_Beach
 	cod.difficulty = Game.Difficulty.EASY
 	items.append(cod)
@@ -122,6 +124,7 @@ func _enter_tree() -> void:
 	var driftwood_plank = Junk.new(2, "Driftwood Plank", atlas)
 	driftwood_plank.description = "A plank of wood that washed up on the shore."
 	driftwood_plank.sell_price = 10.0
+	driftwood_plank.category = Game.Category.JUNK
 	driftwood_plank.power_needed = 0.0
 	driftwood_plank.rarity = Game.Rarity.COMMON
 	driftwood_plank.location = Game.Location.Crystalwater_Beach
@@ -133,6 +136,7 @@ func _enter_tree() -> void:
 	var seaweed = Junk.new(3, "Seaweed", atlas)
 	seaweed.description = "A clump of seaweed, your fishing rod probably scraped it off the seabed."
 	seaweed.sell_price = 8.0
+	seaweed.category = Game.Category.JUNK
 	seaweed.power_needed = 0.0
 	seaweed.rarity = Game.Rarity.COMMON
 	seaweed.location = Game.Location.Crystalwater_Beach

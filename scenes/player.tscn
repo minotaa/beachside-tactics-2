@@ -17,7 +17,6 @@
 [ext_resource type="Texture2D" uid="uid://doantlsit6s6j" path="res://assets/sprites/minigame-progress-bar.png" id="14_oprun"]
 [ext_resource type="Texture2D" uid="uid://dpi0maofy08ke" path="res://assets/sprites/minigame-hook-icon.png" id="16_a8ls1"]
 [ext_resource type="Texture2D" uid="uid://cdv6sl0kdiy6g" path="res://assets/sprites/caught-fish-common.png" id="17_4r5pv"]
-[ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="18_fulsm"]
 [ext_resource type="FontFile" uid="uid://l3853frrj62o" path="res://assets/fonts/at01.ttf" id="19_4r5pv"]
 [ext_resource type="PackedScene" uid="uid://uwv7c6qqty0j" path="res://scenes/inventory_entry.tscn" id="20_a38lo"]
 [ext_resource type="Texture2D" uid="uid://canc01jjjgqsq" path="res://assets/sprites/bubble.png" id="20_i4ail"]
@@ -436,13 +435,24 @@ scale_max = 0.7
 color = Color(0.8901961, 1, 1, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_60mlk"]
+line_spacing = -5.0
 font = ExtResource("19_4r5pv")
-font_size = 40
+font_size = 48
+shadow_size = 2
+shadow_color = Color(0, 0, 0, 0.54901963)
+
+[sub_resource type="LabelSettings" id="LabelSettings_a38lo"]
+font = ExtResource("19_4r5pv")
+font_size = 72
+
+[sub_resource type="LabelSettings" id="LabelSettings_4ni07"]
+font = ExtResource("19_4r5pv")
+font_size = 42
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4r5pv"]
 radius = 40.0
 
-[node name="Player" type="CharacterBody2D" unique_id=855136150]
+[node name="Player" type="CharacterBody2D" unique_id=855136150 groups=["players"]]
 texture_filter = 1
 motion_mode = 1
 script = ExtResource("1_qlg0r")
@@ -514,6 +524,8 @@ position = Vector2(22, 0)
 texture = ExtResource("16_a8ls1")
 
 [node name="Area2D" type="Area2D" parent="Minigame/Hook" unique_id=880474768]
+collision_layer = 0
+collision_mask = 32768
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Minigame/Hook/Area2D" unique_id=316947869]
 shape = SubResource("RectangleShape2D_qfm1y")
@@ -535,7 +547,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 32.0
 offset_top = -276.0
-offset_right = 328.0
+offset_right = 376.0
 offset_bottom = 276.0
 grow_vertical = 2
 
@@ -555,7 +567,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HUD/Inventory" unique_id=1934498580]
-custom_minimum_size = Vector2(264, 360)
+custom_minimum_size = Vector2(306, 360)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.054
@@ -585,41 +597,85 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="HUD/Main" unique_id=2127030442]
+[node name="Debug" type="Label" parent="HUD/Main" unique_id=1791772496]
 layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -256.0
-offset_top = -80.0
-offset_right = -16.0
-offset_bottom = -16.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="TextureRect" type="TextureRect" parent="HUD/Main/Panel" unique_id=2053358555]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -227.0
-offset_top = 12.0
-offset_right = -187.0
-offset_bottom = 52.0
-grow_horizontal = 0
-texture = ExtResource("18_fulsm")
-
-[node name="Label" type="Label" parent="HUD/Main/Panel" unique_id=1791772496]
-layout_mode = 0
-offset_left = 64.0
-offset_top = 10.0
-offset_right = 232.0
-offset_bottom = 50.0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 205.0
+offset_bottom = 48.0
 text = "No fishing rod"
 label_settings = SubResource("LabelSettings_60mlk")
 vertical_alignment = 1
+
+[node name="Shop" type="Control" parent="HUD" unique_id=1574313464]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="HUD/Shop" unique_id=807915049]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 664.0
+offset_bottom = 680.0
+
+[node name="Title" type="Label" parent="HUD/Shop" unique_id=383619156]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -510.0
+offset_top = 40.0
+offset_right = -82.0
+offset_bottom = 97.0
+grow_horizontal = 2
+text = "Shop"
+label_settings = SubResource("LabelSettings_a38lo")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rods" type="Control" parent="HUD/Shop" unique_id=803585718]
+anchors_preset = 0
+offset_left = 48.0
+offset_top = 112.0
+offset_right = 640.0
+offset_bottom = 408.0
+
+[node name="Title" type="Label" parent="HUD/Shop/Rods" unique_id=139573493]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -280.0
+offset_right = 280.0
+offset_bottom = 57.0
+grow_horizontal = 2
+text = "Fishing Rods"
+label_settings = SubResource("LabelSettings_4ni07")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HUD/Shop/Rods" unique_id=416700450]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -288.0
+offset_top = -92.0
+offset_right = 288.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/Shop/Rods/ScrollContainer" unique_id=1790481445]
+layout_mode = 2
+alignment = 1
 
 [node name="Interaction" type="Area2D" parent="." unique_id=1380827311]
 collision_mask = 2
@@ -650,5 +706,8 @@ offset_bottom = 3.008
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("21_a38lo")
+
+[node name="Trap" type="Sprite2D" parent="." unique_id=382535271]
+texture = ExtResource("20_i4ail")
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]

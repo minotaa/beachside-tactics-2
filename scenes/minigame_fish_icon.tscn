@@ -6,18 +6,20 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_ki4kp"]
 radius = 6.0
 
-[node name="Minigame Fish Icon" type="Node2D"]
+[node name="Minigame Fish Icon" type="Node2D" unique_id=1049633153]
 script = ExtResource("1_ki4kp")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=1403879956]
+collision_layer = 32768
+collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1990354168]
 shape = SubResource("CircleShape2D_ki4kp")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1168582545]
 z_index = 1
 texture = ExtResource("1_08t6r")
 
-[node name="MoveTimer" type="Timer" parent="."]
+[node name="MoveTimer" type="Timer" parent="." unique_id=698049419]
 
 [connection signal="timeout" from="MoveTimer" to="." method="timeout"]
