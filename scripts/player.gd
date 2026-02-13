@@ -9,6 +9,8 @@ const DIRECTIONS = {
 	"down": Vector2.DOWN
 }
 
+var original_zoom := Vector2(3.5, 3.5)
+var intended_zoom := Vector2(3.5, 3.5)
 var hantenjutsushiki: bool = false
 var last_direction: String = "down"
 var body_type: String = "cat0"
@@ -90,6 +92,12 @@ func _process_input(delta: float) -> void:
 		velocity = Vector2.ZERO
 	var velocity_length = velocity.length_squared()
 	var is_moving = velocity_length > 0
+
+	if Input.is_action_just_pressed("zoom_in"):
+		intended_zoom = Vector2(clamp(intended_zoom.x + 0.75, 1, 4.5), clamp(intended_zoom.y + 0.75, 1, 4.5))
+	if Input.is_action_just_pressed("zoom_out"):
+		intended_zoom = Vector2(clamp(intended_zoom.x - 0.75, 1, 4.5), clamp(intended_zoom.y - 0.75, 1, 4.5))
+	
 
 	if Input.is_action_just_released("interact"):
 		if not $HUD/Shop.visible:
@@ -305,6 +313,8 @@ func _process_ui(_delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+	if $Camera2D.zoom != intended_zoom:
+		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
 	debug_text += "Inventory: " + str(Game.bag.list.size()) + "\n"
