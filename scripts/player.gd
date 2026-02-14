@@ -249,7 +249,7 @@ func _process_input(delta: float) -> void:
 		$Minigame.scale = Vector2(0.1, 0.1)
 		var fish: Fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
 		if fish.difficulty == Game.Difficulty.EASY:
-			add_fish(30, 80, 1.2, 3)
+			add_fish(30, 80, 5, 3)
 		else: # TODO: FIX ME!
 			print("Unsupported fish difficulty.")
 		
@@ -319,7 +319,7 @@ func _process_ui(_delta: float) -> void:
 	debug_text += "Balance: " + str(Game.balance) + "\n"
 	debug_text += "Inventory: " + str(Game.bag.list.size()) + "\n"
 	debug_text += "Level: " + str(Game.level) + "\n"
-	debug_text += "XP: " + str(Game.xp) + "\n"
+	debug_text += "XP: " + str(roundi(Game.xp)) + "\n"
 	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + "\n"
 	debug_text += "Day: " + str(Game.days) + "\n"
 	if state == FishState.FISHING:

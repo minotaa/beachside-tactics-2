@@ -113,7 +113,7 @@ func calculate_xp_for_level(_level: int) -> float:
 func level_up():
 	xp -= calculate_xp_for_level(level)
 	level += 1
-	Toast.add("You leveled up! You are now Level %f!" % [level])
+	Toast.add("You leveled up! You are now Level %d!" % [roundi(level)])
 	print("Level up! Now level ", level)
 
 @rpc("authority", "call_local")

@@ -246,6 +246,7 @@ physics_layer_0/collision_layer = 1
 terrain_set_0/mode = 0
 terrain_set_0/terrain_0/name = "Sand"
 terrain_set_0/terrain_0/color = Color(0.75173223, 0.56496924, 9.818673e-06, 1)
+navigation_layer_0/layers = 1
 custom_data_layer_0/name = "water"
 custom_data_layer_0/type = 1
 custom_data_layer_1/name = "location"
