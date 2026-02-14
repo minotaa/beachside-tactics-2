@@ -31,10 +31,21 @@ func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
 	var catchable_fish = []
+	var current_time := Game.time / Game.TIME_IN_DAY
+	
 	for item in items:
 		if item is Fish:
 			if item.location == location and rod_power >= item.power_needed:
-				catchable_fish.append(item)
+				# hour_start == hour_end means always available
+				var time_ok = item.hour_start == item.hour_end
+				if not time_ok:
+					if item.hour_start < item.hour_end:
+						time_ok = current_time >= item.hour_start and current_time < item.hour_end
+					else:
+						# Wraps midnight e.g. 0.9 -> 0.1
+						time_ok = current_time >= item.hour_start or current_time < item.hour_end
+				if time_ok:
+					catchable_fish.append(item)
 	
 	if catchable_fish.is_empty():
 		return null
