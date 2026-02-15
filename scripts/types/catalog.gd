@@ -25,8 +25,10 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 	# 10% chance to get junk instead of fish
 	if randf() > 0.90:
+		print("junkkk")
 		return get_junk(location, rod_power)
 	else:
+		print("feesh")
 		return get_fish(location, rod_power)
 
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
@@ -38,6 +40,7 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 			if item.location == location and rod_power >= item.power_needed:
 				# hour_start == hour_end means always available
 				var time_ok = item.hour_start == item.hour_end
+				print(item, time_ok)
 				if not time_ok:
 					if item.hour_start < item.hour_end:
 						time_ok = current_time >= item.hour_start and current_time < item.hour_end
@@ -47,6 +50,7 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 				if time_ok:
 					catchable_fish.append(item)
 	
+	print(catchable_fish)
 	if catchable_fish.is_empty():
 		return null
 	
@@ -119,7 +123,7 @@ func _enter_tree() -> void:
 	atlas.atlas = preload("res://assets/sprites/fish.png")
 	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
 	var cod = Fish.new(1, "Cod", atlas) # IDs must iterate no matter what, even if they're on a different list, but they probably won't.
-	cod.description = "A common fish very popular as a food choice."
+	cod.description = "A hefty, pale-fleshed fish that lurks in cool waters. Most active at dawn and dusk when the light is low."
 	cod.sell_price = 20.0
 	cod.power_needed = 0.0
 	cod.threshold = 10.0
@@ -127,6 +131,8 @@ func _enter_tree() -> void:
 	cod.category = Game.Category.FISH
 	cod.location = Game.Location.Crystalwater_Beach
 	cod.difficulty = Game.Difficulty.EASY
+	cod.hour_start = 0.208
+	cod.hour_end = 0.375
 	items.append(cod)
 
 	atlas = AtlasTexture.new()
@@ -152,3 +158,99 @@ func _enter_tree() -> void:
 	seaweed.rarity = Game.Rarity.COMMON
 	seaweed.location = Game.Location.Crystalwater_Beach
 	items.append(seaweed)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(48.0, 0.0, 16.0, 16.0)
+	var red_snapper = Fish.new(4, "Red Snapper", atlas)
+	red_snapper.description = "A vibrant, deep-water predator with a firm bite. Hunts confidently under the full heat of the midday sun."
+	red_snapper.sell_price = 45.0
+	red_snapper.power_needed = 0.0
+	red_snapper.threshold = 30.0
+	red_snapper.rarity = Game.Rarity.UNCOMMON
+	red_snapper.category = Game.Category.FISH
+	red_snapper.location = Game.Location.Crystalwater_Beach
+	red_snapper.difficulty = Game.Difficulty.MEDIUM
+	red_snapper.hour_start = 0.458
+	red_snapper.hour_end = 0.667
+	items.append(red_snapper)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(64.0, 0.0, 16.0, 16.0)
+	var minnow = Fish.new(5, "Minnow", atlas)
+	minnow.description = "A tiny, skittish baitfish that darts through the shallows at all hours. Never hard to find, just hard to catch in numbers."
+	minnow.sell_price = 15.0
+	minnow.power_needed = 0.0
+	minnow.threshold = 10.0
+	minnow.rarity = Game.Rarity.COMMON
+	minnow.category = Game.Category.FISH
+	minnow.location = Game.Location.Crystalwater_Beach
+	minnow.difficulty = Game.Difficulty.EASY
+	minnow.hour_start = 0.0
+	minnow.hour_end = 0.0
+	items.append(minnow)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(80.0, 0.0, 16.0, 16.0)
+	var sea_bass = Fish.new(6, "Sea Bass", atlas)
+	sea_bass.description = "A sharp-eyed, hard-fighting fish that patrols the shallows from sunrise through early afternoon before retreating to cooler depths."
+	sea_bass.rarity = Game.Rarity.RARE
+	sea_bass.sell_price = 100.0
+	sea_bass.power_needed = 0.0
+	sea_bass.difficulty = Game.Difficulty.HARD
+	sea_bass.category = Game.Category.FISH
+	sea_bass.location = Game.Location.Crystalwater_Beach
+	sea_bass.hour_start = 0.250 
+	sea_bass.hour_end = 0.583
+	sea_bass.threshold = 100.0
+	items.append(sea_bass)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(96.0, 0.0, 16.0, 16.0)
+	var sardine = Fish.new(7, "Sardine", atlas)
+	sardine.description = "A small, silver schooling fish that surges to the surface at dawn and dusk to feed on plankton."
+	sardine.rarity = Game.Rarity.COMMON
+	sardine.sell_price = 35.0
+	sardine.power_needed = 0.0
+	sardine.difficulty = Game.Difficulty.EASY
+	sardine.category = Game.Category.FISH
+	sardine.location = Game.Location.Crystalwater_Beach
+	sardine.hour_start = 0.208
+	sardine.hour_end = 0.333
+	sardine.threshold = 10.0
+	items.append(sardine)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(112.0, 0.0, 16.0, 16.0)
+	var bream = Fish.new(8, "Bream", atlas)
+	bream.description = "A flat, round fish with a cautious temperament. Feeds eagerly through the morning but disappears into the shade by noon."
+	bream.rarity = Game.Rarity.UNCOMMON
+	bream.sell_price = 60.0
+	bream.power_needed = 0.0
+	bream.difficulty = Game.Difficulty.MEDIUM
+	bream.location = Game.Location.Crystalwater_Beach
+	bream.category = Game.Category.FISH
+	bream.hour_start = 0.250
+	bream.hour_end = 0.500
+	bream.threshold = 50.0
+	items.append(bream)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(128.0, 0.0, 16.0, 16.0)
+	var bluefish = Fish.new(9, "Bluefish", atlas)
+	bluefish.description = "A fast, aggressive predator with a vicious bite. Comes alive in the late afternoon and tears through the water well into the night."
+	bluefish.sell_price = 80.0
+	bluefish.rarity = Game.Rarity.RARE
+	bluefish.power_needed = 1.0
+	bluefish.difficulty = Game.Difficulty.MEDIUM
+	bluefish.location = Game.Location.Crystalwater_Beach
+	bluefish.category = Game.Category.FISH
+	bluefish.hour_start = 0.667
+	bluefish.hour_end = 0.042
+	bluefish.threshold = 200.0
+	items.append(bluefish)

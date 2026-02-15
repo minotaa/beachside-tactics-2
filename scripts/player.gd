@@ -249,7 +249,9 @@ func _process_input(delta: float) -> void:
 		$Minigame.scale = Vector2(0.1, 0.1)
 		var fish: Fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
 		if fish.difficulty == Game.Difficulty.EASY:
-			add_fish(30, 80, 5, 3)
+			add_fish(5, 40, 2, 6)
+		elif fish.difficulty == Game.Difficulty.MEDIUM:
+			add_fish(10, 50, 3, 4)
 		else: # TODO: FIX ME!
 			print("Unsupported fish difficulty.")
 		
@@ -305,7 +307,9 @@ func _process_input(delta: float) -> void:
 	move_and_slide()
 	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
 
-func _process_ui(_delta: float) -> void:
+var i_float_timer = 0.0
+
+func _process_ui(delta: float) -> void:
 	$InteractionMark.visible = false
 	for child in $InteractionMark.get_children():
 		child.visible = false
@@ -313,6 +317,8 @@ func _process_ui(_delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+	i_float_timer += delta * 8.0
+	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
 		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
@@ -373,7 +379,7 @@ func _process_ui(_delta: float) -> void:
 		$Camera2D.global_position = (bobber.global_position + global_position) / 2
 		var z1 = abs(bobber.global_position.x - global_position.x) / (get_viewport_rect().size.x-25)
 		var z2 = abs(bobber.global_position.y - global_position.y) / (get_viewport_rect().size.y-25)
-		var zoom_factor = max(max(z1, z2), 3.5)
+		var zoom_factor = max(max(z1, z2), intended_zoom.x)
 		$Camera2D.zoom = Vector2(zoom_factor, zoom_factor) 
 	
 		# Position minigame based on fishing direction
@@ -415,6 +421,7 @@ func _fishing_timer(location: Game.Location) -> void:
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
 			var fish = Catalog.get_fish_drop(location, rod_power)
+			print(fish)
 			var bobber_fish = preload("res://scenes/bobber_fish.tscn").instantiate()
 			bobber_fish.set_meta("fish_id", fish.id)
 			bobber_fish.get_node("Sprite2D").texture = fish.texture
