@@ -40,13 +40,13 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 			if item.location == location and rod_power >= item.power_needed:
 				# hour_start == hour_end means always available
 				var time_ok = item.hour_start == item.hour_end
-				print(item, time_ok)
 				if not time_ok:
 					if item.hour_start < item.hour_end:
 						time_ok = current_time >= item.hour_start and current_time < item.hour_end
 					else:
 						# Wraps midnight e.g. 0.9 -> 0.1
 						time_ok = current_time >= item.hour_start or current_time < item.hour_end
+				print(item, time_ok)
 				if time_ok:
 					catchable_fish.append(item)
 	
@@ -131,8 +131,8 @@ func _enter_tree() -> void:
 	cod.category = Game.Category.FISH
 	cod.location = Game.Location.Crystalwater_Beach
 	cod.difficulty = Game.Difficulty.EASY
-	cod.hour_start = 0.208
-	cod.hour_end = 0.375
+	cod.hour_start = 0.125
+	cod.hour_end = 0.500
 	items.append(cod)
 
 	atlas = AtlasTexture.new()
@@ -171,8 +171,8 @@ func _enter_tree() -> void:
 	red_snapper.category = Game.Category.FISH
 	red_snapper.location = Game.Location.Crystalwater_Beach
 	red_snapper.difficulty = Game.Difficulty.MEDIUM
-	red_snapper.hour_start = 0.458
-	red_snapper.hour_end = 0.667
+	red_snapper.hour_start = 0.333
+	red_snapper.hour_end = 0.750
 	items.append(red_snapper)
 	
 	atlas = AtlasTexture.new()
@@ -202,8 +202,8 @@ func _enter_tree() -> void:
 	sea_bass.difficulty = Game.Difficulty.HARD
 	sea_bass.category = Game.Category.FISH
 	sea_bass.location = Game.Location.Crystalwater_Beach
-	sea_bass.hour_start = 0.250 
-	sea_bass.hour_end = 0.583
+	sea_bass.hour_start = 0.167 
+	sea_bass.hour_end = 0.667
 	sea_bass.threshold = 100.0
 	items.append(sea_bass)
 	
@@ -218,8 +218,8 @@ func _enter_tree() -> void:
 	sardine.difficulty = Game.Difficulty.EASY
 	sardine.category = Game.Category.FISH
 	sardine.location = Game.Location.Crystalwater_Beach
-	sardine.hour_start = 0.208
-	sardine.hour_end = 0.333
+	sardine.hour_start = 0.125
+	sardine.hour_end = 0.417
 	sardine.threshold = 10.0
 	items.append(sardine)
 	
@@ -234,8 +234,8 @@ func _enter_tree() -> void:
 	bream.difficulty = Game.Difficulty.MEDIUM
 	bream.location = Game.Location.Crystalwater_Beach
 	bream.category = Game.Category.FISH
-	bream.hour_start = 0.250
-	bream.hour_end = 0.500
+	bream.hour_start = 0.167
+	bream.hour_end = 0.625
 	bream.threshold = 50.0
 	items.append(bream)
 	
@@ -250,7 +250,7 @@ func _enter_tree() -> void:
 	bluefish.difficulty = Game.Difficulty.MEDIUM
 	bluefish.location = Game.Location.Crystalwater_Beach
 	bluefish.category = Game.Category.FISH
-	bluefish.hour_start = 0.667
-	bluefish.hour_end = 0.042
+	bluefish.hour_start = 0.583
+	bluefish.hour_end = 0.125
 	bluefish.threshold = 200.0
 	items.append(bluefish)

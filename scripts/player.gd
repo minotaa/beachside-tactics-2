@@ -326,7 +326,7 @@ func _process_ui(delta: float) -> void:
 	debug_text += "Inventory: " + str(Game.bag.list.size()) + "\n"
 	debug_text += "Level: " + str(Game.level) + "\n"
 	debug_text += "XP: " + str(roundi(Game.xp)) + "\n"
-	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + "\n"
+	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + " R: " + str(roundi(Game.time)) + "\n"
 	debug_text += "Day: " + str(Game.days) + "\n"
 	if state == FishState.FISHING:
 		debug_text += "\n"
