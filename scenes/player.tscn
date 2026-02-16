@@ -437,7 +437,7 @@ color = Color(0.8901961, 1, 1, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_60mlk"]
 line_spacing = -5.0
 font = ExtResource("19_4r5pv")
-font_size = 48
+font_size = 40
 shadow_size = 4
 shadow_color = Color(0, 0, 0, 0.54901963)
 
