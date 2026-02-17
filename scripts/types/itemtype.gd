@@ -7,7 +7,7 @@ var description: String
 var rarity: Game.Rarity = Game.Rarity.COMMON
 var texture: Texture
 
-var single_purchase: bool = false
+var purchase_limit: int = -1
 var purchasable: bool = false
 var price: float = 0.0
 var sell_price: float = 0.0

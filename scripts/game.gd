@@ -55,7 +55,7 @@ var equipped_fishing_rod: FishingRod
 var time: float = TIME_IN_DAY * 0.55
 var days: int = 0
 var bag = Inventory.new()
-var upgrades = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
+var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 
 func _process(delta: float) -> void:
@@ -205,8 +205,8 @@ func load_game() -> void:
 			var rod_id = data["equipped_fishing_rod"]
 			if rod_id != null:  # null means no rod equipped
 				equipped_fishing_rod = Catalog.get_item(rod_id)
-		if data.has("upgrades"):
-			upgrades.set_list_from_save(data["upgrades"])
+		if data.has("inventory"):
+			inventory.set_list_from_save(data["inventory"])
 		if data.has("balance"):
 			balance = data["balance"]
 		if data.has("whiffs"):
@@ -226,7 +226,7 @@ func load_game() -> void:
 func get_save_data() -> Dictionary:
 	return {
 		"bag": bag.to_list(),
-		"upgrades": upgrades.to_list(),
+		"inventory": inventory.to_list(),
 		"balance": balance,
 		"whiffs": whiffs,
 		"catches": catches,

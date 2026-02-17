@@ -109,7 +109,7 @@ func _enter_tree() -> void:
 	var basic_fishing_rod = FishingRod.new(0, "Basic Fishing Rod", atlas)
 	basic_fishing_rod.fishing_power = 1.0
 	basic_fishing_rod.description = "The most basic fishing rod ever. You couldn't get more boring than this."
-	basic_fishing_rod.single_purchase = true
+	basic_fishing_rod.purchase_limit = 1
 	basic_fishing_rod.purchasable = true
 	basic_fishing_rod.rarity = Game.Rarity.COMMON
 	basic_fishing_rod.category = Game.Category.RODS
@@ -117,6 +117,12 @@ func _enter_tree() -> void:
 	basic_fishing_rod.price = 100.0
 	basic_fishing_rod.sell_price = 10.0
 	basic_fishing_rod.baitable = false
+	basic_fishing_rod.data = { 
+		"extra_stats": {
+			"Baitable": "No",
+			"Rod Power": "+1"
+		}
+	}
 	items.append(basic_fishing_rod)
 
 	atlas = AtlasTexture.new()
@@ -254,3 +260,48 @@ func _enter_tree() -> void:
 	bluefish.hour_end = 0.125
 	bluefish.threshold = 200.0
 	items.append(bluefish)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(144.0, 0.0, 16.0, 16.0)
+	var carp = Fish.new(10, "Carp", atlas)
+	carp.description = "A large, bottom-feeding fish that slowly grazes through murky water. Patient and elusive, it feeds throughout the day but is most sluggish in harsh light."
+	carp.sell_price = 65.0
+	carp.rarity = Game.Rarity.UNCOMMON
+	carp.difficulty = Game.Difficulty.MEDIUM
+	carp.location = Game.Location.Crystalwater_Beach
+	carp.category = Game.Category.FISH
+	carp.hour_start = 0.167
+	carp.hour_end = 0.708
+	carp.threshold = 20.0
+	items.append(carp)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(160.0, 0.0, 16.0, 16.0)
+	var eel = Fish.new(11, "Eel", atlas)
+	eel.description = "A slippery, snake-like creature that hides in the mud and weeds. Almost exclusively a creature of the night."
+	eel.sell_price = 100.0
+	eel.rarity = Game.Rarity.RARE
+	eel.difficulty = Game.Difficulty.HARD
+	eel.location = Game.Location.Crystalwater_Beach
+	eel.category = Game.Category.FISH
+	eel.hour_start = 0.750
+	eel.hour_end = 0.292
+	eel.threshold = 200.0
+	items.append(eel)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(176.0, 0.0, 16.0, 16.0)
+	var goldfish = Fish.new(12, "Goldfish", atlas)
+	goldfish.description = "A small, ornamental fish that somehow ended up in the wild. Docile and easy to catch at any hour."
+	goldfish.sell_price = 40.0
+	goldfish.rarity = Game.Rarity.COMMON
+	goldfish.difficulty = Game.Difficulty.EASY
+	goldfish.location = Game.Location.Crystalwater_Beach
+	goldfish.category = Game.Category.FISH
+	goldfish.hour_start = 0.0
+	goldfish.hour_end = 0.0
+	goldfish.threshold = 2.0
+	items.append(goldfish)
