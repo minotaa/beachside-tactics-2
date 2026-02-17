@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://cuvlu0jyq8u8k"]
 
-[ext_resource type="FontFile" uid="uid://l3853frrj62o" path="res://assets/fonts/at01.ttf" id="1_w1q34"]
+[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="1_w1q34"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_61ify"]
+line_spacing = 6.0
 font = ExtResource("1_w1q34")
-font_size = 32
+font_size = 15
 
 [node name="Shop Entry" type="Control" unique_id=137208026]
 custom_minimum_size = Vector2(184, 208)
@@ -47,13 +48,15 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -84.0
-offset_top = -65.0
+offset_top = -64.0
 offset_right = 84.0
-offset_bottom = -10.0
+offset_bottom = -9.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_fonts/font = ExtResource("1_w1q34")
 text = "Fishing Rod
 500g"
 label_settings = SubResource("LabelSettings_61ify")
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2

@@ -76,19 +76,27 @@ func play_animation(_name: String, backwards: bool = false, speed: float = 1) ->
 		$Base.play(_name, speed * -1, true)
 
 func update_catalog() -> void:
-	for children in $"HUD/Shop/Rods/ScrollContainer/HBoxContainer".get_children():
+	for children in $"HUD/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".get_children():
+		children.queue_free()
+	for children in $HUD/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
 			var shop_entry = preload("res://scenes/shop_entry.tscn").instantiate()
 			shop_entry.get_node("TextureRect").texture = item.texture
 			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
-			$"HUD/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
+			$"HUD/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
+	for item in Game.bag.list:
+		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
+			var sell_entry = preload("res://scenes/sell_entry.tscn").instantiate()
+			sell_entry.get_node("HBoxContainer/Label").text = str(item) + ": " + str(roundi(item.amount)) + " x " + str(roundi(item.type.sell_price)) + " = " + str(roundi(item.type.sell_price * item.amount)) + "g" 
+			sell_entry.get_node("HBoxContainer/TextureRect").texture = item.type.texture
+			$HUD/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 
 func _process_input(delta: float) -> void:
 	# Movement controls
 	velocity = Input.get_vector("left", "right", "up", "down", 0.1)
-	if (state == FishState.REELING or state == FishState.FISHING) or $HUD/Shop.visible:
+	if (state == FishState.REELING or state == FishState.FISHING) or $HUD/Vendor.visible:
 		velocity = Vector2.ZERO
 	var velocity_length = velocity.length_squared()
 	var is_moving = velocity_length > 0
@@ -100,15 +108,15 @@ func _process_input(delta: float) -> void:
 	
 
 	if Input.is_action_just_released("interact"):
-		if not $HUD/Shop.visible:
+		if not $HUD/Vendor.visible:
 			for body in $Interaction.get_overlapping_areas():
 				if body.is_in_group("shop"):
-					$HUD/Shop.visible = true
+					$HUD/Vendor.visible = true
 					$HUD/Inventory.visible = false
 					$HUD/Main.visible = false
 					update_catalog()
 		else:
-			$HUD/Shop.visible = false
+			$HUD/Vendor.visible = false
 			$HUD/Inventory.visible = true
 			$HUD/Main.visible = true
 
@@ -242,7 +250,7 @@ func _process_input(delta: float) -> void:
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	
 	# Confirm catch & start minigame
-	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $HUD/Shop.visible:
+	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $HUD/Vendor.visible:
 		state = FishState.REELING
 		$Minigame.visible = true
 		$Minigame.position = Vector2(0, 0)
@@ -256,7 +264,7 @@ func _process_input(delta: float) -> void:
 			print("Unsupported fish difficulty.")
 		
 	
-	if Game.equipped_fishing_rod != null and not $HUD/Shop.visible:
+	if Game.equipped_fishing_rod != null and not $HUD/Vendor.visible:
 		# Charge up cast
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
 			if not $FishPowerBar.visible:
@@ -301,7 +309,7 @@ func _process_input(delta: float) -> void:
 		if Input.is_action_just_released("fish"):
 			fish_control_safe = true
 	else:
-		if Input.is_action_just_pressed("fish") and not $HUD/Shop.visible:
+		if Input.is_action_just_pressed("fish") and not $HUD/Vendor.visible:
 			Toast.add("You can't fish without a [img center region=0,0,16,16 width=32 height=32]res://assets/sprites/items.png[/img] Fishing Rod.")
 	
 	move_and_slide()
@@ -323,7 +331,7 @@ func _process_ui(delta: float) -> void:
 		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
-	debug_text += "Inventory: " + str(Game.bag.list.size()) + "\n"
+	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + "\n"
 	debug_text += "Level: " + str(Game.level) + "\n"
 	debug_text += "XP: " + str(roundi(Game.xp)) + "\n"
 	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + " R: " + str(roundi(Game.time)) + "\n"
@@ -337,7 +345,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$HUD/Main/Debug.text = debug_text
 	
-	if Input.is_action_pressed("inventory") and not $HUD/Shop.visible:
+	if Input.is_action_pressed("inventory") and not $HUD/Vendor.visible:
 		$HUD/Inventory.position.x = lerp($HUD/Inventory.position.x, 32.0, 0.2)
 		$HUD/Main/Debug.hide()
 		if not $HUD/Inventory.visible:
@@ -501,3 +509,22 @@ func _on_base_animation_finished() -> void:
 					bobber.queue_free()
 					bobber = null
 				play_idle_animation()
+
+func _on_sell_pressed() -> void:
+	var amount_earned = 0.0
+	var to_remove = []
+	print(Game.bag.list)
+	for item in Game.bag.list:
+		print(item)
+		if item.type.category == Game.Category.FISH or item.type.category == Game.Category.JUNK:
+			Game.balance += item.amount * item.type.sell_price
+			amount_earned += item.amount * item.type.sell_price
+			to_remove.append(item)
+	if not to_remove.is_empty():
+		print(to_remove)
+		for item in to_remove:
+			Game.bag.take_item(item.type, item.amount)
+	
+	if amount_earned > 0.0:
+		Toast.add("You made " + str(amount_earned) + "g!")
+	update_catalog()
