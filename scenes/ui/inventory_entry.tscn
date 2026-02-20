@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://uwv7c6qqty0j"]
+
+[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="1_53sba"]
+[ext_resource type="Texture2D" uid="uid://d4jmtgjd4em2i" path="res://assets/sprites/fish.png" id="2_qu4uu"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_53sba"]
+font = ExtResource("1_53sba")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7y1c0"]
+atlas = ExtResource("2_qu4uu")
+region = Rect2(0, 0, 16, 16)
+
+[node name="Inventory Entry" type="Control" unique_id=1700963795]
+custom_minimum_size = Vector2(306, 32)
+layout_mode = 3
+anchor_right = 0.23900001
+anchor_bottom = 0.044000003
+offset_right = 0.07998657
+offset_bottom = 0.3199978
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="." unique_id=910644431]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="." unique_id=288936257]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -264.0
+offset_top = -13.0
+offset_right = -11.0
+offset_bottom = 13.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "2x Cod"
+label_settings = SubResource("LabelSettings_53sba")
+vertical_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1224345094]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 2.0
+offset_top = -16.0
+offset_right = 34.0
+offset_bottom = 16.0
+grow_vertical = 2
+texture = SubResource("AtlasTexture_7y1c0")
