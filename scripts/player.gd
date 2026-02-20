@@ -266,7 +266,7 @@ func _process_input(delta: float) -> void:
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 	
 	# Confirm catch & start minigame
-	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $UI/Vendor.visible:
+	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $UI/Vendor.visible and not Input.is_action_just_released("inventory"):
 		state = FishState.REELING
 		$Minigame.visible = true
 		$Minigame.position = Vector2(0, 0)
@@ -302,7 +302,7 @@ func _process_input(delta: float) -> void:
 					hantenjutsushiki = true
 					
 		# Cast out charged up cast
-		if Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe:
+		if Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe and not Input.is_action_just_released("inventory"):
 			$FishPowerBar.visible = false
 			hantenjutsushiki = false
 			
@@ -600,4 +600,7 @@ func _on_sell_pressed() -> void:
 	update_catalog()
 
 func _on_inventory_button_pressed() -> void:
+	Input.action_release("inventory")
+
+func _on_close_inventory_pressed() -> void:
 	Input.action_release("inventory")
