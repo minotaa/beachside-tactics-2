@@ -15,6 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Beachside Tactics 2"
+config/version="1"
 run/main_scene="uid://cpeeutcaupkit"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
@@ -24,6 +25,17 @@ Toast="*uid://bwuwrg2up5rs6"
 Catalog="*res://scripts/types/catalog.gd"
 Game="*res://scripts/game.gd"
 LimboConsole="*uid://dyxornv8vwibg"
+Network="*uid://c2vy2jytykhf6"
+EOSGRuntime="*uid://7saywdx0ipep"
+HPlatform="*uid://yl2muvqrdiud"
+HAuth="*uid://786t1jiowvvg"
+HAchievements="*uid://bis404dty5u5c"
+HFriends="*uid://uumqbey8ji5t"
+HStats="*uid://dbckdip83oone"
+HLeaderboards="*uid://b06khhf20mplm"
+HLobbies="*uid://6iqvm33q0tb1"
+HP2P="*uid://u6ae5fpm6l8q"
+HSessions="*uid://bieh2rxxahuu2"
 
 [display]
 
@@ -34,7 +46,7 @@ window/stretch/aspect="ignore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/limbo_console/plugin.cfg")
+enabled=PackedStringArray("res://addons/epic-online-services-godot/plugin.cfg", "res://addons/limbo_console/plugin.cfg")
 
 [global_group]
 

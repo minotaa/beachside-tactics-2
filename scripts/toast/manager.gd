@@ -1,7 +1,7 @@
 extends Node
 
 var canvas_layer: CanvasLayer
-var toast_resource = preload("res://scenes/toast.tscn")
+var toast_resource = preload("res://scenes/ui/toast.tscn")
 var toasts = []
 var toast_queue = []  
 var max_toasts = 5

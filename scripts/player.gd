@@ -40,7 +40,7 @@ func _ready() -> void:
 func add_fish(min_d, max_d, move_speed, move_time):
 	#print("adding fish with " + str(min_d) + " " + str(max_d) + " " + str(move_speed) + " " + str(move_time))
 
-	var f = preload("res://scenes/minigame_fish_icon.tscn").instantiate()
+	var f = preload("res://scenes/ui/minigame_fish_icon.tscn").instantiate()
 	f.position = Vector2(0, 0)
 	
 	f.min_distance = abs(min_d)
@@ -98,14 +98,14 @@ func update_catalog() -> void:
 		children.queue_free()
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
-			var shop_entry = preload("res://scenes/shop_entry.tscn").instantiate()
+			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
 			shop_entry.get_node("TextureRect").texture = item.texture
 			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "buy_item").bind(item.id))
 			$"UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
 	for item in Game.bag.list:
 		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
-			var sell_entry = preload("res://scenes/sell_entry.tscn").instantiate()
+			var sell_entry = preload("res://scenes/ui/sell_entry.tscn").instantiate()
 			sell_entry.get_node("HBoxContainer/Label").text = str(item) + ": " + str(roundi(item.amount)) + " x " + str(roundi(item.type.sell_price)) + " = " + str(roundi(item.type.sell_price * item.amount)) + "g" 
 			sell_entry.get_node("HBoxContainer/TextureRect").texture = item.type.texture
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
@@ -356,7 +356,7 @@ func update_inventory() -> void:
 	for child in $"UI/Inventory/Container/Fishing Rods/GridContainer".get_children():
 		child.queue_free()
 	$UI/Inventory/Title.text = "Your bag (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + ")"
-	var inventory_button = preload("res://scenes/inventory_button.tscn").instantiate()
+	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
 	if Game.equipped_fishing_rod != null:
 		inventory_button.get_node("Label").hide()
@@ -377,14 +377,14 @@ func update_inventory() -> void:
 			$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_fishing_rod.data["extra_stats"][key]) + "\n"
 
 	for item in Game.bag.list:
-		var inventory_entry = preload("res://scenes/inventory_entry.tscn").instantiate()
+		var inventory_entry = preload("res://scenes/ui/inventory_entry.tscn").instantiate()
 		inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
 		inventory_entry.get_node("TextureRect").texture = item.type.texture
 		$UI/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 		
 	for item in Game.inventory.list:
 		if item.type.category == Game.Category.RODS:
-			inventory_button = preload("res://scenes/inventory_button.tscn").instantiate()
+			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
 			if Game.equipped_fishing_rod != item.type:
 				inventory_button.get_node("Label").hide()
@@ -495,7 +495,7 @@ func _fishing_timer(location: Game.Location) -> void:
 		if your_odds >= odds:	
 			var fish = Catalog.get_fish_drop(location, rod_power)
 			print(fish)
-			var bobber_fish = preload("res://scenes/bobber_fish.tscn").instantiate()
+			var bobber_fish = preload("res://scenes/ui/bobber_fish.tscn").instantiate()
 			bobber_fish.set_meta("fish_id", fish.id)
 			bobber_fish.get_node("Sprite2D").texture = fish.texture
 			bobber_fish.get_node("Sprite2D").visible = false
