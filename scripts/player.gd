@@ -373,8 +373,12 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = Game.equipped_fishing_rod.name
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = Game.equipped_fishing_rod.description
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = ""
+		var index = 0
 		for key in Game.equipped_fishing_rod.data["extra_stats"].keys():
-			$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_fishing_rod.data["extra_stats"][key]) + "\n"
+			index += 1
+			$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_fishing_rod.data["extra_stats"][key])
+			if index < Game.equipped_fishing_rod.data["extra_stats"].keys().size():
+				$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += "\n"
 
 	for item in Game.bag.list:
 		var inventory_entry = preload("res://scenes/inventory_entry.tscn").instantiate()
