@@ -1,0 +1,193 @@
+[gd_scene format=3 uid="uid://bdulqma2s6tm4"]
+
+[ext_resource type="Texture2D" uid="uid://b6i7wq4h3faqm" path="res://assets/sprites/minoware-sheet.png" id="1_ir5ef"]
+[ext_resource type="Script" uid="uid://ctu6wen0fowc0" path="res://scripts/loading.gd" id="1_yc7uc"]
+[ext_resource type="FontFile" uid="uid://c5shll6t6od1m" path="res://assets/fonts/Megufont-Regular.ttf" id="3_yt702"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_nxo4k"]
+font = ExtResource("3_yt702")
+font_size = 64
+font_color = Color(0, 0, 0, 1)
+shadow_color = Color(0, 0, 0, 0.76862746)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yc7uc"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(0, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dhqfv"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(1024, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_101rs"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(2048, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yt702"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(3072, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ytni"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(4096, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nxo4k"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(5120, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c856a"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(6144, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3cqd5"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(7168, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2b8ay"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(8192, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mp7cq"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(9216, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kc112"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(10240, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ay1x"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(11264, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pjhx7"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(12288, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xn74e"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(13312, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x5boc"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(14336, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gspuy"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(15360, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f8gjb"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(16384, 0, 1024, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ffpfu"]
+atlas = ExtResource("1_ir5ef")
+region = Rect2(17408, 0, 1024, 1024)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_buusq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yc7uc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dhqfv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_101rs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yt702")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ytni")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nxo4k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c856a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3cqd5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2b8ay")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mp7cq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kc112")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ay1x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pjhx7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xn74e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x5boc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gspuy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f8gjb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ffpfu")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Loading" type="Node2D" unique_id=1465578903]
+script = ExtResource("1_yc7uc")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1183805573]
+layer = -1
+
+[node name="Control" type="Control" parent="UI" unique_id=297889403]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/Control" unique_id=1628602395]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/Control" unique_id=187821158]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -486.0
+offset_top = 148.0
+offset_right = 486.0
+offset_bottom = 204.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "minoware"
+label_settings = SubResource("LabelSettings_nxo4k")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=333155987]
+z_index = -1
+y_sort_enabled = true
+position = Vector2(640, 296)
+scale = Vector2(0.45, 0.45)
+sprite_frames = SubResource("SpriteFrames_buusq")
+frame_progress = 0.1716048
