@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://vk5tvvwthfs2" path="res://scripts/level.gd" id="1_lnu2h"]
 [ext_resource type="TileSet" uid="uid://cx3i648h1rssq" path="res://assets/game.tres" id="1_yqjtg"]
-[ext_resource type="PackedScene" uid="uid://b62nnfwg2bmhs" path="res://scenes/player.scn" id="3_lnu2h"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_lnu2h"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yqjtg"]
 size = Vector2(18, 16)
