@@ -2,13 +2,12 @@
 
 [ext_resource type="Texture2D" uid="uid://b6i7wq4h3faqm" path="res://assets/sprites/minoware-sheet.png" id="1_ir5ef"]
 [ext_resource type="Script" uid="uid://ctu6wen0fowc0" path="res://scripts/loading.gd" id="1_yc7uc"]
+[ext_resource type="FontFile" uid="uid://d4a48f2cwmyq1" path="res://font.fnt" id="2_101rs"]
 [ext_resource type="FontFile" uid="uid://c5shll6t6od1m" path="res://assets/fonts/Megufont-Regular.ttf" id="3_yt702"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_nxo4k"]
-font = ExtResource("3_yt702")
-font_size = 64
-font_color = Color(0, 0, 0, 1)
-shadow_color = Color(0, 0, 0, 0.76862746)
+[sub_resource type="FontVariation" id="FontVariation_dhqfv"]
+base_font = ExtResource("3_yt702")
+variation_embolden = 1.1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yc7uc"]
 atlas = ExtResource("1_ir5ef")
@@ -166,7 +165,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="UI/Control" unique_id=187821158]
+[node name="Label" type="RichTextLabel" parent="UI/Control" unique_id=1399072367]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -174,13 +173,21 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -486.0
-offset_top = 148.0
+offset_top = 140.0
 offset_right = 486.0
-offset_bottom = 204.0
+offset_bottom = 196.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "minoware"
-label_settings = SubResource("LabelSettings_nxo4k")
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_fonts/normal_font = ExtResource("2_101rs")
+theme_override_fonts/bold_font = SubResource("FontVariation_dhqfv")
+theme_override_font_sizes/normal_font_size = 48
+theme_override_font_sizes/bold_font_size = 48
+theme_override_font_sizes/bold_italics_font_size = 48
+theme_override_font_sizes/italics_font_size = 48
+theme_override_font_sizes/mono_font_size = 48
+bbcode_enabled = true
+text = "[wave amp=15.0 freq=8.0 connected=1]made by minoware[/wave]"
 horizontal_alignment = 1
 vertical_alignment = 1
 

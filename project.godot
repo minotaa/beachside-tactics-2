@@ -16,8 +16,10 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Beachside Tactics 2"
 config/version="1"
-run/main_scene="uid://cpeeutcaupkit"
+run/main_scene="uid://bdulqma2s6tm4"
 config/features=PackedStringArray("4.6", "Forward Plus")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
 
 [autoload]
 
@@ -36,6 +38,7 @@ HLeaderboards="*uid://b06khhf20mplm"
 HLobbies="*uid://6iqvm33q0tb1"
 HP2P="*uid://u6ae5fpm6l8q"
 HSessions="*uid://bieh2rxxahuu2"
+Fade="*uid://b7c4rwest4m8y"
 
 [display]
 

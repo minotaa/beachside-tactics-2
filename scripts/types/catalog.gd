@@ -25,10 +25,8 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 	# 10% chance to get junk instead of fish
 	if randf() > 0.90:
-		print("junkkk")
 		return get_junk(location, rod_power)
 	else:
-		print("feesh")
 		return get_fish(location, rod_power)
 
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
@@ -46,11 +44,9 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 					else:
 						# Wraps midnight e.g. 0.9 -> 0.1
 						time_ok = current_time >= item.hour_start or current_time < item.hour_end
-				print(item, time_ok)
 				if time_ok:
 					catchable_fish.append(item)
 	
-	print(catchable_fish)
 	if catchable_fish.is_empty():
 		return null
 	

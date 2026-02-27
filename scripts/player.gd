@@ -403,6 +403,7 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+	$UI/Main/InventoryButton.text = "    Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
@@ -519,6 +520,24 @@ func _fishing_timer(location: Game.Location) -> void:
 				return
 			else:
 				$Exclaim.emitting = true
+				if fish.rarity == Game.Rarity.COMMON:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-common.png")
+				if fish.rarity == Game.Rarity.UNCOMMON:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-uncommon.png")
+				if fish.rarity == Game.Rarity.RARE:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-rare.png")
+				if fish.rarity == Game.Rarity.EPIC:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-epic.png")
+				if fish.rarity == Game.Rarity.LEGENDARY:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-legendary.png")
+				if fish.rarity == Game.Rarity.MYTHIC:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-mythic.png")
+				if fish.rarity == Game.Rarity.DIVINE:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-divine.png")
+				if fish.rarity == Game.Rarity.SUPREME:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-supreme.png")
+				if fish.rarity == Game.Rarity.SECRET:
+					$Exclaim.texture = preload("res://assets/sprites/caught-fish-secret.png")
 				state = FishState.FOUND_FISH
 			await get_tree().create_timer(1.5).timeout
 			if state == FishState.FOUND_FISH:
