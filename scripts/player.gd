@@ -428,7 +428,7 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
-	$UI/Main/InventoryButton.text = "    Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
+	$UI/Main/InventoryButton.text = "    Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ") "
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
