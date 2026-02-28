@@ -2,7 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://b6i7wq4h3faqm" path="res://assets/sprites/minoware-sheet.png" id="1_ir5ef"]
 [ext_resource type="Script" uid="uid://ctu6wen0fowc0" path="res://scripts/loading.gd" id="1_yc7uc"]
-[ext_resource type="FontFile" uid="uid://d4a48f2cwmyq1" path="res://font.fnt" id="2_101rs"]
 [ext_resource type="FontFile" uid="uid://c5shll6t6od1m" path="res://assets/fonts/Megufont-Regular.ttf" id="3_yt702"]
 
 [sub_resource type="FontVariation" id="FontVariation_dhqfv"]
@@ -179,7 +178,7 @@ offset_bottom = 196.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
-theme_override_fonts/normal_font = ExtResource("2_101rs")
+theme_override_fonts/normal_font = ExtResource("3_yt702")
 theme_override_fonts/bold_font = SubResource("FontVariation_dhqfv")
 theme_override_font_sizes/normal_font_size = 48
 theme_override_font_sizes/bold_font_size = 48

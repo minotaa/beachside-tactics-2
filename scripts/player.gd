@@ -9,6 +9,7 @@ const DIRECTIONS = {
 	"down": Vector2.DOWN
 }
 
+var current_log_path: String
 var original_zoom := Vector2(3.5, 3.5)
 var intended_zoom := Vector2(3.5, 3.5)
 var hantenjutsushiki: bool = false
@@ -36,6 +37,30 @@ enum FishState {
 
 func _ready() -> void:
 	play_idle_animation()
+	if multiplayer.has_multiplayer_peer():
+		set_multiplayer_authority(name.to_int())
+		for player in Network.players:
+			if player["id"] == name.to_int():
+				$Username.text = player["username"]
+		$Username.show()
+		if is_multiplayer_authority():
+			$Camera2D.make_current()
+		else:
+			$UI.hide()
+	else:
+		$Username.hide()
+	
+	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+		if not DirAccess.dir_exists_absolute("user://chats"):
+			DirAccess.make_dir_absolute("user://chats")
+			
+		var timestamp = Time.get_datetime_string_from_system().replace(":", "-")
+		current_log_path = "user://chats/%s.log" % timestamp
+		
+		var file = FileAccess.open(current_log_path, FileAccess.WRITE)
+		if file:
+			file.store_line("--- Chat session started at %s ---" % timestamp)
+		file.close()
 	
 func add_fish(min_d, max_d, move_speed, move_time):
 	#print("adding fish with " + str(min_d) + " " + str(max_d) + " " + str(move_speed) + " " + str(move_time))
@@ -555,6 +580,8 @@ func _fishing_timer(location: Game.Location) -> void:
 		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25)
 	
 func _physics_process(delta: float) -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
 	_process_ui(delta)
 	_process_input(delta)
 	
