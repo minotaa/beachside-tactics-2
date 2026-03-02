@@ -1,94 +1,88 @@
 [gd_scene format=3 uid="uid://bdulqma2s6tm4"]
 
-[ext_resource type="Texture2D" uid="uid://b6i7wq4h3faqm" path="res://assets/sprites/minoware-sheet.png" id="1_ir5ef"]
 [ext_resource type="Script" uid="uid://ctu6wen0fowc0" path="res://scripts/loading.gd" id="1_yc7uc"]
+[ext_resource type="Texture2D" uid="uid://b55108ivh4703" path="res://assets/sprites/minoware-sheet.svg" id="3_dhqfv"]
 [ext_resource type="FontFile" uid="uid://c5shll6t6od1m" path="res://assets/fonts/Megufont-Regular.ttf" id="3_yt702"]
 
 [sub_resource type="FontVariation" id="FontVariation_dhqfv"]
 base_font = ExtResource("3_yt702")
 variation_embolden = 1.1
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_yc7uc"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(0, 0, 1024, 1024)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_dhqfv"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(1024, 0, 1024, 1024)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_101rs"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(2048, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(0, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yt702"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(3072, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(910, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2ytni"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(4096, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(1820, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nxo4k"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(5120, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(2730, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c856a"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(6144, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(3640, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3cqd5"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(7168, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(4550, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2b8ay"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(8192, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(5460, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mp7cq"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(9216, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(6370, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kc112"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(10240, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(7280, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4ay1x"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(11264, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(8190, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pjhx7"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(12288, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(9100, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xn74e"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(13312, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(10010, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x5boc"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(14336, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(10920, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gspuy"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(15360, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(11830, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f8gjb"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(16384, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(12740, 0, 910, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ffpfu"]
-atlas = ExtResource("1_ir5ef")
-region = Rect2(17408, 0, 1024, 1024)
+atlas = ExtResource("3_dhqfv")
+region = Rect2(13650, 0, 910, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_buusq"]
+atlas = ExtResource("3_dhqfv")
+region = Rect2(14560, 0, 910, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_se4la"]
+atlas = ExtResource("3_dhqfv")
+region = Rect2(15470, 0, 910, 1024)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_buusq"]
 animations = [{
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_yc7uc")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_dhqfv")
-}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_101rs")
 }, {
@@ -136,6 +130,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ffpfu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_buusq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_se4la")
 }],
 "loop": true,
 "name": &"default",
@@ -193,7 +193,7 @@ vertical_alignment = 1
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=333155987]
 z_index = -1
 y_sort_enabled = true
-position = Vector2(640, 296)
-scale = Vector2(0.45, 0.45)
+position = Vector2(640, 360)
+scale = Vector2(0.501, 0.45)
 sprite_frames = SubResource("SpriteFrames_buusq")
 frame_progress = 0.1716048

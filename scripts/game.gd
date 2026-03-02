@@ -156,6 +156,20 @@ func set_time(value: Variant) -> void:
 			_:          LimboConsole.error("Unknown time of day: " + value)
 		LimboConsole.info("Time set to: " + get_time_string() + " (" + TimeOfDay.keys()[get_day_time()] + ")")
 
+func host() -> void:
+	var server_res = await Network.host_server(6466)
+	if not server_res:
+		LimboConsole.error("Couldn't create the server, something probably happened.")
+	else:
+		LimboConsole.info("Successfully created a server.")
+
+func connect_to_server(address: String, username: String = "Player") -> void:
+	var join_res = await Network.join_server(address, username)
+	if not join_res:
+		LimboConsole.error("Couldn't connect to the address.")
+	else:
+		LimboConsole.info("Successfully joined through the connection.")
+
 func _ready() -> void:
 	multiplayer.multiplayer_peer = null # TODO: REMOVE ME
 	load_game()
@@ -178,6 +192,8 @@ func _ready() -> void:
 		func():
 			return [true, false]
 	)
+	LimboConsole.register_command(host, "host", "Hosts a multiplayer server.")
+	LimboConsole.register_command(connect_to_server, "connect", "Connect to the server using the connection address.")
 	
 func set_holding_trap(holding_trap: bool) -> void:
 	if get_player() != null:

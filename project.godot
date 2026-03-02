@@ -25,9 +25,9 @@ boot_splash/show_image=false
 
 Toast="*uid://bwuwrg2up5rs6"
 Catalog="*res://scripts/types/catalog.gd"
+Network="*uid://c2vy2jytykhf6"
 Game="*res://scripts/game.gd"
 LimboConsole="*uid://dyxornv8vwibg"
-Network="*uid://c2vy2jytykhf6"
 EOSGRuntime="*uid://7saywdx0ipep"
 HPlatform="*uid://yl2muvqrdiud"
 HAuth="*uid://786t1jiowvvg"

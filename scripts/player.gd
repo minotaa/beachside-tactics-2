@@ -10,8 +10,8 @@ const DIRECTIONS = {
 }
 
 var current_log_path: String
-var original_zoom := Vector2(3.5, 3.5)
-var intended_zoom := Vector2(3.5, 3.5)
+var original_zoom := Vector2(3.25, 3.25)
+var intended_zoom := Vector2(3.25, 3.25)
 var hantenjutsushiki: bool = false
 var last_direction: String = "down"
 var body_type: String = "cat0"

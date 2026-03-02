@@ -44,13 +44,13 @@ func _ready() -> void:
 		create_opts.flags = EOS.Platform.PlatformFlags.WindowsEnableOverlayOpengl
 
 	# set up SDK
-	var init_res := await HPlatform.initialize_async(init_opts)
+	var init_res = await HPlatform.initialize_async(init_opts)
 	if not EOS.is_success(init_res):
 		printerr("Failed to initialize EOS SDK: ", EOS.result_str(init_res))
 		# TODO: consequences
 		return
 	
-	var create_success := await HPlatform.create_platform_async(create_opts)
+	var create_success = await HPlatform.create_platform_async(create_opts)
 	if not create_success:
 		printerr("Failed to create EOS Platform")
 		# TODO: consequences
@@ -59,7 +59,7 @@ func _ready() -> void:
 	# Setup Logs from EOS
 	HPlatform.log_msg.connect(_on_eos_log_msg)
 	# This will control which logs you get from EOS SDK
-	var log_res := HPlatform.set_eos_log_level(EOS.Logging.LogCategory.AllCategories, EOS.Logging.LogLevel.Verbose)
+	var log_res = HPlatform.set_eos_log_level(EOS.Logging.LogCategory.AllCategories, EOS.Logging.LogLevel.Verbose)
 	if not EOS.is_success(log_res):
 		printerr("Failed to set logging level")
 		# TODO: consequences
@@ -114,7 +114,11 @@ func join_server(address: String, username: String = "Player") -> bool:
 		return false
 
 	multiplayer.multiplayer_peer = peer
+	if multiplayer.server_disconnected.is_connected(server_disconnected):
+		multiplayer.server_disconnected.disconnect(server_disconnected)
 	multiplayer.server_disconnected.connect(server_disconnected)
+	if multiplayer.connection_failed.is_connected(connection_failed):
+		multiplayer.connection_failed.disconnect(connection_failed)
 	multiplayer.connection_failed.connect(connection_failed)
 
 	# Wait a moment for connection to establish
@@ -145,7 +149,11 @@ func host_server(port: int) -> bool:
 
 	print("Created server with IP " + DEFAULT_SERVER_IP + " on port " + str(PORT))
 	multiplayer.multiplayer_peer = peer
+	if multiplayer.peer_connected.is_connected(_player_joined):
+		multiplayer.peer_connected.disconnect(_player_joined)
 	multiplayer.peer_connected.connect(_player_joined)
+	if multiplayer.peer_disconnected.is_connected(_player_quit):
+		multiplayer.peer_disconnected.disconnect(_player_quit)
 	multiplayer.peer_disconnected.connect(_player_quit)
 
 	# Host joins as ID 1
@@ -192,11 +200,19 @@ func _player_quit(id: int) -> void:
 func server_disconnected() -> void:
 	print("Disconnected from server")
 	Toast.add("Disconnected from the server.")
-	multiplayer.server_disconnected.disconnect(server_disconnected)
-	multiplayer.connection_failed.disconnect(connection_failed)
-		
+	if multiplayer.server_disconnected.is_connected(server_disconnected):
+		multiplayer.server_disconnected.disconnect(server_disconnected)
+	multiplayer.server_disconnected.connect(server_disconnected)
+	if multiplayer.connection_failed.is_connected(connection_failed):
+		multiplayer.connection_failed.disconnect(connection_failed)
+	multiplayer.connection_failed.connect(connection_failed)
+
 func connection_failed() -> void:
 	print("Connection failed")
 	Toast.add("Connection failed.")
-	multiplayer.server_disconnected.disconnect(server_disconnected)
-	multiplayer.connection_failed.disconnect(connection_failed)
+	if multiplayer.server_disconnected.is_connected(server_disconnected):
+		multiplayer.server_disconnected.disconnect(server_disconnected)
+	multiplayer.server_disconnected.connect(server_disconnected)
+	if multiplayer.connection_failed.is_connected(connection_failed):
+		multiplayer.connection_failed.disconnect(connection_failed)
+	multiplayer.connection_failed.connect(connection_failed)
