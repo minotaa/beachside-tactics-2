@@ -16,4 +16,4 @@ func _ready():
 			.set_trans(Tween.TRANS_QUINT) \
 			.set_ease(Tween.EASE_OUT)
 	await get_tree().create_timer(2.0).timeout
-	await Fade.fade_to_scene("res://scenes/game.tscn", 1.0)
+	await Fade.fade_to_scene("res://scenes/main_menu.tscn", 1.0)

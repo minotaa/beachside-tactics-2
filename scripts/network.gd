@@ -135,6 +135,8 @@ func join_server(address: String, username: String = "Player") -> bool:
 
 	if multiplayer.multiplayer_peer == null:
 		return false
+		
+	send_info.rpc(multiplayer.get_unique_id(), username)
 
 	print("[" + str(multiplayer.get_unique_id()) + "] Connected to the server")
 	return true
@@ -181,6 +183,23 @@ func server_player_quit(id: int) -> void:
 	print("[" + str(multiplayer.get_unique_id()) + "] [client] Player quit: " + str(id))
 	player_quit.emit(id)
 	
+@rpc("any_peer", "call_local", "reliable")
+func send_info(id: int, username: String) -> void:
+	if multiplayer.is_server():
+		print("[server] Received username from peer " + str(id) + ": " + username)
+		# Add or update the player
+		var existing = players.any(func(p): return p["id"] == id)
+		if not existing:
+			players.append({
+				"id": id,
+				"username": username
+			})
+			print("[server] Updated players list:")
+			for p in players:
+				print(p)
+		Toast.add.rpc(username + " joined the server!")
+		broadcast_players.rpc(players)
+		update_players.emit(players)
 
 # client funcs
 func _player_joined(id: int) -> void:

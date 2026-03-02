@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://vk5tvvwthfs2" path="res://scripts/level.gd" id="1_lnu2h"]
 [ext_resource type="TileSet" uid="uid://cx3i648h1rssq" path="res://assets/game.tres" id="1_yqjtg"]
-[ext_resource type="PackedScene" uid="uid://iwd3tf65vrso" path="res://scenes/player.tscn" id="3_lnu2h"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yqjtg"]
 size = Vector2(18, 16)
@@ -36,7 +35,9 @@ shape = SubResource("RectangleShape2D_yqjtg")
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1465685631]
 color = Color(0.19326925, 0.14784163, 0.50386935, 1)
 
-[node name="Player" parent="." unique_id=855136150 instance=ExtResource("3_lnu2h")]
-
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=74306554]
 replication_config = SubResource("SceneReplicationConfig_lnu2h")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=137547574]
+_spawnable_scenes = PackedStringArray("uid://iwd3tf65vrso")
+spawn_path = NodePath("..")

@@ -38,6 +38,7 @@ enum FishState {
 func _ready() -> void:
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
+		print(str(multiplayer.get_unique_id()) + " name is: " + name)
 		set_multiplayer_authority(name.to_int())
 		for player in Network.players:
 			if player["id"] == name.to_int():
@@ -47,6 +48,10 @@ func _ready() -> void:
 			$Camera2D.make_current()
 		else:
 			$UI.hide()
+			$InteractionMark.hide()
+			$Trap.hide()
+			$Minigame.hide()
+			$FishPowerBar.hide()
 	else:
 		$Username.hide()
 	
