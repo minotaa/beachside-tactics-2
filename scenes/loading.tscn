@@ -143,6 +143,7 @@ animations = [{
 }]
 
 [node name="Loading" type="Node2D" unique_id=1465578903]
+process_mode = 3
 script = ExtResource("1_yc7uc")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1183805573]

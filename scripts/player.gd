@@ -35,15 +35,19 @@ enum FishState {
 	INACTIVE # You're not doing anything.
 }
 
+func _enter_tree() -> void:
+	if multiplayer.has_multiplayer_peer():
+		set_multiplayer_authority(name.to_int())
+		print("Player node entered tree, name: ", name, " authority: ", get_multiplayer_authority(), " am I authority: ", is_multiplayer_authority())
+
 func _ready() -> void:
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
 		print(str(multiplayer.get_unique_id()) + " name is: " + name)
-		set_multiplayer_authority(name.to_int())
-		for player in Network.players:
-			if player["id"] == name.to_int():
-				$Username.text = player["username"]
-		$Username.show()
+		#for player in Network.players:
+			#if player["id"] == name.to_int():
+				#$Username.text = player["username"]
+		#$Username.show()
 		if is_multiplayer_authority():
 			$Camera2D.make_current()
 		else:
@@ -53,7 +57,8 @@ func _ready() -> void:
 			$Minigame.hide()
 			$FishPowerBar.hide()
 	else:
-		$Username.hide()
+		#$Username.hide()
+		pass
 	
 	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
 		if not DirAccess.dir_exists_absolute("user://chats"):
