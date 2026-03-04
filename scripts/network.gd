@@ -23,6 +23,15 @@ func _ready() -> void:
 	if not dev_mode:
 		HLog.log_level = HLog.LogLevel.OFF
 
+	if DisplayServer.get_name() == "headless":
+		print("Detected client is using a headless version of the game, loading the game...")
+		get_tree().change_scene_to_packed(preload("res://scenes/game.tscn"))
+		print("Starting a server...")
+		var success = host_server(PORT)
+		if not success:
+			print("Couldn't create server.")
+			return
+
 	var init_opts = EOS.Platform.InitializeOptions.new()
 	init_opts.product_name = "Beachside Tactics 2"
 	init_opts.product_version = ProjectSettings.get_setting("application/config/version")

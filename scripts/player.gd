@@ -35,15 +35,11 @@ enum FishState {
 	INACTIVE # You're not doing anything.
 }
 
-func _enter_tree() -> void:
-	if multiplayer.has_multiplayer_peer():
-		set_multiplayer_authority(name.to_int())
-		print("Player node entered tree, name: ", name, " authority: ", get_multiplayer_authority(), " am I authority: ", is_multiplayer_authority())
 
 func _ready() -> void:
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
-		print(str(multiplayer.get_unique_id()) + " name is: " + name)
+		set_multiplayer_authority(int(name))
 		#for player in Network.players:
 			#if player["id"] == name.to_int():
 				#$Username.text = player["username"]
@@ -450,6 +446,8 @@ func _process_ui(delta: float) -> void:
 	debug_text += "XP: " + str(roundi(Game.xp)) + "\n"
 	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + " R: " + str(roundi(Game.time)) + "\n"
 	debug_text += "Day: " + str(Game.days) + "\n"
+	if multiplayer.has_multiplayer_peer():
+		debug_text += "MP ID: " + str(multiplayer.get_unique_id()) + "\n"
 	if state == FishState.FISHING:
 		debug_text += "\n"
 		debug_text += "Num until catch: " + str(odds) + "\n"
