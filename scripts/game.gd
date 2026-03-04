@@ -58,6 +58,9 @@ var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 
+var game_scene = preload("res://scenes/game.tscn")
+var main_menu_scene = preload("res://scenes/main_menu.tscn")
+
 func _process(delta: float) -> void:
 	time += delta
 	if time >= TIME_IN_DAY: # 1200 = 20 minutes
@@ -272,3 +275,17 @@ func get_player() -> Node2D:
 			if player.name == "Player":
 				return player
 	return null
+
+@rpc("authority", "call_local", "reliable")
+func start_game() -> void:
+	for child in get_tree().current_scene.get_children():
+		if child.name.begins_with("Main Menu") or child.name.begins_with("Game"):
+			child.queue_free()
+	get_tree().current_scene.add_child(game_scene.instantiate(), true)
+	
+@rpc("authority", "call_local", "reliable")
+func end_game() -> void:	
+	for child in get_tree().current_scene.get_children():
+		if child.name.begins_with("Game") or child.name.begins_with("Main Menu"):
+			child.queue_free()
+	get_tree().current_scene.add_child(main_menu_scene.instantiate(), true)

@@ -36,10 +36,12 @@ enum FishState {
 }
 
 
+func _enter_tree() -> void:
+	set_multiplayer_authority(int(name))
+
 func _ready() -> void:
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
-		set_multiplayer_authority(int(name))
 		#for player in Network.players:
 			#if player["id"] == name.to_int():
 				#$Username.text = player["username"]

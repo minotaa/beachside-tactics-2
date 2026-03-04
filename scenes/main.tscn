@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dkffwyi7n7iwc"]
+
+[ext_resource type="PackedScene" uid="uid://br18qtdarql5s" path="res://scenes/main_menu.tscn" id="1_o5qli"]
+
+[node name="Main" type="Node" unique_id=1403192229]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=822530957]
+_spawnable_scenes = PackedStringArray("uid://br18qtdarql5s", "uid://cpeeutcaupkit")
+spawn_path = NodePath("..")
+
+[node name="Main Menu" parent="." unique_id=1068561459 instance=ExtResource("1_o5qli")]

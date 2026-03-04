@@ -9,16 +9,19 @@ func _ready() -> void:
 	Network.update_players.connect(player_update)
 	if not multiplayer.has_multiplayer_peer():
 		spawn_player(1)
-	for player in Network.players:
-		spawn_player(player["id"])
+	if multiplayer.is_server():
+		for player in Network.players:
+			spawn_player(player["id"])
 
 @rpc("authority", "call_local", "reliable")
 func send_time(time: float) -> void:
 	Game.time = time
 		
 func player_joined(id) -> void:
-	spawn_player(id)
-	send_time.rpc(Game.time)
+	if multiplayer.is_server():
+		Game.start_game.rpc_id(id)
+		spawn_player(id)
+		send_time.rpc(Game.time)
 
 func player_quit(id) -> void:
 	for child in get_children():

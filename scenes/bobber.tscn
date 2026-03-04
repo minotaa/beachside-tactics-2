@@ -47,6 +47,11 @@ gravity = Vector3(0, 0, 0)
 scale_curve = SubResource("CurveTexture_5btnv")
 alpha_curve = SubResource("CurveTexture_4o5is")
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_rn3pg"]
+properties/0/path = NodePath("Line2D:points")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
 [node name="Bobber" type="RigidBody2D" unique_id=1601675114]
 z_index = 1
 collision_layer = 0
@@ -84,3 +89,6 @@ lifetime = 1.5
 one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_4f4en")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=2067705923]
+replication_config = SubResource("SceneReplicationConfig_rn3pg")
