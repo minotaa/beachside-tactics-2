@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ds2lepfjkrk3y" path="res://assets/sprites/panel5.png" id="2_o4de1"]
 [ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="2_p2es3"]
 [ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="3_ci7xw"]
+[ext_resource type="Texture2D" uid="uid://ceedkq0hqm0op" path="res://assets/sprites/panel6.png" id="6_o4de1"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v1t68"]
 texture = ExtResource("1_u5csj")
@@ -60,3 +61,22 @@ offset_top = 16.0
 offset_right = 80.0
 offset_bottom = 80.0
 texture = ExtResource("3_ci7xw")
+
+[node name="Equipped" type="NinePatchRect" parent="." unique_id=136108256]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -55.0
+offset_top = -55.0
+offset_right = 55.0
+offset_bottom = 55.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_o4de1")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16

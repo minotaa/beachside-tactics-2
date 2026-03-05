@@ -392,8 +392,8 @@ func update_inventory() -> void:
 	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
-	#if Game.equipped_fishing_rod != null:
-		#inventory_button.get_node("Equipped").hide()
+	if Game.equipped_fishing_rod != null:
+		inventory_button.get_node("Equipped").hide()
 	inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(-1))
 	$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
 
@@ -424,8 +424,8 @@ func update_inventory() -> void:
 		if item.type.category == Game.Category.RODS:
 			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
-			#if Game.equipped_fishing_rod != item.type:
-				#inventory_button.get_node("Label").hide()
+			if Game.equipped_fishing_rod != item.type:
+				inventory_button.get_node("Equipped").hide()
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(item.type.id))
 			$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
