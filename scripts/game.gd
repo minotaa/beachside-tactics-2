@@ -278,14 +278,18 @@ func get_player() -> Node2D:
 
 @rpc("authority", "call_local", "reliable")
 func start_game() -> void:
+	await Fade.fade_out()
 	for child in get_tree().current_scene.get_children():
 		if child.name.begins_with("Main Menu") or child.name.begins_with("Game"):
 			child.queue_free()
 	get_tree().current_scene.add_child(game_scene.instantiate(), true)
+	await Fade.fade_in()
 	
 @rpc("authority", "call_local", "reliable")
-func end_game() -> void:	
+func end_game() -> void:
+	await Fade.fade_in()	
 	for child in get_tree().current_scene.get_children():
 		if child.name.begins_with("Game") or child.name.begins_with("Main Menu"):
 			child.queue_free()
 	get_tree().current_scene.add_child(main_menu_scene.instantiate(), true)
+	await Fade.fade_out()
