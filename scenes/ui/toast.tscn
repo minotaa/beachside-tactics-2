@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cap3eftdsb2vh" path="res://scripts/toast/resource.gd" id="1_4iex2"]
 [ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="2_4iex2"]
-[ext_resource type="Texture2D" uid="uid://c68b28kjm3u6v" path="res://assets/sprites/box.png" id="2_vkair"]
+[ext_resource type="Texture2D" uid="uid://3cynwd6ecdea" path="res://assets/sprites/panel.png" id="3_6vn8l"]
 
 [sub_resource type="FontVariation" id="FontVariation_4iex2"]
 base_font = ExtResource("2_4iex2")
@@ -18,9 +18,9 @@ base_font = ExtResource("2_4iex2")
 variation_transform = Transform2D(1, 0.1, 0, 1, 0, 0)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kx06n"]
-texture = ExtResource("2_vkair")
-texture_margin_left = 20.0
-texture_margin_top = 14.0
+texture = ExtResource("3_6vn8l")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
 texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 
@@ -28,20 +28,18 @@ texture_margin_bottom = 16.0
 texture_filter = 1
 layout_mode = 3
 anchor_right = 0.4
-anchor_bottom = 0.078
-offset_bottom = -0.15999985
+anchor_bottom = 0.062000003
+offset_bottom = 0.3599968
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_4iex2")
 
 [node name="Label" type="RichTextLabel" parent="." unique_id=1339503554]
 layout_mode = 1
-anchors_preset = -1
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 0.768
-offset_bottom = -0.00799942
+offset_bottom = 45.0
 grow_horizontal = 2
-grow_vertical = 2
 theme_override_fonts/normal_font = ExtResource("2_4iex2")
 theme_override_fonts/bold_font = SubResource("FontVariation_4iex2")
 theme_override_fonts/bold_italics_font = SubResource("FontVariation_vkair")

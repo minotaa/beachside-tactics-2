@@ -1,33 +1,41 @@
 [gd_scene format=3 uid="uid://c3x0kaqpwgj4q"]
 
-[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="1_y7t8k"]
+[ext_resource type="Texture2D" uid="uid://bunrtnbpg7rqv" path="res://assets/sprites/panel3.png" id="1_u5csj"]
+[ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="2_p2es3"]
+[ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="3_ci7xw"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_j6i4b"]
-font = ExtResource("1_y7t8k")
-font_size = 12
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v1t68"]
+texture = ExtResource("1_u5csj")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
 
 [node name="Inventory Button" type="Button" unique_id=226721162]
-custom_minimum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(96, 96)
 anchors_preset = -1
-anchor_right = 0.1
-anchor_bottom = 0.178
-offset_bottom = -0.16000366
+anchor_right = 0.075
+anchor_bottom = 0.133
+offset_bottom = 0.23999786
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_v1t68")
+
+[node name="Rarity" type="NinePatchRect" parent="." unique_id=509498088]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 96.0
+texture = ExtResource("2_p2es3")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1104561669]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 8.0
-offset_right = 112.0
-offset_bottom = 104.0
-
-[node name="Label" type="Label" parent="." unique_id=1200787993]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 108.0
-offset_right = 112.0
-offset_bottom = 131.0
-text = "EQUIPPED"
-label_settings = SubResource("LabelSettings_j6i4b")
-horizontal_alignment = 1
+offset_top = 16.0
+offset_right = 80.0
+offset_bottom = 80.0
+texture = ExtResource("3_ci7xw")
