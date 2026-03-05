@@ -1,11 +1,29 @@
 [gd_scene format=3 uid="uid://c3x0kaqpwgj4q"]
 
 [ext_resource type="Texture2D" uid="uid://bunrtnbpg7rqv" path="res://assets/sprites/panel3.png" id="1_u5csj"]
+[ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="2_ci7xw"]
+[ext_resource type="Texture2D" uid="uid://ds2lepfjkrk3y" path="res://assets/sprites/panel5.png" id="2_o4de1"]
 [ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="2_p2es3"]
 [ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="3_ci7xw"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v1t68"]
 texture = ExtResource("1_u5csj")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_o4de1"]
+texture = ExtResource("2_o4de1")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_b2sbn"]
+texture = ExtResource("2_ci7xw")
 texture_margin_left = 32.0
 texture_margin_top = 32.0
 texture_margin_right = 32.0
@@ -21,8 +39,11 @@ offset_bottom = 0.23999786
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_v1t68")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_o4de1")
+theme_override_styles/hover = SubResource("StyleBoxTexture_b2sbn")
 
 [node name="Rarity" type="NinePatchRect" parent="." unique_id=509498088]
+modulate = Color(1, 1, 1, 0.68235296)
 layout_mode = 0
 offset_right = 96.0
 offset_bottom = 96.0

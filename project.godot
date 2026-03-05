@@ -47,6 +47,10 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="ignore"
 
+[editor]
+
+run/main_run_args="--dev"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/epic-online-services-godot/plugin.cfg", "res://addons/limbo_console/plugin.cfg")
