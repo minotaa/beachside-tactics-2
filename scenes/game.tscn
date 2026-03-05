@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" uid="uid://vk5tvvwthfs2" path="res://scripts/level.gd" id="1_lnu2h"]
 [ext_resource type="TileSet" uid="uid://cx3i648h1rssq" path="res://assets/game.tres" id="1_yqjtg"]
+[ext_resource type="PackedScene" uid="uid://1iqhgrq7dgum" path="res://scenes/shelly.tscn" id="3_lnu2h"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yqjtg"]
-size = Vector2(18, 16)
+size = Vector2(18, 25)
 
 [node name="Level" type="Node2D" unique_id=2087867780]
 texture_filter = 1
@@ -16,7 +17,7 @@ tile_set = ExtResource("1_yqjtg")
 
 [node name="Decoration" type="TileMapLayer" parent="." unique_id=705781238]
 z_index = 1
-tile_map_data = PackedByteArray("AAABAP7/AAAIAAEAAAD4/wEAAAAMAAEAAAD9/wQAAAAKAAEAAAAJAPz/AAAKAAEAAAAKAAIAAAAKAAEAAAAIAAYAAAAMAAEAAAADAAgAAAAMAAEAAAAFAAAAAAAKAAEAAAD6/wkAAAAMAAEAAADx/wcAAAAKAAEAAAD2/wQAAAAKAAEAAADx/wAAAAAMAAEAAAD2//z/AAAKAAEAAADq/wgAAAAKAAEAAADu/wQAAAAMAAEAAADm/wkAAAAMAAEAAADm/wMAAAAMAAEAAADr////AAAKAAEAAADm//v/AAAMAAEAAADv//r/AAAMAAEAAAD6//n/AAAMAAEAAAAFAPr/AAAKAAEAAAA=")
+tile_map_data = PackedByteArray("AAD4/wEAAAAMAAEAAAD9/wQAAAAKAAEAAAAJAPz/AAAKAAEAAAAKAAIAAAAKAAEAAAAIAAYAAAAMAAEAAAADAAgAAAAMAAEAAAAFAAAAAAAKAAEAAAD6/wkAAAAMAAEAAADx/wcAAAAKAAEAAAD2/wQAAAAKAAEAAADx/wAAAAAMAAEAAAD2//z/AAAKAAEAAADq/wgAAAAKAAEAAADu/wQAAAAMAAEAAADm/wkAAAAMAAEAAADm/wMAAAAMAAEAAADr////AAAKAAEAAADm//v/AAAMAAEAAADv//r/AAAMAAEAAAD6//n/AAAMAAEAAAAFAPr/AAAKAAEAAAA=")
 tile_set = ExtResource("1_yqjtg")
 
 [node name="Shop" type="Area2D" parent="." unique_id=1952843701 groups=["shop"]]
@@ -24,7 +25,7 @@ collision_layer = 2
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Shop" unique_id=1836126221]
-position = Vector2(24, -25)
+position = Vector2(24, -29.5)
 shape = SubResource("RectangleShape2D_yqjtg")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1465685631]
@@ -33,3 +34,6 @@ color = Color(0.19326925, 0.14784163, 0.50386935, 1)
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1799670428]
 _spawnable_scenes = PackedStringArray("uid://iwd3tf65vrso")
 spawn_path = NodePath("..")
+
+[node name="Shelly" parent="." unique_id=804101878 instance=ExtResource("3_lnu2h")]
+position = Vector2(24, -33)

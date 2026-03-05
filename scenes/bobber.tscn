@@ -68,7 +68,7 @@ shape = SubResource("CircleShape2D_2wku4")
 [node name="Line2D" type="Line2D" parent="." unique_id=1203809563]
 z_index = 2
 points = PackedVector2Array(0, -1.5, 0, -1.5)
-width = 0.3
+width = 0.5
 default_color = Color(0, 0, 0, 1)
 
 [node name="Splashes" type="GPUParticles2D" parent="." unique_id=323615007]
