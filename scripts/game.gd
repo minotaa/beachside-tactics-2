@@ -46,6 +46,7 @@ const DAY_COLOR := Color.WHITE
 const NIGHT_COLOR := Color(135 / 255.0, 135 / 255.0, 242 / 255.0)
 const TIME_IN_DAY = 1200 
 
+var dev_mode: bool = false
 var level: int = 0
 var xp: float = 0.0
 var catches: int = 0
@@ -173,7 +174,12 @@ func connect_to_server(address: String, username: String = "Player") -> void:
 	else:
 		LimboConsole.info("Successfully joined through the connection.")
 
-func _ready() -> void:
+func _ready() -> void:	
+	var arguments = OS.get_cmdline_args()
+	for arg in arguments:
+		if arg == "--dev":
+			dev_mode = true
+			print("Dev mode detected.")
 	multiplayer.multiplayer_peer = null # TODO: REMOVE ME
 	load_game()
 	LimboConsole.register_command(set_fishing_rod, "set_fishing_rod", "Set your currently equipped fishing rod.")

@@ -6,7 +6,6 @@ const MAX_PLAYERS: int = 9
 
 var players = []
 var player_name: String
-var dev_mode: bool = false
 var eos_is_initialized: bool = false
 
 signal player_joined(peer_id)
@@ -14,13 +13,7 @@ signal update_players(players)
 signal player_quit(peer_id)
 
 func _ready() -> void:
-	var arguments = OS.get_cmdline_args()
-	for arg in arguments:
-		if arg == "--dev":
-			dev_mode = true
-			print("Dev mode detected.")
-			HLog.log_level = HLog.LogLevel.DEBUG
-	if not dev_mode:
+	if not Game.dev_mode:
 		HLog.log_level = HLog.LogLevel.OFF
 
 	var init_opts = EOS.Platform.InitializeOptions.new()

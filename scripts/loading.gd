@@ -1,5 +1,9 @@
 extends Node2D
 
+func _process(delta: float) -> void:
+	if Game.dev_mode:
+		await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
+
 func _ready():
 	$AnimatedSprite2D.play("default")
 	$UI/Control/Label.modulate = Color(0, 0, 0, 0)
