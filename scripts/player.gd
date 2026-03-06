@@ -364,7 +364,7 @@ func _process_input(delta: float) -> void:
 			fish_control_safe = true
 	else:
 		if Input.is_action_just_pressed("fish") and not $UI/Vendor.visible and not $UI/Inventory.visible:
-			Toast.add("You can't fish without a [img center region=0,0,16,16 width=32 height=32]res://assets/sprites/items.png[/img] Fishing Rod.")
+			Toast.add("You can't fish without a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 	
 	move_and_slide()
 	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
@@ -443,11 +443,14 @@ func _process_ui(delta: float) -> void:
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
 		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
+	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
+	$UI/Main/LevelBar.value = roundi(Game.xp)
+	$UI/Main/LevelBar.max_value = roundi(Game.calculate_xp_for_level(Game.level))
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
 	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + "\n"
 	debug_text += "Level: " + str(Game.level) + "\n"
-	debug_text += "XP: " + str(roundi(Game.xp)) + "\n"
+	debug_text += "XP: " + str(roundi(Game.xp)) + "/" + str(roundi(Game.calculate_xp_for_level(Game.level))) + "\n" 
 	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + " R: " + str(roundi(Game.time)) + "\n"
 	debug_text += "Day: " + str(Game.days) + "\n"
 	if multiplayer.has_multiplayer_peer():
