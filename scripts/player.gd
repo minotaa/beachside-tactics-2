@@ -443,28 +443,7 @@ func _process_ui(delta: float) -> void:
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
 		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
-	
-	if Game.equipped_fishing_rod != null:
-		$UI/Main/LevelBar/TextureRect.texture = Game.equipped_fishing_rod.texture
-	else:
-		$UI/Main/LevelBar/TextureRect.texture = preload("res://assets/sprites/cross.png")
-	var symbol
-	match (Game.get_day_time()):
-		Game.TimeOfDay.MORNING:
-			symbol = preload("res://assets/sprites/sun.png")
-		Game.TimeOfDay.DAY:
-			symbol = preload("res://assets/sprites/sun.png")
-		Game.TimeOfDay.MIDDAY:
-			symbol = preload("res://assets/sprites/sun.png")
-		Game.TimeOfDay.EVENING:
-			symbol = preload("res://assets/sprites/moon.png")
-		Game.TimeOfDay.NIGHT:
-			symbol = preload("res://assets/sprites/moon.png")
-	$UI/Main/Time/HBoxContainer/TextureRect.texture = symbol
-	$UI/Main/Time/HBoxContainer/Label.text = str(Game.get_time_string())
-	$UI/Main/Time/Days.text = "Day: " + str(Game.days)
 	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
-	$UI/Main/Info/HBoxContainer/Label.text = "$" + str(roundi(Game.balance))
 	$UI/Main/LevelBar.value = roundi(Game.xp)
 	$UI/Main/LevelBar.max_value = roundi(Game.calculate_xp_for_level(Game.level))
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
@@ -487,16 +466,12 @@ func _process_ui(delta: float) -> void:
 	
 	if Input.is_action_just_released("inventory") and not $UI/Vendor.visible:
 		$UI/Main/Debug.hide()
-		$UI/Main/LevelBar.hide()
-		$UI/Main/Time.hide()
 		if not $UI/Inventory.visible:
 			$UI/Inventory.show()
 			$UI/Main/InventoryButton.hide()
 			update_inventory()
 		else:
-			$UI/Main/LevelBar.show()
-			$UI/Main/Time.show()
-			#$UI/Main/Debug.show()
+			$UI/Main/Debug.show()
 			$UI/Inventory.hide()
 			$UI/Main/InventoryButton.show()
 	
