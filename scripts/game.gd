@@ -62,6 +62,15 @@ var game_loaded: bool = false
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
+func get_rarity_color(rarity: String) -> String:
+	match Game.Rarity.find_key(rarity):
+		Game.Rarity.COMMON:
+			return "[color=#ffffffff]"	
+		Game.Rarity.DIVINE:
+			return "[color=#7ce9ffff]"
+		_:
+			return ""
+
 func _process(delta: float) -> void:
 	time += delta
 	if time >= TIME_IN_DAY: # 1200 = 20 minutes

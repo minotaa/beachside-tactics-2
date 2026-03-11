@@ -438,7 +438,7 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
-	$UI/Main/InventoryButton.text = "    Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ") "
+	$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
@@ -446,6 +446,27 @@ func _process_ui(delta: float) -> void:
 	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
 	$UI/Main/LevelBar.value = roundi(Game.xp)
 	$UI/Main/LevelBar.max_value = roundi(Game.calculate_xp_for_level(Game.level))
+	if Game.equipped_fishing_rod != null:
+		$UI/Main/LevelBar/TextureRect.texture = Game.equipped_fishing_rod.texture
+	else:
+		$UI/Main/LevelBar/TextureRect.texture = preload("res://assets/sprites/cross.png")
+	var symbol
+	match (Game.get_day_time()):
+		Game.TimeOfDay.MORNING:
+			symbol = preload("res://assets/sprites/sun.png")
+		Game.TimeOfDay.DAY:
+			symbol = preload("res://assets/sprites/sun.png")
+		Game.TimeOfDay.MIDDAY:
+			symbol = preload("res://assets/sprites/sun.png")
+		Game.TimeOfDay.EVENING:
+			symbol = preload("res://assets/sprites/moon.png")
+		Game.TimeOfDay.NIGHT:
+			symbol = preload("res://assets/sprites/moon.png")
+	$UI/Main/Time/HBoxContainer/TextureRect.texture = symbol
+	$UI/Main/Time/HBoxContainer/Label.text = str(Game.get_time_string())
+	$UI/Main/Time/Days.text = "Day: " + str(Game.days)
+	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
+	$UI/Main/Info/HBoxContainer/Label.text = "$" + str(roundi(Game.balance))
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
 	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + "\n"
@@ -465,15 +486,19 @@ func _process_ui(delta: float) -> void:
 	$UI/Main/Debug.text = debug_text
 	
 	if Input.is_action_just_released("inventory") and not $UI/Vendor.visible:
-		$UI/Main/Debug.hide()
 		if not $UI/Inventory.visible:
-			$UI/Inventory.show()
+			$UI/Main/Info.hide()
+			$UI/Main/Time.hide()
+			$UI/Main/LevelBar.hide()
 			$UI/Main/InventoryButton.hide()
+			$UI/Inventory.show()
 			update_inventory()
 		else:
-			$UI/Main/Debug.show()
-			$UI/Inventory.hide()
+			$UI/Main/Info.show()
+			$UI/Main/Time.show()
+			$UI/Main/LevelBar.show()
 			$UI/Main/InventoryButton.show()
+			$UI/Inventory.hide()
 	
 	if bobber != null:
 		var line = bobber.get_node("Line2D")
