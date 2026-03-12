@@ -438,7 +438,7 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
-	$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
+	#$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
 	if $Camera2D.zoom != intended_zoom:
@@ -462,11 +462,11 @@ func _process_ui(delta: float) -> void:
 			symbol = preload("res://assets/sprites/moon.png")
 		Game.TimeOfDay.NIGHT:
 			symbol = preload("res://assets/sprites/moon.png")
-	$UI/Main/Time/HBoxContainer/TextureRect.texture = symbol
-	$UI/Main/Time/HBoxContainer/Label.text = str(Game.get_time_string())
-	$UI/Main/Time/Days.text = "Day: " + str(Game.days)
+	$UI/Main/Combination/Time/TextureRect.texture = symbol
+	$UI/Main/Combination/Time/Label.text = str(Game.get_time_string())
+	#$UI/Main/Time/Days.text = "Day: " + str(Game.days)
 	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
-	$UI/Main/Info/HBoxContainer/Label.text = "$" + str(roundi(Game.balance))
+	$UI/Main/Combination/Balance/Label.text = "$" + str(roundi(Game.balance))
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
 	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + "\n"
@@ -487,15 +487,13 @@ func _process_ui(delta: float) -> void:
 	
 	if Input.is_action_just_released("inventory") and not $UI/Vendor.visible:
 		if not $UI/Inventory.visible:
-			$UI/Main/Info.hide()
-			$UI/Main/Time.hide()
+			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()
 			$UI/Main/InventoryButton.hide()
 			$UI/Inventory.show()
 			update_inventory()
 		else:
-			$UI/Main/Info.show()
-			$UI/Main/Time.show()
+			$UI/Main/Combination.show()
 			$UI/Main/LevelBar.show()
 			$UI/Main/InventoryButton.show()
 			$UI/Inventory.hide()
