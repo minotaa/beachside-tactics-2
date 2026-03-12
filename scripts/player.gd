@@ -22,10 +22,18 @@ var fish_control_safe: bool = true # Makes it so that you can't fish until you r
 var holding_trap: bool = false
 
 var hookVelocity = 0
-var hookAcceleration = .001
-var hookDeceleration = .2
-var maxVelocity = 2.0
-var bounce = .6
+var hookAcceleration = 0.1
+var hookDeceleration = 0.2
+var maxVelocity = 6.0
+var bounce = 0.3
+
+# ROPE PHYSICS VARIABLES
+var line_segments = 15  # More segments = smoother curve
+var line_points = []  # Array of Vector2 positions
+var line_velocities = []  # Physics velocities for each point
+var line_gravity = 80.0  # Sag amount (reduced from 150 for less droop)
+var line_damping = 0.92  # How quickly line settles
+var line_stiffness = 0.5  # How much line resists bending (increased from 0.3 for less sag)
 
 enum FishState {
 	FISHING, # When your bobber is out in the water, haven't found a fish.
@@ -40,6 +48,11 @@ func _enter_tree() -> void:
 	set_multiplayer_authority(int(name))
 
 func _ready() -> void:
+	# Initialize line physics
+	for i in range(line_segments):
+		line_points.append(Vector2.ZERO)
+		line_velocities.append(Vector2.ZERO)
+	
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
 		#for player in Network.players:
@@ -69,6 +82,66 @@ func _ready() -> void:
 		if file:
 			file.store_line("--- Chat session started at %s ---" % timestamp)
 		file.close()
+
+func update_fishing_line(delta):
+	if bobber == null:
+		return
+	
+	var rod_tip = get_rod_tip(get_fishing_direction())
+	var bobber_pos = bobber.global_position
+	
+	# Safety check: ensure line physics is initialized at rod tip
+	if line_points.is_empty():
+		for i in range(line_segments):
+			# Initialize all points along a straight line from rod to bobber
+			var t = float(i) / float(line_segments - 1)
+			line_points.append(lerp(rod_tip, bobber_pos, t))
+			line_velocities.append(Vector2.ZERO)
+		
+	# Set endpoints
+	line_points[0] = rod_tip
+	line_points[line_segments - 1] = bobber_pos
+	
+	# Physics simulation for middle points
+	for i in range(1, line_segments - 1):
+		# Apply gravity (makes line sag)
+		line_velocities[i].y += line_gravity * delta
+		
+		# Apply velocity
+		line_points[i] += line_velocities[i] * delta
+		
+		# Damping (air resistance)
+		line_velocities[i] *= line_damping
+	
+	# Constraint pass - keep segments connected (run multiple times for stability)
+	# More iterations = stiffer, fewer = more loose
+	var iterations = 5 if state == FishState.REELING or state == FishState.REELING_BACK else 3
+	for iteration in range(iterations):
+		for i in range(line_segments - 1):
+			var segment_length = rod_tip.distance_to(bobber_pos) / (line_segments - 1)
+			var current_point = line_points[i]
+			var next_point = line_points[i + 1]
+			
+			var delta_pos = next_point - current_point
+			var current_distance = delta_pos.length()
+			if current_distance < 0.01:  # Prevent division by zero
+				continue
+			var difference = (current_distance - segment_length) / current_distance
+			
+			var offset = delta_pos * difference * line_stiffness
+			
+			# Don't move endpoints, apply smooth interpolation to middle points
+			if i > 0:
+				line_points[i] += offset * 0.5
+			if i < line_segments - 2:
+				line_points[i + 1] -= offset * 0.5
+	
+	# Update Line2D visual with smooth interpolation
+	if bobber.has_node("Line2D"):
+		var line = bobber.get_node("Line2D")
+		line.clear_points()
+		for point in line_points:
+			line.add_point(bobber.to_local(point))
 	
 func add_fish(min_d, max_d, move_speed, move_time):
 	#print("adding fish with " + str(min_d) + " " + str(max_d) + " " + str(move_speed) + " " + str(move_time))
@@ -172,6 +245,8 @@ func _process_input(delta: float) -> void:
 	# Reel back in bobber if you're fishing.
 	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
 		if bobber != null:
+			# Line is already taut from state check in _process_ui
+			
 			bobber.global_position = bobber.global_position.move_toward(
 				get_rod_tip(get_fishing_direction()), 
 				40.0 * delta
@@ -339,20 +414,7 @@ func _process_input(delta: float) -> void:
 			$FishPowerBar.visible = false
 			hantenjutsushiki = false
 			
-			var mouse_pos = get_global_mouse_position()
-			var direction_vec = (mouse_pos - global_position).normalized()
-			var fish_dir := ""
-			
-			if abs(direction_vec.x) > abs(direction_vec.y):
-				if direction_vec.x > 0.0:
-					fish_dir = "right"
-				else:
-					fish_dir = "left"
-			else:
-				if direction_vec.y > 0.0:
-					fish_dir = "down"
-				else:
-					fish_dir = "up"
+			var fish_dir := last_direction
 			bobber_safe = true
 			play_animation(body_type + "_fish_" + fish_dir)
 			if bobber != null:
@@ -498,13 +560,25 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/InventoryButton.show()
 			$UI/Inventory.hide()
 	
+	# Update rope physics for fishing line
 	if bobber != null:
-		var line = bobber.get_node("Line2D")
-		var rod_tip_global := get_rod_tip(get_fishing_direction())
-		line.set_point_position(0, Vector2(0, -1.5))
-		line.set_point_position(1, bobber.to_local(rod_tip_global))
+		# Adjust line tension based on state
+		if state == FishState.FOUND_FISH or state == FishState.REELING:
+			# Line goes TAUT when fish is hooked
+			line_gravity = 2.0
+			line_stiffness = 0.95
+		elif state == FishState.FISHING:
+			# Gentle sag when passively fishing
+			line_gravity = 20.0
+			line_stiffness = 0.5
+		
+		update_fishing_line(delta)
 
 		if state == FishState.REELING_BACK:
+			# Tighten line when reeling back
+			line_gravity = 30.0
+			line_stiffness = 0.95
+			
 			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			bobber.get_node("Splashes").restart()
@@ -638,12 +712,101 @@ func _on_base_animation_finished() -> void:
 		add_child(bobber)
 		var dir = DIRECTIONS[get_fishing_direction()]
 		last_direction = get_fishing_direction()
-		if abs(dir.x) > 0.1:
-			dir = (dir + Vector2(0, 0.15)).normalized()
-		var mult = 80 + $FishPowerBar.value
-		bobber.apply_impulse(dir * mult) 
+		
+		# Reset line physics for new cast
+		line_points.clear()
+		line_velocities.clear()
+		var rod_tip = get_rod_tip(get_fishing_direction())
+		for i in range(line_segments):
+			line_points.append(rod_tip)  # Start all points at rod tip
+			line_velocities.append(Vector2.ZERO)
+		
+		# NATURAL ARC CAST
+		var power_normalized = $FishPowerBar.value / 100.0
+		var base_distance = 60 + (power_normalized * 120)  # How far it goes
+		
+		bobber.rotation = 0
+		bobber.gravity_scale = 0  # We'll handle gravity manually for better control
+		
+		# Determine cast type based on direction
+		var fishing_dir = get_fishing_direction()
+		var is_sideways = (fishing_dir == "left" or fishing_dir == "right")
+		
+		# Calculate target position
+		var target_pos = get_rod_tip(fishing_dir) + (dir * base_distance)
+		
+		# Initialize line to be taut during cast
+		line_gravity = 20.0
+		line_stiffness = 0.85
+		
+		# Natural tumble rotation
+		var rotation_impulse = (15 + power_normalized * 25) * (-1 if dir.x > 0 else 1)
+		bobber.angular_velocity = rotation_impulse
+		
+		# Decay rotation naturally
+		var rotation_tween = create_tween()
+		rotation_tween.tween_property(bobber, "angular_velocity", 0.0, 0.6).set_ease(Tween.EASE_OUT)
+		
+		if is_sideways:
+			# SIDEWAYS: Arc trajectory
+			var cast_duration = 0.7 + (power_normalized * 0.4)  # Slower, more visible
+			var arc_height = 15 + (power_normalized * 20)  # Much gentler arc
+			
+			# Animate position with arc using a custom tween
+			var cast_tween = create_tween()
+			cast_tween.set_trans(Tween.TRANS_QUAD)
+			cast_tween.set_ease(Tween.EASE_OUT)
+			
+			# Track progress for arc calculation
+			var start_pos = bobber.global_position
+			cast_tween.tween_method(
+				func(t):
+					if bobber == null:
+						return
+					# Parabolic arc: x moves linearly, y follows arc
+					var current_x = lerp(start_pos.x, target_pos.x, t)
+					var current_y_base = lerp(start_pos.y, target_pos.y, t)
+					# Arc peaks at t=0.5, using sine for smooth curve
+					var arc_offset = -sin(t * PI) * arc_height
+					bobber.global_position = Vector2(current_x, current_y_base + arc_offset)
+					# Simulate velocity for line physics
+					bobber.linear_velocity = (bobber.global_position - start_pos) / max(t, 0.01)
+					start_pos = bobber.global_position
+			, 0.0, 1.0, cast_duration
+			)
+			
+			await cast_tween.finished
+			
+		else:
+			# UP/DOWN: Bounce trajectory (goes up first, then comes down)
+			var cast_duration = 0.8 + (power_normalized * 0.3)  # Slower
+			var bounce_height = 25 + (power_normalized * 35)  # Gentler bounce
+			
+			var cast_tween = create_tween()
+			cast_tween.set_trans(Tween.TRANS_QUAD)
+			
+			var start_pos = bobber.global_position
+			var is_down = (fishing_dir == "down")
+			
+			# First: bounce UP
+			var up_pos = start_pos + Vector2(0, -bounce_height)
+			cast_tween.tween_property(bobber, "global_position", up_pos, cast_duration * 0.3).set_ease(Tween.EASE_OUT)
+			
+			# Then: fall to target with gravity feel
+			cast_tween.tween_property(bobber, "global_position", target_pos, cast_duration * 0.7).set_ease(Tween.EASE_IN)
+			
+			await cast_tween.finished
+		
+		# Landing: loosen line to passive fishing state
+		line_gravity = 20.0
+		line_stiffness = 0.5
+		
+		if bobber != null:
+			bobber.angular_velocity = 0.0
+			bobber.rotation = 0.0
+			bobber.linear_velocity = Vector2.ZERO
+			bobber.gravity_scale = 1.5  # Re-enable normal physics
 
-		await get_tree().create_timer(0.95).timeout
 		bobber_safe = false
 		if bobber != null:
 			bobber.sleeping = true
@@ -652,7 +815,6 @@ func _on_base_animation_finished() -> void:
 			var data = tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_position))
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
-				#_fishing_timer(data.get_custom_data("location"))
 				_fishing_timer(Game.Location.get(data.get_custom_data("location")))
 			else:
 				print("Invalid tile to fish on, stopping fishing")

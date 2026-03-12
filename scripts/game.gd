@@ -211,7 +211,12 @@ func _ready() -> void:
 			return [true, false]
 	)
 	LimboConsole.register_command(host, "host", "Hosts a multiplayer server.")
+	LimboConsole.register_command(set_xp, "set_xp", "Sets your XP.")
 	LimboConsole.register_command(connect_to_server, "connect", "Connect to the server using the connection address.")
+	
+func set_xp(xp: float) -> void:
+	self.xp = xp
+	LimboConsole.info("Your XP has been set to: " + str(roundi(xp)))
 	
 func set_holding_trap(holding_trap: bool) -> void:
 	if get_player() != null:
