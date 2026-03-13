@@ -317,7 +317,26 @@ func _process_input(delta: float) -> void:
 				state = FishState.REELING_BACK
 				bobber.get_node("Splashes").amount = 64
 				Game.catches += 1
-				var added_xp = 10.0
+				var added_xp = 0.0
+				var fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
+				if fish.rarity == Game.Rarity.COMMON:
+					added_xp += 5.0
+				if fish.rarity == Game.Rarity.UNCOMMON:
+					added_xp += 10.0
+				if fish.rarity == Game.Rarity.RARE:
+					added_xp += 15.0
+				if fish.rarity == Game.Rarity.EPIC:
+					added_xp += 25.0
+				if fish.rarity == Game.Rarity.LEGENDARY:
+					added_xp += 50.0
+				if fish.rarity == Game.Rarity.MYTHIC:
+					added_xp += 125.0
+				if fish.rarity == Game.Rarity.DIVINE:
+					added_xp += 250.0
+				if fish.rarity == Game.Rarity.SUPREME:
+					added_xp += 500.0
+				if fish.rarity == Game.Rarity.SECRET:
+					added_xp += 1000.0
 				Game.add_xp(added_xp)
 				#_show_ui()
 		else:
@@ -436,6 +455,9 @@ func _process_input(delta: float) -> void:
 var i_float_timer = 0.0
 
 func set_fishing_rod(id: int) -> void:
+	if state != FishState.INACTIVE:
+		Toast.add("You can't switch fishing rods while fishing.")
+		return
 	if id != -1:
 		if Catalog.get_item(id) is FishingRod:
 			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
@@ -508,6 +530,13 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size())) * 100.0
+	if percentage_filled < 50.0:
+		$UI/Main/InventoryButton/TextureRect.texture = preload("res://assets/sprites/backpack.png")
+	elif percentage_filled > 50.0 and percentage_filled < 90.0:
+		$UI/Main/InventoryButton/TextureRect.texture = preload("res://assets/sprites/backpack-bloated.png")
+	else:
+		$UI/Main/InventoryButton/TextureRect.texture = preload("res://assets/sprites/backpack-full.png")
 	#$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
@@ -587,10 +616,18 @@ func _process_ui(delta: float) -> void:
 			line_gravity = 0.01
 			line_stiffness = 0.95
 			
-			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
+			var distance_to_rod = bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))
+			if distance_to_rod > 30:
+				line_gravity = 0.01 
+				line_stiffness = 0.98 
+			else:
+				line_gravity = 0.01
+				line_stiffness = 0.95
+			var direction_to_rod = (get_rod_tip(get_fishing_direction()) - bobber.global_position).normalized()
+			bobber.global_position += direction_to_rod * 80.0 * delta
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			bobber.get_node("Splashes").restart()
-			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
+			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) <= 10:
 				state = FishState.INACTIVE
 				bobber_safe = true
 				print("Player reeled in bobber.")

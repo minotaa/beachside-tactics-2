@@ -43,7 +43,7 @@ enum TimeOfDay {
 }
 
 const DAY_COLOR := Color.WHITE
-const NIGHT_COLOR := Color(135 / 255.0, 135 / 255.0, 242 / 255.0)
+const NIGHT_COLOR := Color(0.192, 0.149, 0.502, 1.0)
 const TIME_IN_DAY = 1200 
 
 var dev_mode: bool = false
