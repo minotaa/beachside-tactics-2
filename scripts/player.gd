@@ -476,13 +476,19 @@ func update_inventory() -> void:
 			if index < Game.equipped_fishing_rod.data["extra_stats"].keys().size():
 				$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += "\n"
 
-	for item in Game.bag.list:
+	var bag = Game.bag.list.duplicate()
+	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
+	for item in bag:
 		var inventory_entry = preload("res://scenes/ui/inventory_entry.tscn").instantiate()
 		inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
 		inventory_entry.get_node("TextureRect").texture = item.type.texture
+		inventory_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+		
 		$UI/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 		
-	for item in Game.inventory.list:
+	var inventory = Game.inventory.list.duplicate()
+	inventory.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
+	for item in inventory:
 		if item.type.category == Game.Category.RODS:
 			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
@@ -566,17 +572,17 @@ func _process_ui(delta: float) -> void:
 		if state == FishState.FOUND_FISH or state == FishState.REELING:
 			# Line goes TAUT when fish is hooked
 			line_gravity = 2.0
-			line_stiffness = 0.95
+			line_stiffness = 1.0
 		elif state == FishState.FISHING:
 			# Gentle sag when passively fishing
-			line_gravity = 20.0
+			line_gravity = 5.1
 			line_stiffness = 0.5
 		
 		update_fishing_line(delta)
 
 		if state == FishState.REELING_BACK:
 			# Tighten line when reeling back
-			line_gravity = 30.0
+			line_gravity = 0.01
 			line_stiffness = 0.95
 			
 			bobber.global_position = lerp(bobber.global_position, get_rod_tip(get_fishing_direction()), 0.065)
@@ -757,7 +763,7 @@ func _on_base_animation_finished() -> void:
 			cast_tween.set_trans(Tween.TRANS_QUAD)
 			cast_tween.set_ease(Tween.EASE_OUT)
 			
-			# Track progress for arc calculation
+			# Track progress for arc calculation 
 			var start_pos = bobber.global_position
 			cast_tween.tween_method(
 				func(t):
