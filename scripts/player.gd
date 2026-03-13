@@ -22,8 +22,9 @@ var fish_control_safe: bool = true # Makes it so that you can't fish until you r
 var holding_trap: bool = false
 
 var hookVelocity = 0
-var hookAcceleration = 0.1
-var hookDeceleration = 0.2
+var hookAcceleration = 1.75
+var hookDeceleration = 2.45
+var hookPressAcceleration = 1.75
 var maxVelocity = 6.0
 var bounce = 0.3
 
@@ -275,13 +276,14 @@ func _process_input(delta: float) -> void:
 	# Hook minigame
 	if (Input.is_action_pressed("fish")):
 		if hookVelocity > -maxVelocity:
-			hookVelocity -= hookAcceleration
+			hookVelocity -= hookAcceleration * delta
 	else:
 		if hookVelocity < maxVelocity:
-			hookVelocity += hookDeceleration
+			hookVelocity += hookDeceleration * delta
 
 	if (Input.is_action_pressed("fish")):
-		hookVelocity -= .2
+		hookVelocity -= (hookPressAcceleration * delta)
+		
 
 	var target = $Minigame/Hook.position.y + hookVelocity
 	if (target >= 33.5):
