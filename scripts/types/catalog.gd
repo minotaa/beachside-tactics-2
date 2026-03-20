@@ -24,7 +24,7 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 	# 10% chance to get junk instead of fish
-	if randf() > 0.90:
+	if randf() > 0.9 - Game.get_junk_chance():
 		return get_junk(location, rod_power)
 	else:
 		return get_fish(location, rod_power)
@@ -102,21 +102,22 @@ func _enter_tree() -> void:
 	var atlas = AtlasTexture.new()
 	atlas.atlas = preload("res://assets/sprites/items.png")
 	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
-	var basic_fishing_rod = FishingRod.new(0, "Basic Fishing Rod", atlas)
+	var basic_fishing_rod = FishingRod.new(0, "Flimsy Fishing Rod", atlas)
 	basic_fishing_rod.fishing_power = 1.0
 	basic_fishing_rod.description = "The most basic fishing rod ever. You couldn't get more boring than this."
 	basic_fishing_rod.purchase_limit = 1
 	basic_fishing_rod.purchasable = true
 	basic_fishing_rod.rarity = Game.Rarity.COMMON
 	basic_fishing_rod.category = Game.Category.RODS
-	basic_fishing_rod.junk_chance = 20.0
+	basic_fishing_rod.junk_chance = 0.0
 	basic_fishing_rod.price = 100.0
 	basic_fishing_rod.sell_price = 10.0
 	basic_fishing_rod.baitable = false
 	basic_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "No",
-			"Rod Power": "+1"
+			"Rod Power": "+1",
+			"Extra Junk Chance": "+0"
 		}
 	}
 	items.append(basic_fishing_rod)
@@ -301,3 +302,43 @@ func _enter_tree() -> void:
 	goldfish.hour_end = 0.0
 	goldfish.threshold = 2.0
 	items.append(goldfish)
+
+	var bamboo_fishing_rod = FishingRod.new(13, "Bamboo Fishing Rod", atlas)
+	bamboo_fishing_rod.fishing_power = 5.0
+	bamboo_fishing_rod.description = "A rod of delicate, but crude and simplistic construction, much more better than that Flimsy Fishing Rod."
+	bamboo_fishing_rod.purchase_limit = 1
+	bamboo_fishing_rod.purchasable = true
+	bamboo_fishing_rod.rarity = Game.Rarity.COMMON
+	bamboo_fishing_rod.category = Game.Category.RODS
+	bamboo_fishing_rod.junk_chance = 10.0
+	bamboo_fishing_rod.price = 500.0
+	bamboo_fishing_rod.sell_price = 10.0
+	bamboo_fishing_rod.baitable = false
+	bamboo_fishing_rod.data = { 
+		"extra_stats": {
+			"Baitable": "No",
+			"Rod Power": "+5",
+			"Extra Junk Chance": "+10"
+		}
+	}
+	items.append(bamboo_fishing_rod)
+	
+	var decent_fishing_rod = FishingRod.new(14, "Decent Fishing Rod", atlas)
+	decent_fishing_rod.fishing_power = 12.5
+	decent_fishing_rod.description = "A fishing rod of decent construction, has a grip and can also attach bait!"
+	decent_fishing_rod.purchase_limit = 1
+	decent_fishing_rod.purchasable = true
+	decent_fishing_rod.rarity = Game.Rarity.UNCOMMON
+	decent_fishing_rod.category = Game.Category.RODS
+	decent_fishing_rod.junk_chance = 20.0
+	decent_fishing_rod.price = 2500.0
+	decent_fishing_rod.sell_price = 125.0
+	decent_fishing_rod.baitable = true
+	decent_fishing_rod.data = { 
+		"extra_stats": {
+			"Baitable": "Yes",
+			"Rod Power": "+12.5",
+			"Extra Junk Chance": "+20"
+		}
+	}
+	items.append(decent_fishing_rod)

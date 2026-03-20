@@ -58,6 +58,7 @@ var days: int = 0
 var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
+var bestiary = {}
 
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
@@ -108,6 +109,12 @@ func get_day_time() -> TimeOfDay:
 		return TimeOfDay.MIDDAY
 	else:						# 3:00 PM - 9:00 PM
 		return TimeOfDay.EVENING
+
+func get_junk_chance() -> float:
+	var junk_chance = 0.0
+	if equipped_fishing_rod != null:
+		junk_chance += equipped_fishing_rod.junk_chance * 0.01
+	return junk_chance
 
 func get_fishing_power() -> float:
 	var fishing_power = 0.0
@@ -240,6 +247,8 @@ func load_game() -> void:
 		var data = json.get_data()
 		if data.has("bag"):
 			bag.set_list_from_save(data["bag"])
+		if data.has("bestiary"):
+			bestiary = data["bestiary"]
 		if data.has("equipped_fishing_rod"):
 			var rod_id = data["equipped_fishing_rod"]
 			if rod_id != null:  # null means no rod equipped

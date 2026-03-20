@@ -164,7 +164,7 @@ func get_rod_tip(fish_dir: String) -> Vector2:
 	elif fish_dir == "right":
 		return Vector2(global_position.x + 14, global_position.y + 4.5)
 	elif fish_dir == "up":
-		return Vector2(global_position.x, global_position.y - 5.5)
+		return Vector2(global_position.x, global_position.y - 7.6)
 	elif fish_dir == "down":
 		return Vector2(global_position.x, global_position.y + 22)
 	return global_position
@@ -310,10 +310,14 @@ func _process_input(delta: float) -> void:
 				if bobber != null:
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					if Game.bag.total_size() > Game.get_max_inventory_size():
-						Toast.add("Your inventory is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
-						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						if Game.bestiary.has(str(stack.type.id)):
+							Game.bestiary[str(stack.type.id)] += stack.amount
+						else:
+							Game.bestiary[str(stack.type.id)] = stack.amount
 				state = FishState.REELING_BACK
 				bobber.get_node("Splashes").amount = 64
 				Game.catches += 1
@@ -474,7 +478,7 @@ func update_inventory() -> void:
 		child.queue_free()
 	for child in $"UI/Inventory/Container/Fishing Rods/GridContainer".get_children():
 		child.queue_free()
-	$UI/Inventory/Title.text = "Your bag (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + "):"
+	$UI/Inventory/Title.text = "Tackle Box (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + "):"
 	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
@@ -671,7 +675,7 @@ func _fishing_timer(location: Game.Location) -> void:
 	your_odds = 0
 	state = FishState.FISHING
 	if Game.bag.total_size() > Game.get_max_inventory_size():
-		Toast.add("Your inventory is full, you will release anything you catch.")
+		Toast.add("Your tackle box is full, you will release anything you catch.")
 	
 	var rod_power = Game.get_fishing_power()
 
@@ -695,7 +699,7 @@ func _fishing_timer(location: Game.Location) -> void:
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					if Game.bag.total_size() > Game.get_max_inventory_size():
-						Toast.add("Your inventory is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
 						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
