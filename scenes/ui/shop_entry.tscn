@@ -1,6 +1,44 @@
 [gd_scene format=3 uid="uid://cuvlu0jyq8u8k"]
 
+[ext_resource type="Texture2D" uid="uid://bunrtnbpg7rqv" path="res://assets/sprites/panel3.png" id="1_vee5d"]
 [ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="1_w1q34"]
+[ext_resource type="Texture2D" uid="uid://ds2lepfjkrk3y" path="res://assets/sprites/panel5.png" id="2_s7n5v"]
+[ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="3_0i7ub"]
+[ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="3_s7n5v"]
+[ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="5_af8nh"]
+[ext_resource type="Texture2D" uid="uid://c6r0tapb5q07n" path="res://assets/sprites/small-coin.png" id="5_s7n5v"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_c576r"]
+texture = ExtResource("1_vee5d")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pf8lu"]
+texture = ExtResource("2_s7n5v")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2q6wo"]
+texture = ExtResource("3_0i7ub")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0i7ub"]
+texture = ExtResource("3_s7n5v")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
 
 [sub_resource type="LabelSettings" id="LabelSettings_61ify"]
 line_spacing = 6.0
@@ -8,12 +46,12 @@ font = ExtResource("1_w1q34")
 font_size = 15
 
 [node name="Shop Entry" type="Control" unique_id=137208026]
-custom_minimum_size = Vector2(184, 208)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 3
 anchor_right = 0.14400001
 anchor_bottom = 0.3
-offset_right = -0.32000732
-offset_bottom = -1.5258789e-05
+offset_right = -88.32001
+offset_bottom = -120.000015
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -24,6 +62,24 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_c576r")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_pf8lu")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2q6wo")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_0i7ub")
+
+[node name="Rarity" type="NinePatchRect" parent="." unique_id=1296294546]
+modulate = Color(1, 1, 1, 0.4627451)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_af8nh")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=674538175]
 layout_mode = 1
@@ -32,15 +88,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -60.0
-offset_top = -88.0
-offset_right = 60.0
-offset_bottom = 36.0
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("5_s7n5v")
 
 [node name="Label" type="Label" parent="." unique_id=1773640449]
+visible = false
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -48,9 +106,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -84.0
-offset_top = -64.0
+offset_top = -68.0
 offset_right = 84.0
-offset_bottom = -9.0
+offset_bottom = -13.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_fonts/font = ExtResource("1_w1q34")
@@ -58,5 +116,5 @@ text = "Fishing Rod
 500g"
 label_settings = SubResource("LabelSettings_61ify")
 horizontal_alignment = 1
-vertical_alignment = 1
+vertical_alignment = 2
 autowrap_mode = 2

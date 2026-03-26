@@ -1,7 +1,6 @@
 extends Node2D
 
 var _spawning: Dictionary = {}
-var awaiting_request: bool = false
 
 func _ready() -> void:
 	Network.player_joined.connect(player_joined)

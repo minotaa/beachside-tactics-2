@@ -303,6 +303,9 @@ func _enter_tree() -> void:
 	goldfish.threshold = 2.0
 	items.append(goldfish)
 
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/items.png")
+	atlas.region = Rect2(16.0, 0.0, 16.0, 16.0)
 	var bamboo_fishing_rod = FishingRod.new(13, "Bamboo Fishing Rod", atlas)
 	bamboo_fishing_rod.fishing_power = 5.0
 	bamboo_fishing_rod.description = "A rod of delicate, but crude and simplistic construction, much more better than that Flimsy Fishing Rod."
@@ -323,6 +326,9 @@ func _enter_tree() -> void:
 	}
 	items.append(bamboo_fishing_rod)
 	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/items.png")
+	atlas.region = Rect2(32.0, 0.0, 16.0, 16.0)
 	var decent_fishing_rod = FishingRod.new(14, "Decent Fishing Rod", atlas)
 	decent_fishing_rod.fishing_power = 12.5
 	decent_fishing_rod.description = "A fishing rod of decent construction, has a grip and can also attach bait!"

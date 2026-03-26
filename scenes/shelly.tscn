@@ -53,6 +53,7 @@ size = Vector2(14, 24)
 script = ExtResource("1_tmlc6")
 
 [node name="Shadow" type="Sprite2D" parent="." unique_id=1368585064]
+z_index = -1
 position = Vector2(0, 11)
 scale = Vector2(1.1, 1.1)
 texture = ExtResource("2_kr8rm")
