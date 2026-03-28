@@ -51,7 +51,7 @@ var level: int = 0
 var xp: float = 0.0
 var catches: int = 0
 var whiffs: int = 0
-var balance: float = 0.0
+var balance: float = 100.0
 var equipped_fishing_rod: FishingRod
 var time: float = TIME_IN_DAY * 0.55
 var days: int = 0

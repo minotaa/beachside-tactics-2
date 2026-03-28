@@ -189,6 +189,12 @@ func select_item(id: int) -> void:
 	if item == null:
 		Toast.add("huh?")
 		return
+	if item == selected_item:
+		if $UI/Vendor/ItemPreview.visible:
+			$UI/Vendor/ItemPreview.visible = false
+		else:
+			$UI/Vendor/ItemPreview.visible = true
+		return
 	selected_item = item
 	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description
@@ -932,6 +938,9 @@ func _on_sell_pressed() -> void:
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	Input.action_release("interact")
 	update_catalog()
+
+func _on_close_shop_pressed() -> void:
+	Input.action_release("interact")
 
 func _on_inventory_button_pressed() -> void:
 	Input.action_release("inventory")
