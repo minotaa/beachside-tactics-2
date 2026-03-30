@@ -21,11 +21,11 @@ var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
 var holding_trap: bool = false
 
-var hookVelocity = 0
-var hookAcceleration = 1.75
-var hookDeceleration = 2.45
-var hookPressAcceleration = 1.75
-var maxVelocity = 6.0
+var hook_velocity = 0
+var hook_acceleration = 1.75
+var hook_deceleration = 2.45
+var hook_press_acceleration = 1.75
+var max_velocity = 6.0
 var bounce = 0.3
 
 # ROPE PHYSICS VARIABLES
@@ -201,6 +201,12 @@ func select_item(id: int) -> void:
 	$UI/Vendor/ItemPreview/Name.text = item.name
 	$UI/Vendor/ItemPreview/Item/TextureRect.texture = item.texture
 	$UI/Vendor/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+	if item.price > Game.balance:
+		$UI/Vendor/ItemPreview/Buy.disabled = true
+		$UI/Vendor/ItemPreview/Buy.text = "Can't afford"
+	else:
+		$UI/Vendor/ItemPreview/Buy.disabled = false
+		$UI/Vendor/ItemPreview/Buy.text = "Buy"
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
@@ -232,10 +238,10 @@ func update_catalog() -> void:
 					if i.type == item and i.amount >= item.purchase_limit:
 						cant_buy = true
 			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
-			if roundi((item as ItemType).price) > Game.balance:
-				shop_entry.get_node("Panel").disabled = true
-			else:
-				shop_entry.get_node("Panel").disabled = false
+			#if roundi((item as ItemType).price) > Game.balance:
+				#shop_entry.get_node("Panel").disabled = true
+			#else:
+				#shop_entry.get_node("Panel").disabled = false
 			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
 			shop_entry.get_node("TextureRect").texture = item.texture
 			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
@@ -252,190 +258,53 @@ func update_catalog() -> void:
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))
 
-func _process_input(delta: float) -> void:
-	# Movement controls
-	velocity = Input.get_vector("left", "right", "up", "down", 0.1)
-	if (state == FishState.REELING or state == FishState.FISHING) or $UI/Vendor.visible or $UI/Inventory.visible:
-		velocity = Vector2.ZERO
-	var velocity_length = velocity.length_squared()
-	var is_moving = velocity_length > 0
+## Discrete action handling — no delta needed here.
+## UI checks are centralized so fishing input is naturally blocked.
+func _input(event: InputEvent) -> void:
+	# Zoom
+	if event.is_action_pressed("zoom_in"):
+		intended_zoom = Vector2(
+			clamp(intended_zoom.x + 0.75, 1, 4.5),
+			clamp(intended_zoom.y + 0.75, 1, 4.5)
+		)
+	elif event.is_action_pressed("zoom_out"):
+		intended_zoom = Vector2(
+			clamp(intended_zoom.x - 0.75, 1, 4.5),
+			clamp(intended_zoom.y - 0.75, 1, 4.5)
+		)
 
-	if Input.is_action_just_pressed("zoom_in"):
-		intended_zoom = Vector2(clamp(intended_zoom.x + 0.75, 1, 4.5), clamp(intended_zoom.y + 0.75, 1, 4.5))
-	if Input.is_action_just_pressed("zoom_out"):
-		intended_zoom = Vector2(clamp(intended_zoom.x - 0.75, 1, 4.5), clamp(intended_zoom.y - 0.75, 1, 4.5))
-	
-
-	if Input.is_action_just_released("interact") and state == FishState.INACTIVE and not $UI/Inventory.visible:
-		if not $UI/Vendor.visible:
-			for body in $Interaction.get_overlapping_areas():
-				if body.is_in_group("shop"):
-					$UI/Vendor.visible = true
-					$UI/Vendor/ItemPreview.visible = false
-					$UI/Inventory.visible = false
-					$UI/Main.visible = false
-					update_catalog()
-		else:
-			$UI/Vendor.visible = false
-			$UI/Main.visible = true
-
-	# Reel back in bobber if you're fishing.
-	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
-		if bobber != null:
-			# Line is already taut from state check in _process_ui
-			
-			bobber.global_position = bobber.global_position.move_toward(
-				get_rod_tip(get_fishing_direction()), 
-				40.0 * delta
-			)
-			var tile_map = get_parent().get_node("Ground") as TileMapLayer
-			var bobber_position = tile_map.to_local(bobber.global_position)
-			var data = tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_position))
-			if data and data.get_custom_data("water"):
-				pass
+	# Shop interaction toggle
+	if event.is_action_released("interact"):
+		if state == FishState.INACTIVE:
+			if not $UI/Vendor.visible:
+				for body in $Interaction.get_overlapping_areas():
+					if body.is_in_group("shop"):
+						body.get_node("..").start_dialogue()
+						await body.get_node("..").dialogue_finished
+						$UI/Vendor.visible = true
+						$UI/Vendor/ItemPreview.visible = false
+						$UI/Inventory.visible = false
+						$UI/Main.visible = false
+						update_catalog()
 			else:
-				state = FishState.INACTIVE
-				bobber_safe = true
-				fish_control_safe = false
-				print("The bobber landed on an invalid location.")
-				if bobber != null:
-					bobber.queue_free()
-				play_idle_animation()
-			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
-				print("Player reeled in their bobber.")
-				state = FishState.INACTIVE
-				bobber_safe = true
-				fish_control_safe = false
-				play_idle_animation()
-				bobber.queue_free()
+				$UI/Vendor.visible = false
+				$UI/Main.visible = true
 
-	# Hook minigame
-	if (Input.is_action_pressed("fish")):
-		if hookVelocity > -maxVelocity:
-			hookVelocity -= hookAcceleration * delta
-	else:
-		if hookVelocity < maxVelocity:
-			hookVelocity += hookDeceleration * delta
+	# Let UI consume input first
+	if _is_ui_blocking():
+		return
 
-	if (Input.is_action_pressed("fish")):
-		hookVelocity -= (hookPressAcceleration * delta)
-		
+	# --- Fishing actions (blocked if no rod equipped) ---
+	if Game.equipped_fishing_rod == null:
+		if event.is_action_pressed("fish"):
+			Toast.add("You can't fish without a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
+		return
 
-	var target = $Minigame/Hook.position.y + hookVelocity
-	if (target >= 33.5):
-		hookVelocity *= -bounce
-	elif (target <= -33.5):
-		hookVelocity = 0
-		$Minigame/Hook.position.y = -33.5
-	else:
-		$Minigame/Hook.position.y = target
+	if near_shop():
+		return
 
-	if state == FishState.REELING:
-		$Minigame.visible = true
-		if bobber != null and not bobber.get_node("Splashes").emitting:
-			bobber.get_node("Splashes").restart()
-			
-		# Adjust Value
-		if (len($Minigame/Hook/Area2D.get_overlapping_areas()) > 0):
-			#var modifier = (Inventories.fishing_rods.equipped.deerraticness * 0.01) 
-			$Minigame/Progress.value += 145 * delta
-			$Minigame/Column.get_children()[0].set_vibrate(true)
-			Input.vibrate_handheld(10)
-			if ($Minigame/Progress.value >= $Minigame/Progress.max_value):
-				print("Caught the fish.")
-				if bobber != null:
-					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
-					if Game.bag.total_size() > Game.get_max_inventory_size():
-						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-					else:
-						Game.bag.add_item(stack)
-						Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-						if Game.bestiary.has(str(stack.type.id)):
-							Game.bestiary[str(stack.type.id)] += stack.amount
-						else:
-							Game.bestiary[str(stack.type.id)] = stack.amount
-				state = FishState.REELING_BACK
-				bobber.get_node("Splashes").amount = 64
-				Game.catches += 1
-				var added_xp = 0.0
-				var fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
-				if fish.rarity == Game.Rarity.COMMON:
-					added_xp += 5.0
-				if fish.rarity == Game.Rarity.UNCOMMON:
-					added_xp += 10.0
-				if fish.rarity == Game.Rarity.RARE:
-					added_xp += 15.0
-				if fish.rarity == Game.Rarity.EPIC:
-					added_xp += 25.0
-				if fish.rarity == Game.Rarity.LEGENDARY:
-					added_xp += 50.0
-				if fish.rarity == Game.Rarity.MYTHIC:
-					added_xp += 125.0
-				if fish.rarity == Game.Rarity.DIVINE:
-					added_xp += 250.0
-				if fish.rarity == Game.Rarity.SUPREME:
-					added_xp += 500.0
-				if fish.rarity == Game.Rarity.SECRET:
-					added_xp += 1000.0
-				Game.add_xp(added_xp)
-				#_show_ui()
-		else:
-			$Minigame/Column.get_children()[0].set_vibrate(false)
-			$Minigame/Progress.value -= 85 * delta
-			if ($Minigame/Progress.value <= 0):
-				state = FishState.INACTIVE
-				bobber_safe = true
-				play_idle_animation()
-				print("Lost the fish.")
-				Game.whiffs += 1
-				#_show_ui()
-	else:
-		$Minigame.visible = false
-		for children in $Minigame/Column.get_children():
-			children.queue_free()
-
-	# Highlight tiles for placing traps.
-	if holding_trap:
-		$Trap.show()
-		var tilemap = get_parent().get_node("Ground") as TileMapLayer
-		var mouse_tile = tilemap.local_to_map(tilemap.get_local_mouse_position())
-		var data = tilemap.get_cell_tile_data(mouse_tile)
-		if data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
-			$Trap.global_position = tilemap.map_to_local(mouse_tile)
-		else:
-			$Trap.hide()	
-	else:
-		$Trap.hide()
-
-	# Movement animations
-	if is_moving:
-		bobber_safe = true
-		state = FishState.INACTIVE
-		if bobber != null:
-			bobber.queue_free()
-			bobber = null
-		velocity_length = min(1, 0.5 + velocity_length)
-
-		# Determine last movement direction
-		if abs(velocity.x) > abs(velocity.y):
-			if velocity.x > 0:
-				last_direction = "right"
-			else:
-				last_direction = "left"
-		else:
-			if velocity.y > 0:
-				last_direction = "down"
-			else:
-				last_direction = "up"
-		if $Base.animation != body_type + "_walk_" + last_direction:
-			play_animation(body_type + "_walk_" + last_direction, false, velocity_length)
-	else:
-		if $Base.animation.begins_with(body_type + "_walk"):
-			play_idle_animation()
-	velocity = velocity.normalized() * BASE_WALKING_SPEED
-	
 	# Confirm catch & start minigame
-	if Input.is_action_just_pressed("fish") and state == FishState.FOUND_FISH and not $UI/Vendor.visible and (not Input.is_action_just_released("inventory") or not Input.is_action_just_released("interact")):
+	if event.is_action_pressed("fish") and state == FishState.FOUND_FISH:
 		state = FishState.REELING
 		$Minigame.visible = true
 		$Minigame.position = Vector2(0, 0)
@@ -447,20 +316,131 @@ func _process_input(delta: float) -> void:
 			add_fish(10, 50, 3, 4)
 		elif fish.difficulty == Game.Difficulty.HARD:
 			add_fish(20, 60, 4, 3.5)
-		else: # TODO: FIX ME!
+		else:
 			print("Unsupported fish difficulty.")
-		
-	if $FishPowerBar.visible and $UI/Inventory.visible:
-		$FishPowerBar.hide()
+
+	# Begin charging cast
+	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+		$FishPowerBar.visible = true
+		$FishPowerBar.value = 0
 		hantenjutsushiki = false
 
-	if not near_shop() and not $UI/Inventory.visible and Game.equipped_fishing_rod != null and not $UI/Vendor.visible:
-		# Charge up cast
+	# Release cast
+	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe:
+		$FishPowerBar.visible = false
+		hantenjutsushiki = false
+		var fish_dir := last_direction
+		bobber_safe = true
+		play_animation(body_type + "_fish_" + fish_dir)
+		if bobber != null:
+			bobber.queue_free()
+
+	# Allow fishing again after any fish button release (prevents accidental re-cast)
+	if event.is_action_released("fish"):
+		fish_control_safe = true
+
+
+## Continuous per-frame logic: movement, physics, hold-to-reel, power bar charge.
+func _process_input(delta: float) -> void:
+	# Movement
+	velocity = Vector2.ZERO if _is_ui_blocking() else Input.get_vector("left", "right", "up", "down", 0.1)
+	var velocity_length := velocity.length_squared()
+	var is_moving := velocity_length > 0
+
+	# Hold fish button to reel bobber back manually
+	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
+		if bobber != null:
+			bobber.global_position = bobber.global_position.move_toward(
+				get_rod_tip(get_fishing_direction()),
+				40.0 * delta
+			)
+			var tile_map := get_parent().get_node("Ground") as TileMapLayer
+			var bobber_pos := tile_map.to_local(bobber.global_position)
+			var data := tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_pos))
+			if not (data and data.get_custom_data("water")):
+				_cancel_bobber("The bobber landed on an invalid location.")
+			elif round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
+				print("Player reeled in their bobber.")
+				_cancel_bobber()
+
+	# Hook minigame physics
+	if Input.is_action_pressed("fish"):
+		if hook_velocity > -max_velocity:
+			hook_velocity -= hook_acceleration * delta
+		hook_velocity -= hook_press_acceleration * delta
+	else:
+		if hook_velocity < max_velocity:
+			hook_velocity += hook_deceleration * delta
+
+	var target = $Minigame/Hook.position.y + hook_velocity
+	if target >= 33.5:
+		hook_velocity *= -bounce
+	elif target <= -33.5:
+		hook_velocity = 0
+		$Minigame/Hook.position.y = -33.5
+	else:
+		$Minigame/Hook.position.y = target
+
+	# Reeling minigame progress
+	if state == FishState.REELING:
+		$Minigame.visible = true
+		if bobber != null and not bobber.get_node("Splashes").emitting:
+			bobber.get_node("Splashes").restart()
+
+		if len($Minigame/Hook/Area2D.get_overlapping_areas()) > 0:
+			$Minigame/Progress.value += 145 * delta
+			$Minigame/Column.get_children()[0].set_vibrate(true)
+			Input.vibrate_handheld(10)
+			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
+				_on_fish_caught()
+		else:
+			$Minigame/Column.get_children()[0].set_vibrate(false)
+			$Minigame/Progress.value -= 85 * delta
+			if $Minigame/Progress.value <= 0:
+				_on_fish_lost()
+	else:
+		$Minigame.visible = false
+		for child in $Minigame/Column.get_children():
+			child.queue_free()
+
+	# Trap placement highlight
+	if holding_trap:
+		$Trap.show()
+		var tilemap := get_parent().get_node("Ground") as TileMapLayer
+		var mouse_tile := tilemap.local_to_map(tilemap.get_local_mouse_position())
+		var data := tilemap.get_cell_tile_data(mouse_tile)
+		if data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
+			$Trap.global_position = tilemap.map_to_local(mouse_tile)
+		else:
+			$Trap.hide()
+	else:
+		$Trap.hide()
+
+	# Movement animations & state reset on move
+	if is_moving:
+		bobber_safe = true
+		state = FishState.INACTIVE
+		if bobber != null:
+			bobber.queue_free()
+			bobber = null
+		velocity_length = min(1, 0.5 + velocity_length)
+
+		if abs(velocity.x) > abs(velocity.y):
+			last_direction = "right" if velocity.x > 0 else "left"
+		else:
+			last_direction = "down" if velocity.y > 0 else "up"
+
+		if $Base.animation != body_type + "_walk_" + last_direction:
+			play_animation(body_type + "_walk_" + last_direction, false, velocity_length * 1.2)
+	else:
+		if $Base.animation.begins_with(body_type + "_walk"):
+			play_idle_animation()
+
+	velocity = velocity.normalized() * BASE_WALKING_SPEED
+
+	# Power bar charge (held fish button while idle)
+	if not near_shop() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
-			if not $FishPowerBar.visible:
-				$FishPowerBar.visible = true
-				$FishPowerBar.value = 0
-				hantenjutsushiki = false
 			if hantenjutsushiki:
 				$FishPowerBar.value -= randi_range(1, 3)
 				if $FishPowerBar.value <= 0:
@@ -469,29 +449,73 @@ func _process_input(delta: float) -> void:
 				$FishPowerBar.value += randi_range(1, 3)
 				if $FishPowerBar.value >= 100:
 					hantenjutsushiki = true
-					
-		# Cast out charged up cast
-		if not near_shop() and Input.is_action_just_released("fish") and state == FishState.INACTIVE and fish_control_safe and (not Input.is_action_just_released("inventory") or not Input.is_action_just_released("interact")):
-			$FishPowerBar.visible = false
-			hantenjutsushiki = false
-			
-			var fish_dir := last_direction
-			bobber_safe = true
-			play_animation(body_type + "_fish_" + fish_dir)
-			if bobber != null:
-				bobber.queue_free()
-		
-		# Make it so you can fish after releasing the fish button, helpful for when you're reeling your line and don't want to immediately fish again.
-		# This logic should also be RIGHT after the casting out the charged up cast.
-		if Input.is_action_just_released("fish"):
-			fish_control_safe = true
-	else:
-		if Input.is_action_just_pressed("fish") and not $UI/Vendor.visible and not $UI/Inventory.visible and Game.equipped_fishing_rod == null:
-			Toast.add("You can't fish without a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
-	
-	move_and_slide()
-	global_position = round(global_position/ 2) * 2 # Needed to smooth out jittering on diagonal movement
 
+	# Hide power bar if inventory opens mid-charge
+	if $FishPowerBar.visible and $UI/Inventory.visible:
+		$FishPowerBar.hide()
+		hantenjutsushiki = false
+
+	move_and_slide()
+	global_position = round(global_position / 2) * 2
+
+
+# --- Helpers ---
+
+## Returns true whenever UI should block all gameplay input.
+func _is_ui_blocking() -> bool:
+	return (
+		state == FishState.REELING
+		or state == FishState.FISHING
+		or $UI/Vendor.visible
+		or $UI/Inventory.visible
+	)
+
+## Frees the bobber and returns the player to INACTIVE.
+func _cancel_bobber(message: String = "") -> void:
+	if message != "":
+		print(message)
+	state = FishState.INACTIVE
+	bobber_safe = true
+	fish_control_safe = false
+	play_idle_animation()
+	if bobber != null:
+		bobber.queue_free()
+
+func _on_fish_caught() -> void:
+	print("Caught the fish.")
+	if bobber != null:
+		var stack := ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
+		if Game.bag.total_size() > Game.get_max_inventory_size():
+			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+		else:
+			Game.bag.add_item(stack)
+			Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
+
+	state = FishState.REELING_BACK
+	bobber.get_node("Splashes").amount = 64
+	Game.catches += 1
+
+	var fish := Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
+	var xp_table := {
+		Game.Rarity.COMMON:    5.0,
+		Game.Rarity.UNCOMMON:  10.0,
+		Game.Rarity.RARE:      15.0,
+		Game.Rarity.EPIC:      25.0,
+		Game.Rarity.LEGENDARY: 50.0,
+		Game.Rarity.MYTHIC:    125.0,
+		Game.Rarity.DIVINE:    250.0,
+		Game.Rarity.SUPREME:   500.0,
+		Game.Rarity.SECRET:    1000.0,
+	}
+	Game.add_xp(xp_table.get(fish.rarity, 0.0))
+
+func _on_fish_lost() -> void:
+	state = FishState.INACTIVE
+	bobber_safe = true
+	play_idle_animation()
+	print("Lost the fish.")
+	Game.whiffs += 1
 var i_float_timer = 0.0
 
 func set_fishing_rod(id: int) -> void:
@@ -542,14 +566,15 @@ func update_inventory() -> void:
 
 	var bag = Game.bag.list.duplicate()
 	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
+	var total = 0.0
 	for item in bag:
 		var inventory_entry = preload("res://scenes/ui/inventory_entry.tscn").instantiate()
 		inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
 		inventory_entry.get_node("TextureRect").texture = item.type.texture
 		inventory_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
-		
+		total += item.type.sell_price
 		$UI/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
-		
+	$UI/Inventory/Amount.text = "Total: $" + str(roundi(total))
 	var inventory = Game.inventory.list.duplicate()
 	inventory.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
 	for item in inventory:
@@ -570,6 +595,18 @@ func near_shop() -> bool:
 
 func _process_ui(delta: float) -> void:
 	$InteractionMark.visible = false
+	if Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY or Game.get_day_time() == Game.TimeOfDay.DAY:
+		$PointLight2D.visible = false
+	else:
+		$PointLight2D.visible = true
+	if $UI/Vendor.visible:
+		var panel_width = -$UI/Vendor/TabContainer.size.x
+		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
+		var target_pos = global_position + Vector2(offset, 0)
+		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
+	else:
+		$Camera2D.global_position = $Camera2D.global_position.lerp(global_position, 5.0 * delta)
+
 	for child in $InteractionMark.get_children():
 		child.visible = false
 	for body in $Interaction.get_overlapping_areas():
@@ -713,7 +750,7 @@ var odds: int
 var your_odds: int
 	
 func _fishing_timer(location: Game.Location) -> void:
-	odds = randi_range(250, 850)
+	odds = randi_range(250, 1100)
 	your_odds = 0
 	state = FishState.FISHING
 	if Game.bag.total_size() > Game.get_max_inventory_size():
@@ -817,7 +854,7 @@ func _on_base_animation_finished() -> void:
 		
 		# NATURAL ARC CAST
 		var power_normalized = $FishPowerBar.value / 100.0
-		var base_distance = 60 + (power_normalized * 120)  # How far it goes
+		var base_distance = 20 + (power_normalized * 100)  # How far it goes
 		
 		bobber.rotation = 0
 		bobber.gravity_scale = 0  # We'll handle gravity manually for better control
@@ -940,7 +977,10 @@ func _on_sell_pressed() -> void:
 	update_catalog()
 
 func _on_close_shop_pressed() -> void:
-	Input.action_release("interact")
+	var release_interact = InputEventAction.new()
+	release_interact.action = "interact"
+	release_interact.pressed = false
+	Input.parse_input_event(release_interact)
 
 func _on_inventory_button_pressed() -> void:
 	Input.action_release("inventory")

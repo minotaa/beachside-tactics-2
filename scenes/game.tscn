@@ -4,9 +4,6 @@
 [ext_resource type="TileSet" uid="uid://cx3i648h1rssq" path="res://assets/game.tres" id="1_yqjtg"]
 [ext_resource type="PackedScene" uid="uid://1iqhgrq7dgum" path="res://scenes/shelly.tscn" id="3_lnu2h"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_yqjtg"]
-size = Vector2(18, 25)
-
 [node name="Level" type="Node2D" unique_id=2087867780]
 y_sort_enabled = true
 texture_filter = 1
@@ -26,15 +23,6 @@ tile_set = ExtResource("1_yqjtg")
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAD4/wEAAAAMAAEAAAD9/wQAAAAKAAEAAAAJAPz/AAAKAAEAAAAKAAIAAAAKAAEAAAAIAAYAAAAMAAEAAAADAAgAAAAMAAEAAAAFAAAAAAAKAAEAAAD6/wkAAAAMAAEAAADx/wcAAAAKAAEAAAD2/wQAAAAKAAEAAADx/wAAAAAMAAEAAAD2//z/AAAKAAEAAADq/wgAAAAKAAEAAADu/wQAAAAMAAEAAADm/wkAAAAMAAEAAADm/wMAAAAMAAEAAADr////AAAKAAEAAADm//v/AAAMAAEAAADv//r/AAAMAAEAAAD6//n/AAAMAAEAAAAFAPr/AAAKAAEAAAABAP7/AAADAAIAAAA=")
 tile_set = ExtResource("1_yqjtg")
-
-[node name="Shop" type="Area2D" parent="." unique_id=1952843701 groups=["shop"]]
-position = Vector2(0, 9)
-collision_layer = 2
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Shop" unique_id=1836126221]
-position = Vector2(24, -29.5)
-shape = SubResource("RectangleShape2D_yqjtg")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1465685631]
 color = Color(0.19215687, 0.14901961, 0.5019608, 1)

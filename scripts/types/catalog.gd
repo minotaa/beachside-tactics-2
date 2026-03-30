@@ -185,7 +185,7 @@ func _enter_tree() -> void:
 	minnow.description = "A tiny, skittish baitfish that darts through the shallows at all hours. Never hard to find, just hard to catch in numbers."
 	minnow.sell_price = 15.0
 	minnow.power_needed = 0.0
-	minnow.threshold = 10.0
+	minnow.threshold = 5.0
 	minnow.rarity = Game.Rarity.COMMON
 	minnow.category = Game.Category.FISH
 	minnow.location = Game.Location.Crystalwater_Beach

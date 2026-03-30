@@ -49,6 +49,9 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rw3ai"]
 size = Vector2(14, 24)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_popqq"]
+size = Vector2(18, 25)
+
 [node name="Shelly" type="CharacterBody2D" unique_id=804101878]
 script = ExtResource("1_tmlc6")
 
@@ -66,3 +69,15 @@ frame_progress = 0.13045748
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1169953044]
 position = Vector2(0, 4)
 shape = SubResource("RectangleShape2D_rw3ai")
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=277356324]
+position = Vector2(0, -9)
+
+[node name="Shop" type="Area2D" parent="." unique_id=145546351 groups=["shop"]]
+position = Vector2(0, 9)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shop" unique_id=309900125]
+position = Vector2(0, -5.5)
+shape = SubResource("RectangleShape2D_popqq")
