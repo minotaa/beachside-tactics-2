@@ -348,3 +348,22 @@ func _enter_tree() -> void:
 		}
 	}
 	items.append(decent_fishing_rod)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/bait.png")
+	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
+	var worms = Bait.new(15, "Worms", atlas)
+	worms.category = Game.Category.BAIT
+	worms.rarity = Game.Rarity.COMMON
+	worms.purchasable = true
+	worms.extra_fishing_speed = 25.0
+	worms.extra_quick_bite = 0.0
+	worms.description = "A common and effective bait used to attract a variety of fish."
+	worms.price = 10.0
+	worms.data = { 
+		"extra_stats": {
+			"Fishing Speed": "+25",
+			"Quick Bite": "+0"
+		}
+	}
+	items.append(worms)

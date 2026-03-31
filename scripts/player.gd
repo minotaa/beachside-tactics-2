@@ -197,7 +197,16 @@ func select_item(id: int) -> void:
 		return
 	selected_item = item
 	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
-	$UI/Vendor/ItemPreview/Description.text = item.description
+	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
+	var index = 0
+	if item.data.has("extra_stats"):
+		for key in item.data["extra_stats"].keys():
+			index += 1
+			$UI/Vendor/ItemPreview/Description.text += str(key) + ": " + str(item.data["extra_stats"][key])
+			if index < item.data["extra_stats"].keys().size():
+				$UI/Vendor/ItemPreview/Description.text += "\n"
+
+	
 	$UI/Vendor/ItemPreview/Name.text = item.name
 	$UI/Vendor/ItemPreview/Item/TextureRect.texture = item.texture
 	$UI/Vendor/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
@@ -228,6 +237,8 @@ func buy_item() -> void:
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
+	for children in $"UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer".get_children():
+		children.queue_free()
 	for children in $UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
 	for item in Catalog.items:
@@ -248,6 +259,24 @@ func update_catalog() -> void:
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 			if not cant_buy:
 				$"UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
+		if (item as ItemType).category == Game.Category.BAIT:
+			var cant_buy = false
+			if item.purchase_limit != -1:
+				for i in Game.inventory.list:
+					if i.type == item and i.amount >= item.purchase_limit:
+						cant_buy = true
+			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
+			#if roundi((item as ItemType).price) > Game.balance:
+				#shop_entry.get_node("Panel").disabled = true
+			#else:
+				#shop_entry.get_node("Panel").disabled = false
+			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+			shop_entry.get_node("TextureRect").texture = item.texture
+			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
+			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
+			if not cant_buy:
+				$"UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
+	
 	var total = 0.0
 	for item in Game.bag.list:
 		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
@@ -518,6 +547,21 @@ func _on_fish_lost() -> void:
 	Game.whiffs += 1
 var i_float_timer = 0.0
 
+func set_bait(id: int) -> void:
+	if state != FishState.INACTIVE:
+		Toast.add("You can't switch bait while fishing.")
+		return
+	if id != -1:
+		if Catalog.get_item(id) is Bait:
+			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
+			Game.equipped_bait = Catalog.get_item(id)
+		else:
+			LimboConsole.error("This doesn't seem to be bait.")
+	else:
+		Toast.add("Removed currently equipped bait.")
+		Game.equipped_bait = null
+	update_inventory()
+
 func set_fishing_rod(id: int) -> void:
 	if state != FishState.INACTIVE:
 		Toast.add("You can't switch fishing rods while fishing.")
@@ -538,6 +582,8 @@ func update_inventory() -> void:
 		child.queue_free()
 	for child in $"UI/Inventory/Container/Fishing Rods/GridContainer".get_children():
 		child.queue_free()
+	for child in $"UI/Inventory/Container/Bait/GridContainer".get_children():
+		child.queue_free()
 	$UI/Inventory/Title.text = "Tackle Box (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + "):"
 	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
@@ -546,6 +592,32 @@ func update_inventory() -> void:
 		inventory_button.get_node("Equipped").hide()
 	inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(-1))
 	$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
+
+	inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+	inventory_button.get_node("Rarity").texture = null
+	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
+	if Game.equipped_bait != null:
+		inventory_button.get_node("Equipped").hide()
+	inventory_button.connect("pressed", Callable(self, "set_bait").bind(-1))
+	$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
+
+	if Game.equipped_bait == null:
+		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
+		$"UI/Inventory/Container/Bait/Equipped/Name".text = "Nothing"
+		$"UI/Inventory/Container/Bait/Equipped/Description".text = "You have no bait equipped, buy one in the shop."
+		$"UI/Inventory/Container/Bait/Equipped/Stats".text = "Nothing: +0"
+	else:
+		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = Game.equipped_bait.texture
+		$"UI/Inventory/Container/Bait/Equipped/Name".text = Game.equipped_bait.name
+		$"UI/Inventory/Container/Bait/Equipped/Description".text = Game.equipped_bait.description
+		$"UI/Inventory/Container/Bait/Equipped/Stats".text = ""
+		var index = 0
+		for key in Game.equipped_bait.data["extra_stats"].keys():
+			index += 1
+			$"UI/Inventory/Container/Bait/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_bait.data["extra_stats"][key])
+			if index < Game.equipped_bait.data["extra_stats"].keys().size():
+				$"UI/Inventory/Container/Bait/Equipped/Stats".text += "\n"
+
 
 	if Game.equipped_fishing_rod == null:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
@@ -586,6 +658,15 @@ func update_inventory() -> void:
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(item.type.id))
 			$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
+		if item.type.category == Game.Category.BAIT:
+			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+			inventory_button.get_node("TextureRect").texture = item.type.texture
+			if Game.equipped_bait != item.type:
+				inventory_button.get_node("Equipped").hide()
+			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+			inventory_button.connect("pressed", Callable(self, "set_bait").bind(item.type.id))
+			$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
+	
 
 func near_shop() -> bool:
 	for body in $Interaction.get_overlapping_areas():
@@ -811,14 +892,15 @@ func _fishing_timer(location: Game.Location) -> void:
 				state = FishState.FISHING
 				print("Player decided not to catch fish, continuing loop.")
 				your_odds = 0
-				odds = randi_range(250, 750)
+				odds = randi_range(250, 1000)
 			else:
 				print("Player decided to catch fish, ending loop.")
 				return
-			
-		await get_tree().create_timer(0.75).timeout
-		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25)
-	
+		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite()) * 0.025))
+		await get_tree().create_timer(tick_interval).timeout
+		var tick_bonus = sqrt(Game.get_fishing_speed()) * 3.5
+		odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25) + tick_bonus
+
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
 		return

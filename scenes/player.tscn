@@ -40,6 +40,7 @@
 [ext_resource type="PackedScene" uid="uid://cuvlu0jyq8u8k" path="res://scenes/ui/shop_entry.tscn" id="34_j2b1d"]
 [ext_resource type="Texture2D" uid="uid://ptsyvuy6bo4d" path="res://assets/sprites/dotted-line.png" id="35_t4otl"]
 [ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="36_2dvfe"]
+[ext_resource type="Texture2D" uid="uid://bbhl3tnt2ng1f" path="res://assets/sprites/baits.png" id="36_fdfoy"]
 [ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="38_giy8y"]
 [ext_resource type="Texture2D" uid="uid://b2kt1y66uo04a" path="res://assets/sprites/light.png" id="39_j2b1d"]
 
@@ -502,7 +503,19 @@ texture_margin_top = 32.0
 texture_margin_right = 32.0
 texture_margin_bottom = 32.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dt7fs"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_t4otl"]
+texture = ExtResource("33_hax0n")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j2b1d"]
+texture = ExtResource("33_hax0n")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wqfne"]
 texture = ExtResource("22_31cv2")
@@ -510,6 +523,8 @@ texture_margin_left = 20.0
 texture_margin_top = 20.0
 texture_margin_right = 20.0
 texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fdfoy"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wnwbv"]
 texture = ExtResource("23_31cv2")
@@ -534,20 +549,6 @@ font = ExtResource("18_i4ail")
 [sub_resource type="LabelSettings" id="LabelSettings_ke2ow"]
 line_spacing = 6.0
 font = ExtResource("18_i4ail")
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_t4otl"]
-texture = ExtResource("33_hax0n")
-texture_margin_left = 20.0
-texture_margin_top = 20.0
-texture_margin_right = 20.0
-texture_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j2b1d"]
-texture = ExtResource("33_hax0n")
-texture_margin_left = 20.0
-texture_margin_top = 20.0
-texture_margin_right = 20.0
-texture_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bj30b"]
 
@@ -881,7 +882,6 @@ label_settings = SubResource("LabelSettings_487ah")
 horizontal_alignment = 1
 
 [node name="Inventory" type="Panel" parent="UI" unique_id=1760576589]
-visible = false
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
@@ -949,15 +949,18 @@ offset_left = 368.0
 offset_top = -328.0
 offset_right = 1216.0
 offset_bottom = 328.0
-theme_override_fonts/font = ExtResource("18_ke2ow")
+theme_override_fonts/font = ExtResource("18_i4ail")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
-theme_override_styles/tab_unselected = SubResource("StyleBoxEmpty_dt7fs")
+theme_override_styles/tab_unselected = SubResource("StyleBoxTexture_t4otl")
+theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
+theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_fdfoy")
 tab_alignment = 1
-current_tab = 0
+current_tab = 1
 
 [node name="Fishing Rods" type="Control" parent="UI/Inventory/Container" unique_id=122686232]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -1041,12 +1044,116 @@ autowrap_mode = 3
 
 [node name="Close" type="Button" parent="UI/Inventory/Container/Fishing Rods/Equipped" unique_id=1090723078]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = -1
+anchor_left = 0.82400006
+anchor_top = -0.108
 anchor_right = 1.0
-offset_left = -48.0
-offset_top = -56.0
-offset_bottom = -8.0
+anchor_bottom = -0.015000001
+offset_left = 0.37197876
+offset_top = 0.15999985
+offset_right = 0.5
+offset_bottom = -0.19999981
+grow_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_bj30b")
+icon = ExtResource("34_giy8y")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Bait" type="Control" parent="UI/Inventory/Container" unique_id=876232754]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Bait" unique_id=1502213689]
+layout_mode = 0
+offset_top = -4.0
+offset_right = 504.0
+offset_bottom = 556.0
+theme_override_constants/h_separation = 16
+columns = 4
+
+[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Bait" unique_id=1271656385]
+layout_mode = 0
+offset_left = 528.0
+offset_top = 39.0
+offset_right = 800.0
+offset_bottom = 559.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
+
+[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Bait/Equipped" unique_id=547617863]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -68.0
+offset_top = 16.0
+offset_right = 68.0
+offset_bottom = 152.0
+grow_horizontal = 2
+texture = SubResource("AtlasTexture_2a3c5")
+
+[node name="Name" type="Label" parent="UI/Inventory/Container/Bait/Equipped" unique_id=644264990]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
+offset_top = 168.0
+offset_right = 128.0
+offset_bottom = 219.0
+grow_horizontal = 2
+text = "Basic Fishing Rod"
+label_settings = SubResource("LabelSettings_42b1b")
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="UI/Inventory/Container/Bait/Equipped" unique_id=752088226]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
+offset_top = 232.0
+offset_right = 128.0
+offset_bottom = 472.0
+grow_horizontal = 2
+text = "The most basic fishing rod ever. You couldn't get more boring than this."
+label_settings = SubResource("LabelSettings_l71n6")
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Stats" type="Label" parent="UI/Inventory/Container/Bait/Equipped" unique_id=1893127040]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -104.0
+offset_right = 128.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Stats:
++1 Rod Power"
+label_settings = SubResource("LabelSettings_ke2ow")
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
+
+[node name="Close" type="Button" parent="UI/Inventory/Container/Bait/Equipped" unique_id=840461331]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.82400006
+anchor_top = -0.108
+anchor_right = 1.0
+anchor_bottom = -0.015000001
+offset_left = 0.37197876
+offset_top = 0.15999985
+offset_right = 0.5
+offset_bottom = -0.19999981
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -1078,10 +1185,9 @@ theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
 theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_bj30b")
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="Shop" type="Control" parent="UI/Vendor/TabContainer" unique_id=1574313464]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -1116,13 +1222,13 @@ expand_icon = true
 [node name="Rods" type="Control" parent="UI/Vendor/TabContainer/Shop" unique_id=803585718]
 layout_mode = 1
 anchor_left = -0.042000003
-anchor_top = 0.08800001
+anchor_top = 0.127
 anchor_right = 1.042
-anchor_bottom = 0.36800003
+anchor_bottom = 0.328
 offset_left = 0.19200134
-offset_top = 0.12799454
+offset_top = 0.22798157
 offset_right = -0.1920166
-offset_bottom = -0.1920166
+offset_bottom = 0.2559967
 
 [node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/Rods" unique_id=667866520]
 layout_mode = 1
@@ -1156,7 +1262,51 @@ alignment = 1
 [node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer" unique_id=137208026 instance=ExtResource("34_j2b1d")]
 layout_mode = 2
 
+[node name="Bait" type="Control" parent="UI/Vendor/TabContainer/Shop" unique_id=2128491989]
+layout_mode = 1
+anchor_left = -0.042000003
+anchor_top = 0.127
+anchor_right = 1.042
+anchor_bottom = 0.328
+offset_left = 0.19200134
+offset_top = 112.227974
+offset_right = -0.1920166
+offset_bottom = 112.256
+
+[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/Bait" unique_id=632359853]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 22.0
+offset_top = -36.0
+offset_right = 86.0
+offset_bottom = 28.0
+grow_vertical = 2
+texture = ExtResource("36_fdfoy")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/Bait" unique_id=1858847491]
+custom_minimum_size = Vector2(520, 104)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 104.0
+offset_top = -52.0
+offset_right = 624.0
+offset_bottom = 52.0
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/Bait/ScrollContainer" unique_id=1193798037]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer" unique_id=1948378778 instance=ExtResource("34_j2b1d")]
+layout_mode = 2
+
 [node name="Sell" type="Control" parent="UI/Vendor/TabContainer" unique_id=1504702216]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
