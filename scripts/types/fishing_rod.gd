@@ -6,3 +6,4 @@ var reel_power: float = 0.0 # Faster progress in fishing minigame.
 var junk_chance: float = 0.0 # Chance to catch junk.
 var baitable: bool = false # Can use bait.
 var data: Dictionary = {}
+var shoddy: bool = false

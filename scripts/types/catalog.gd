@@ -107,6 +107,7 @@ func _enter_tree() -> void:
 	basic_fishing_rod.description = "The most basic fishing rod ever. You couldn't get more boring than this."
 	basic_fishing_rod.purchase_limit = 1
 	basic_fishing_rod.purchasable = true
+	basic_fishing_rod.shoddy = true
 	basic_fishing_rod.rarity = Game.Rarity.COMMON
 	basic_fishing_rod.category = Game.Category.RODS
 	basic_fishing_rod.junk_chance = 0.0
@@ -317,6 +318,7 @@ func _enter_tree() -> void:
 	bamboo_fishing_rod.price = 500.0
 	bamboo_fishing_rod.sell_price = 10.0
 	bamboo_fishing_rod.baitable = false
+	bamboo_fishing_rod.shoddy = true
 	bamboo_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "No",
@@ -340,6 +342,7 @@ func _enter_tree() -> void:
 	decent_fishing_rod.price = 2500.0
 	decent_fishing_rod.sell_price = 125.0
 	decent_fishing_rod.baitable = true
+	decent_fishing_rod.shoddy = false
 	decent_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "Yes",

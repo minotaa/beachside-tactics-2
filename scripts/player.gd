@@ -946,7 +946,10 @@ func _on_base_animation_finished() -> void:
 		
 		# NATURAL ARC CAST
 		var power_normalized = $FishPowerBar.value / 100.0
-		var base_distance = 20 + (power_normalized * 100)  # How far it goes
+		var baser_distance = 20
+		if not Game.equipped_fishing_rod.shoddy:
+			baser_distance += 40
+		var base_distance = baser_distance + (power_normalized * 100)  # How far it goes
 		
 		bobber.rotation = 0
 		bobber.gravity_scale = 0  # We'll handle gravity manually for better control
