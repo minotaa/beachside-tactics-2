@@ -120,13 +120,13 @@ func get_junk_chance() -> float:
 
 func get_fishing_speed() -> float:
 	var fishing_speed = 0.0
-	if equipped_bait != null:
+	if equipped_bait != null and equipped_fishing_rod != null and equipped_fishing_rod.baitable:
 		fishing_speed += equipped_bait.extra_fishing_speed
 	return fishing_speed
 
 func get_quick_bite() -> float:
 	var quick_bite = 0.0
-	if equipped_bait != null:
+	if equipped_bait != null and equipped_fishing_rod != null and equipped_fishing_rod.baitable:
 		quick_bite += equipped_bait.extra_quick_bite
 	return quick_bite
 
@@ -265,7 +265,7 @@ func load_game() -> void:
 			bestiary = data["bestiary"]
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
-			if bait_id != null:  # null means no bait equipped
+			if bait_id != null and typeof(bait_id) == TYPE_INT:  # null means no bait equipped
 				equipped_bait = Catalog.get_item(bait_id)
 		if data.has("equipped_fishing_rod"):
 			var rod_id = data["equipped_fishing_rod"]
@@ -297,7 +297,7 @@ func get_save_data() -> Dictionary:
 		"whiffs": whiffs,
 		"catches": catches,
 		"equipped_fishing_rod": equipped_fishing_rod.id if equipped_fishing_rod else null,
-		"equipped_bait": equipped_bait if equipped_bait else null,
+		"equipped_bait": equipped_bait.id if equipped_bait else null,
 		"days": days,
 		"time": time,
 		"xp": xp,

@@ -235,12 +235,14 @@ func buy_item() -> void:
 	pass
 
 func update_catalog() -> void:
-	for children in $"UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".get_children():
+	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
-	for children in $"UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer".get_children():
+	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
 	for children in $UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
+	if Game.level < 5:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
 			var cant_buy = false
@@ -258,7 +260,7 @@ func update_catalog() -> void:
 			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 			if not cant_buy:
-				$"UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
+				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
 		if (item as ItemType).category == Game.Category.BAIT:
 			var cant_buy = false
 			if item.purchase_limit != -1:
@@ -275,7 +277,7 @@ func update_catalog() -> void:
 			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 			if not cant_buy:
-				$"UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
+				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
 	
 	var total = 0.0
 	for item in Game.bag.list:
@@ -304,7 +306,7 @@ func _input(event: InputEvent) -> void:
 
 	# Shop interaction toggle
 	if event.is_action_released("interact"):
-		if state == FishState.INACTIVE:
+		if state == FishState.INACTIVE and not $UI/Inventory.visible:
 			if not $UI/Vendor.visible:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("shop"):
@@ -555,6 +557,8 @@ func set_bait(id: int) -> void:
 		if Catalog.get_item(id) is Bait:
 			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.equipped_bait = Catalog.get_item(id)
+			if not Game.equipped_fishing_rod.baitable:
+				Toast.add("The bait won't work unless you have a fishing rod that can be baited.")
 		else:
 			LimboConsole.error("This doesn't seem to be bait.")
 	else:
@@ -680,6 +684,12 @@ func _process_ui(delta: float) -> void:
 		$PointLight2D.visible = false
 	else:
 		$PointLight2D.visible = true
+	if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
+		$UI/Main/Bait.visible = true
+		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
+		$UI/Main/Bait/HBoxContainer/Label.text = "x" + str(Game.inventory.get_item_stack(Game.equipped_bait).amount)
+	else:
+		$UI/Main/Bait.visible = false
 	if $UI/Vendor.visible:
 		var panel_width = -$UI/Vendor/TabContainer.size.x
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
@@ -1055,7 +1065,7 @@ func _on_sell_pressed() -> void:
 	
 	if amount_earned > 0.0:
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
-	Input.action_release("interact")
+	_on_close_shop_pressed()
 	update_catalog()
 
 func _on_close_shop_pressed() -> void:

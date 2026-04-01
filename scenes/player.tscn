@@ -461,17 +461,20 @@ line_spacing = 5.0
 font = ExtResource("18_ke2ow")
 font_size = 22
 
-[sub_resource type="LabelSettings" id="LabelSettings_md1ol"]
-font = ExtResource("18_i4ail")
-shadow_size = 2
-shadow_color = Color(0.07058824, 0.07058824, 0.08627451, 0.9607843)
-
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_487ah"]
-texture = ExtResource("25_wqfne")
+texture = ExtResource("27_gl8cc")
 texture_margin_left = 16.0
 texture_margin_top = 16.0
 texture_margin_right = 16.0
 texture_margin_bottom = 16.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_g5jhy"]
+font = ExtResource("18_i4ail")
+
+[sub_resource type="LabelSettings" id="LabelSettings_md1ol"]
+font = ExtResource("18_i4ail")
+shadow_size = 2
+shadow_color = Color(0.07058824, 0.07058824, 0.08627451, 0.9607843)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_md1ol"]
 texture = ExtResource("26_wnwbv")
@@ -743,6 +746,40 @@ text = "No fishing rod"
 label_settings = SubResource("LabelSettings_60mlk")
 vertical_alignment = 1
 
+[node name="Bait" type="Panel" parent="UI/Main" unique_id=411007197]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.162
+anchor_top = 0.178
+anchor_right = 0.24400002
+anchor_bottom = 0.23300001
+offset_left = 0.6399994
+offset_top = -0.16000366
+offset_right = -0.32000732
+offset_bottom = 0.23999023
+theme_override_styles/panel = SubResource("StyleBoxTexture_487ah")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Main/Bait" unique_id=1828695915]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.07700001
+anchor_top = 0.125
+anchor_right = 0.92300004
+anchor_bottom = 0.87500006
+offset_left = 0.29599857
+offset_right = 0.0079956055
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="UI/Main/Bait/HBoxContainer" unique_id=172875102]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("36_fdfoy")
+
+[node name="Label" type="Label" parent="UI/Main/Bait/HBoxContainer" unique_id=1759848330]
+layout_mode = 2
+text = "x0"
+label_settings = SubResource("LabelSettings_g5jhy")
+
 [node name="Combination" type="NinePatchRect" parent="UI/Main" unique_id=51740318]
 layout_mode = 1
 anchors_preset = -1
@@ -882,6 +919,7 @@ label_settings = SubResource("LabelSettings_487ah")
 horizontal_alignment = 1
 
 [node name="Inventory" type="Panel" parent="UI" unique_id=1760576589]
+visible = false
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
@@ -957,10 +995,9 @@ theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
 theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_fdfoy")
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="Fishing Rods" type="Control" parent="UI/Inventory/Container" unique_id=122686232]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -1062,6 +1099,7 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="Bait" type="Control" parent="UI/Inventory/Container" unique_id=876232754]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -1219,18 +1257,28 @@ icon = ExtResource("34_giy8y")
 icon_alignment = 1
 expand_icon = true
 
-[node name="Rods" type="Control" parent="UI/Vendor/TabContainer/Shop" unique_id=803585718]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop" unique_id=885517425]
 layout_mode = 1
-anchor_left = -0.042000003
-anchor_top = 0.127
-anchor_right = 1.042
-anchor_bottom = 0.328
-offset_left = 0.19200134
-offset_top = 0.22798157
-offset_right = -0.1920166
-offset_bottom = 0.2559967
+anchors_preset = -1
+anchor_left = -0.028
+anchor_top = 0.117000006
+anchor_right = 1.028
+anchor_bottom = 1.0
+offset_left = 0.12800026
+offset_top = -0.116004944
+offset_right = -0.12799072
+offset_bottom = 4.0
+horizontal_scroll_mode = 0
 
-[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/Rods" unique_id=667866520]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer" unique_id=815489362]
+layout_mode = 2
+alignment = 1
+
+[node name="Rods" type="Control" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer" unique_id=803585718]
+custom_minimum_size = Vector2(600, 110)
+layout_mode = 2
+
+[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods" unique_id=667866520]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -1242,7 +1290,7 @@ offset_bottom = 28.0
 grow_vertical = 2
 texture = ExtResource("33_t4otl")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/Rods" unique_id=416700450]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods" unique_id=416700450]
 custom_minimum_size = Vector2(520, 104)
 layout_mode = 1
 anchors_preset = 4
@@ -1254,26 +1302,19 @@ offset_right = 624.0
 offset_bottom = 52.0
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/Rods/ScrollContainer" unique_id=1790481445]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer" unique_id=1790481445]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/Rods/ScrollContainer/HBoxContainer" unique_id=137208026 instance=ExtResource("34_j2b1d")]
+[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer" unique_id=137208026 instance=ExtResource("34_j2b1d")]
 layout_mode = 2
 
-[node name="Bait" type="Control" parent="UI/Vendor/TabContainer/Shop" unique_id=2128491989]
-layout_mode = 1
-anchor_left = -0.042000003
-anchor_top = 0.127
-anchor_right = 1.042
-anchor_bottom = 0.328
-offset_left = 0.19200134
-offset_top = 112.227974
-offset_right = -0.1920166
-offset_bottom = 112.256
+[node name="Bait" type="Control" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer" unique_id=2128491989]
+custom_minimum_size = Vector2(600, 110)
+layout_mode = 2
 
-[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/Bait" unique_id=632359853]
+[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait" unique_id=632359853]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -1285,7 +1326,7 @@ offset_bottom = 28.0
 grow_vertical = 2
 texture = ExtResource("36_fdfoy")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/Bait" unique_id=1858847491]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait" unique_id=1858847491]
 custom_minimum_size = Vector2(520, 104)
 layout_mode = 1
 anchors_preset = 4
@@ -1297,12 +1338,12 @@ offset_right = 624.0
 offset_bottom = 52.0
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/Bait/ScrollContainer" unique_id=1193798037]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer" unique_id=1193798037]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/Bait/ScrollContainer/HBoxContainer" unique_id=1948378778 instance=ExtResource("34_j2b1d")]
+[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer" unique_id=1948378778 instance=ExtResource("34_j2b1d")]
 layout_mode = 2
 
 [node name="Sell" type="Control" parent="UI/Vendor/TabContainer" unique_id=1504702216]
@@ -1573,6 +1614,7 @@ texture_scale = 0.5
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]
 [connection signal="pressed" from="UI/Main/InventoryButton" to="." method="_on_inventory_button_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Fishing Rods/Equipped/Close" to="." method="_on_close_inventory_pressed"]
+[connection signal="pressed" from="UI/Inventory/Container/Bait/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Shop/Close" to="." method="_on_close_shop_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Sell" to="." method="_on_sell_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Close" to="." method="_on_close_shop_pressed"]

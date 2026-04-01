@@ -4,7 +4,7 @@ extends CharacterBody2D
 var dialogue_lines: Array[String] = [
 	"Welcome! Take a look around.",
 ]
-var chars_per_second: float = 20.0
+var chars_per_second: float = 30.0
 var line_display_duration: float = 1.0
 
 # --- STATE ---
