@@ -233,7 +233,12 @@ func _ready() -> void:
 	)
 	LimboConsole.register_command(host, "host", "Hosts a multiplayer server.")
 	LimboConsole.register_command(set_xp, "set_xp", "Sets your XP.")
+	LimboConsole.register_command(set_balance, "set_balance", "Sets your balance.")
 	LimboConsole.register_command(connect_to_server, "connect", "Connect to the server using the connection address.")
+	
+func set_balance(balance: float) -> void:
+	self.balance = balance
+	LimboConsole.info("Your balance has been set to: " + str(roundi(self.balance)))
 	
 func set_xp(xp: float) -> void:
 	self.xp = xp

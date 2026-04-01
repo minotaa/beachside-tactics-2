@@ -198,6 +198,8 @@ func select_item(id: int) -> void:
 	selected_item = item
 	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
+	if randf() > 0.2:
+		$UI/Vendor/ItemPreview/Description.text = $UI/Vendor/ItemPreview/Description.text.replace("Flimsy Fishing Rod", "Flismy Fshing Bod")
 	var index = 0
 	if item.data.has("extra_stats"):
 		for key in item.data["extra_stats"].keys():
@@ -632,6 +634,8 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = Game.equipped_fishing_rod.texture
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = Game.equipped_fishing_rod.name
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = Game.equipped_fishing_rod.description
+		if randf() < 0.2:
+			$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = $"UI/Inventory/Container/Fishing Rods/Equipped/Description".text.replace("Flimsy Fishing Rod", "Flismy Fshing Bod")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = ""
 		var index = 0
 		for key in Game.equipped_fishing_rod.data["extra_stats"].keys():
