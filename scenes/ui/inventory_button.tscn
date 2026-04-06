@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="2_p2es3"]
 [ext_resource type="Texture2D" uid="uid://c2cymjqktciju" path="res://assets/sprites/cross.png" id="3_ci7xw"]
 [ext_resource type="Texture2D" uid="uid://ceedkq0hqm0op" path="res://assets/sprites/panel6.png" id="6_o4de1"]
+[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="7_b2sbn"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v1t68"]
 texture = ExtResource("1_u5csj")
@@ -30,6 +31,11 @@ texture_margin_top = 32.0
 texture_margin_right = 32.0
 texture_margin_bottom = 32.0
 modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="LabelSettings" id="LabelSettings_4k8lb"]
+font = ExtResource("7_b2sbn")
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
 
 [node name="Inventory Button" type="Button" unique_id=226721162]
 custom_minimum_size = Vector2(96, 96)
@@ -80,3 +86,14 @@ patch_margin_left = 16
 patch_margin_top = 16
 patch_margin_right = 16
 patch_margin_bottom = 16
+
+[node name="Label" type="Label" parent="." unique_id=456362561]
+visible = false
+layout_mode = 0
+offset_left = 54.999996
+offset_top = 75.999985
+offset_right = 91.0
+offset_bottom = 91.999985
+text = "x2"
+label_settings = SubResource("LabelSettings_4k8lb")
+horizontal_alignment = 2

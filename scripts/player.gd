@@ -245,6 +245,9 @@ func update_catalog() -> void:
 		children.queue_free()
 	if Game.level < 5:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
+	else:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = true
+	
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
 			var cant_buy = false
@@ -280,7 +283,10 @@ func update_catalog() -> void:
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 			if not cant_buy:
 				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
-	
+	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer.get_children().size() == 0:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
+	else:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = true
 	var total = 0.0
 	for item in Game.bag.list:
 		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
@@ -671,6 +677,11 @@ func update_inventory() -> void:
 			inventory_button.get_node("TextureRect").texture = item.type.texture
 			if Game.equipped_bait != item.type:
 				inventory_button.get_node("Equipped").hide()
+			if item.amount == 1:
+				inventory_button.get_node("Label").visible = false
+			else:	
+				inventory_button.get_node("Label").visible = true
+				inventory_button.get_node("Label").text = "x" + str(item.amount)
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_bait").bind(item.type.id))
 			$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
@@ -870,6 +881,10 @@ func _fishing_timer(location: Game.Location) -> void:
 				Game.add_xp(3)
 				state = FishState.REELING_BACK
 				if bobber != null:
+					Game.inventory.take_item(Game.equipped_bait, 1)
+					if not Game.inventory.has_item(Game.equipped_bait):
+						Game.equipped_bait = null
+						Toast.add("You ran out of bait!")		
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					if Game.bag.total_size() > Game.get_max_inventory_size():
@@ -908,12 +923,16 @@ func _fishing_timer(location: Game.Location) -> void:
 				your_odds = 0
 				odds = randi_range(250, 1000)
 			else:
+				Game.inventory.take_item(Game.equipped_bait, 1)
+				if not Game.inventory.has_item(Game.equipped_bait):
+					Game.equipped_bait = null
+					Toast.add("You ran out of bait!")
 				print("Player decided to catch fish, ending loop.")
 				return
 		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite()) * 0.025))
 		await get_tree().create_timer(tick_interval).timeout
 		var tick_bonus = sqrt(Game.get_fishing_speed()) * 3.5
-		odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25) + tick_bonus
+		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25) + tick_bonus
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
