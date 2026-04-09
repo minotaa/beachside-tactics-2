@@ -444,7 +444,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bj30b"]
-size = Vector2(3, 11)
+size = Vector2(5.2, 11)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qfm1y"]
 size = Vector2(8, 17)
@@ -1307,9 +1307,6 @@ layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer" unique_id=137208026 instance=ExtResource("34_j2b1d")]
-layout_mode = 2
-
 [node name="Bait" type="Control" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer" unique_id=2128491989]
 custom_minimum_size = Vector2(600, 110)
 layout_mode = 2
@@ -1564,7 +1561,7 @@ position = Vector2(0, 8)
 shape = SubResource("CircleShape2D_4r5pv")
 
 [node name="InteractionMark" type="TextureRect" parent="." unique_id=1540127431]
-z_index = 128
+z_index = 127
 offset_left = -8.0
 offset_top = -23.0
 offset_right = 8.0

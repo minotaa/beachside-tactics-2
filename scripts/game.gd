@@ -270,7 +270,7 @@ func load_game() -> void:
 			bestiary = data["bestiary"]
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
-			if bait_id != null and typeof(bait_id) == TYPE_INT:  # null means no bait equipped
+			if bait_id != null:  # null means no bait equipped
 				equipped_bait = Catalog.get_item(bait_id)
 		if data.has("equipped_fishing_rod"):
 			var rod_id = data["equipped_fishing_rod"]

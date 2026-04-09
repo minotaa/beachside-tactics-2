@@ -288,17 +288,18 @@ func update_catalog() -> void:
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = true
 	var total = 0.0
-	for item in Game.bag.list:
+	var bag = Game.bag.list.duplicate()
+	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
+	for item in bag:
 		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
 			total += roundi(item.type.sell_price)
 			var sell_entry = preload("res://scenes/ui/sell_entry.tscn").instantiate()
 			sell_entry.get_node("HBoxContainer/Label").text = str(item) + ": $" + str(roundi(item.type.sell_price)) + " = $" + str(roundi(item.type.sell_price * item.amount)) 
 			sell_entry.get_node("HBoxContainer/TextureRect").texture = item.type.texture
+			sell_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))
 
-## Discrete action handling — no delta needed here.
-## UI checks are centralized so fishing input is naturally blocked.
 func _input(event: InputEvent) -> void:
 	# Zoom
 	if event.is_action_pressed("zoom_in"):
@@ -566,7 +567,7 @@ func set_bait(id: int) -> void:
 			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.equipped_bait = Catalog.get_item(id)
 			if not Game.equipped_fishing_rod.baitable:
-				Toast.add("The bait won't work unless you have a fishing rod that can be baited.")
+				Toast.add("The bait won't work unless you have a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod that can be baited.")
 		else:
 			LimboConsole.error("This doesn't seem to be bait.")
 	else:
@@ -576,16 +577,16 @@ func set_bait(id: int) -> void:
 
 func set_fishing_rod(id: int) -> void:
 	if state != FishState.INACTIVE:
-		Toast.add("You can't switch fishing rods while fishing.")
+		Toast.add("You can't switch [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rods while fishing.")
 		return
 	if id != -1:
 		if Catalog.get_item(id) is FishingRod:
 			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.equipped_fishing_rod = Catalog.get_item(id)
 		else:
-			LimboConsole.error("This doesn't seem to be a fishing rod.")
+			LimboConsole.error("This doesn't seem to be a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 	else:
-		Toast.add("Removed currently equipped fishing rod.")
+		Toast.add("Removed currently equipped [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 		Game.equipped_fishing_rod = null
 	update_inventory()
 
@@ -634,7 +635,7 @@ func update_inventory() -> void:
 	if Game.equipped_fishing_rod == null:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = "Nothing"
-		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no fishing rod equipped, buy one in the shop."
+		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod equipped, buy one in the shop."
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = "Nothing: +0"
 	else:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = Game.equipped_fishing_rod.texture
@@ -881,10 +882,11 @@ func _fishing_timer(location: Game.Location) -> void:
 				Game.add_xp(3)
 				state = FishState.REELING_BACK
 				if bobber != null:
-					Game.inventory.take_item(Game.equipped_bait, 1)
-					if not Game.inventory.has_item(Game.equipped_bait):
-						Game.equipped_bait = null
-						Toast.add("You ran out of bait!")		
+					if Game.equipped_bait != null:
+						Game.inventory.take_item(Game.equipped_bait, 1)
+						if not Game.inventory.has_item(Game.equipped_bait):
+							Game.equipped_bait = null
+							Toast.add("You ran out of bait!")		
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					if Game.bag.total_size() > Game.get_max_inventory_size():

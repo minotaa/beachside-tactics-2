@@ -9,7 +9,7 @@ line_spacing = 6.0
 font = ExtResource("2_ppych")
 
 [node name="Speech Bubble" type="Label" unique_id=1635914345]
-z_index = 129
+z_index = 131
 custom_minimum_size = Vector2(290, 43)
 anchors_preset = -1
 anchor_right = 0.057000004
@@ -26,8 +26,7 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [node name="Panel" type="NinePatchRect" parent="." unique_id=619465768]
-z_index = 128
-z_as_relative = false
+z_index = -1
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -0.014
