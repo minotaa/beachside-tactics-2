@@ -1609,20 +1609,14 @@ vertical_alignment = 1
 
 [node name="PointLight2D2" type="PointLight2D" parent="." unique_id=1280881913]
 position = Vector2(0, 7)
-energy = 0.15
-shadow_color = Color(0, 0, 0, 0.18431373)
-shadow_filter = 1
-shadow_filter_smooth = 1.0
-shadow_item_cull_mask = 2
+energy = 5.0
 texture = ExtResource("39_j2b1d")
-texture_scale = 0.5
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=1680418076]
 position = Vector2(0, 7)
 energy = 0.15
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 0.06666667)
-shadow_filter = 1
 shadow_filter_smooth = 1.0
 texture = ExtResource("39_j2b1d")
 texture_scale = 0.5

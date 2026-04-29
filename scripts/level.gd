@@ -37,6 +37,7 @@ func spawn_player(id: int) -> void:
 	_spawning[id] = true
 	var p = preload("res://scenes/player.tscn").instantiate()
 	p.name = str(id)
+	p.global_position = Vector2(-216, -125)
 	p.set_multiplayer_authority(id)
 	add_child.call_deferred(p)
 	await get_tree().process_frame
