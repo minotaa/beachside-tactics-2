@@ -698,8 +698,10 @@ func _process_ui(delta: float) -> void:
 	$InteractionMark.visible = false
 	if Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY or Game.get_day_time() == Game.TimeOfDay.DAY:
 		$PointLight2D.visible = false
+		$PointLight2D2.visible = false
 	else:
 		$PointLight2D.visible = true
+		$PointLight2D2.visible = true
 	if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture

@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://d0dlnvo4237xh" path="res://assets/sprites/cat0-up.png" id="5_ur7pv"]
 [ext_resource type="Texture2D" uid="uid://c1v3nyw4pc8s2" path="res://assets/sprites/cat0-fish-up.png" id="6_jej6c"]
 [ext_resource type="Texture2D" uid="uid://bg4e05eq83m7c" path="res://assets/sprites/under.png" id="11_jej6c"]
+[ext_resource type="Texture2D" uid="uid://b8oymws8d8ru6" path="res://assets/sprites/over.png" id="12_hhpqf"]
 [ext_resource type="Texture2D" uid="uid://buxh8vd6jesgi" path="res://assets/sprites/minigame-minigame-bar-empty.png" id="13_a8ls1"]
 [ext_resource type="Texture2D" uid="uid://dgbpnv06el6bi" path="res://assets/sprites/minigame-progress-bar-empty.png" id="13_f1ej7"]
 [ext_resource type="Texture2D" uid="uid://it176hjsau23" path="res://assets/sprites/progress.png" id="13_oprun"]
@@ -673,6 +674,7 @@ pivot_offset = Vector2(7, 7)
 fill_mode = 4
 nine_patch_stretch = true
 texture_under = ExtResource("11_jej6c")
+texture_over = ExtResource("12_hhpqf")
 texture_progress = ExtResource("13_oprun")
 
 [node name="Minigame" type="Control" parent="." unique_id=1517156467]
@@ -767,11 +769,14 @@ anchor_top = 0.125
 anchor_right = 0.92300004
 anchor_bottom = 0.87500006
 offset_left = 0.29599857
+offset_top = 3.0
 offset_right = 0.0079956055
+offset_bottom = -3.0000038
+theme_override_constants/separation = 6
 alignment = 1
 
 [node name="TextureRect" type="TextureRect" parent="UI/Main/Bait/HBoxContainer" unique_id=172875102]
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 texture = ExtResource("36_fdfoy")
 
@@ -1602,9 +1607,23 @@ label_settings = SubResource("LabelSettings_ujl30")
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="PointLight2D2" type="PointLight2D" parent="." unique_id=1280881913]
+position = Vector2(0, 7)
+energy = 0.15
+shadow_color = Color(0, 0, 0, 0.18431373)
+shadow_filter = 1
+shadow_filter_smooth = 1.0
+shadow_item_cull_mask = 2
+texture = ExtResource("39_j2b1d")
+texture_scale = 0.5
+
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=1680418076]
 position = Vector2(0, 7)
-blend_mode = 2
+energy = 0.15
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.06666667)
+shadow_filter = 1
+shadow_filter_smooth = 1.0
 texture = ExtResource("39_j2b1d")
 texture_scale = 0.5
 
