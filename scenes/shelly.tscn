@@ -70,9 +70,6 @@ frame_progress = 0.13045748
 position = Vector2(0, 4)
 shape = SubResource("RectangleShape2D_rw3ai")
 
-[node name="Marker2D" type="Marker2D" parent="." unique_id=277356324]
-position = Vector2(0, -9)
-
 [node name="Shop" type="Area2D" parent="." unique_id=145546351 groups=["shop"]]
 position = Vector2(0, 9)
 collision_layer = 2

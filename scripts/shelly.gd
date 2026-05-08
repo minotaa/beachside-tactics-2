@@ -11,6 +11,7 @@ var line_display_duration: float = 1.0
 var blink_timer: float = 15.0
 var is_in_dialogue: bool = false
 var current_line_index: int = 0
+var marker = Vector2(global_position.x, global_position.y - 9)
 
 signal dialogue_finished
 
@@ -18,6 +19,7 @@ var speech_bubble_scene = preload("res://scenes/ui/speech_bubble.tscn")
 
 func _ready() -> void:
 	$AnimatedSprite2D.play("idle")
+	marker = Vector2(global_position.x, global_position.y - 9)
 
 func _process(delta: float) -> void:
 	if not is_in_dialogue:
@@ -41,9 +43,11 @@ func play_line(index: int) -> void:
 
 	var panel_h: float = bubble.get_node("Panel").size.y
 	bubble.global_position = Vector2(
-		$Marker2D.position.x - (bubble.get_node("Panel").size.x * 0.0399),
-		$Marker2D.position.y - (panel_h * 0.8) * pow(1.35, index)
+		marker.x - (bubble.get_node("Panel").size.x * 0.1166),
+		marker.y - (panel_h * 0.4) * pow(1.35, index)
 	)
+	print(bubble.global_position)
+	print(marker)
 
 	var full_text: String = dialogue_lines[index]
 	bubble.text = ""

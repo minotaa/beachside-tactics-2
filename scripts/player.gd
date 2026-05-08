@@ -62,6 +62,8 @@ func _ready() -> void:
 		#$Username.show()
 		if is_multiplayer_authority():
 			$Camera2D.make_current()
+			$PointLight2D.visible = false
+			$PointLight2D2.visible = false
 		else:
 			$UI.hide()
 			$InteractionMark.hide()
@@ -927,10 +929,11 @@ func _fishing_timer(location: Game.Location) -> void:
 				your_odds = 0
 				odds = randi_range(250, 1000)
 			else:
-				Game.inventory.take_item(Game.equipped_bait, 1)
-				if not Game.inventory.has_item(Game.equipped_bait):
-					Game.equipped_bait = null
-					Toast.add("You ran out of bait!")
+				if Game.equipped_bait != null:
+					Game.inventory.take_item(Game.equipped_bait, 1)
+					if not Game.inventory.has_item(Game.equipped_bait):
+						Game.equipped_bait = null
+						Toast.add("You ran out of bait!")
 				print("Player decided to catch fish, ending loop.")
 				return
 		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite()) * 0.025))

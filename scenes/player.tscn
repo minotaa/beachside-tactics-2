@@ -1609,7 +1609,7 @@ vertical_alignment = 1
 
 [node name="PointLight2D2" type="PointLight2D" parent="." unique_id=1280881913]
 position = Vector2(0, 7)
-energy = 5.0
+energy = 0.2
 texture = ExtResource("39_j2b1d")
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=1680418076]
