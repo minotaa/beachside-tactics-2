@@ -3,23 +3,23 @@ extends Node
 func get_rarity_weight(rarity: Game.Rarity) -> float:
 	match rarity:
 		Game.Rarity.COMMON:
-			return 1000.0
+			return 3000.0
 		Game.Rarity.UNCOMMON:
 			return 500.0
 		Game.Rarity.RARE:
-			return 200.0
+			return 100.0
 		Game.Rarity.EPIC:
-			return 75.0
-		Game.Rarity.LEGENDARY:
 			return 25.0
+		Game.Rarity.LEGENDARY:
+			return 5.0
 		Game.Rarity.MYTHIC:
-			return 10.0
-		Game.Rarity.DIVINE:
-			return 3.0
-		Game.Rarity.SUPREME:
 			return 1.0
+		Game.Rarity.DIVINE:
+			return 0.5
+		Game.Rarity.SUPREME:
+			return 0.0001
 		Game.Rarity.SECRET:
-			return 0.01
+			return 0.0000001
 	return 100.0  # fallback
 
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
@@ -301,7 +301,7 @@ func _enter_tree() -> void:
 	goldfish.category = Game.Category.FISH
 	goldfish.hour_start = 0.0
 	goldfish.hour_end = 0.0
-	goldfish.threshold = 2.0
+	goldfish.threshold = 5.0
 	items.append(goldfish)
 
 	atlas = AtlasTexture.new()

@@ -52,7 +52,7 @@ var level: int = 0
 var xp: float = 0.0
 var catches: int = 0
 var whiffs: int = 0
-var balance: float = 100.0
+var balance: float = 0.0
 var equipped_fishing_rod: FishingRod
 var equipped_bait: Bait
 var time: float = TIME_IN_DAY * 0.55
@@ -61,6 +61,7 @@ var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 var bestiary = {}
+var flags = {}
 
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
@@ -268,6 +269,8 @@ func load_game() -> void:
 			bag.set_list_from_save(data["bag"])
 		if data.has("bestiary"):
 			bestiary = data["bestiary"]
+		if data.has("flags"):
+			flags = data["flags"]
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
 			if bait_id != null:  # null means no bait equipped
@@ -306,7 +309,9 @@ func get_save_data() -> Dictionary:
 		"days": days,
 		"time": time,
 		"xp": xp,
-		"level": level
+		"level": level,
+		"bestiary": bestiary,
+		"flags": flags
 	}
 
 func _notification(what: int) -> void:

@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://bfvbvnwhpsofb"]
+
+[ext_resource type="Script" uid="uid://v56uv10mkmm1" path="res://scripts/choice_bubble.gd" id="1_uapag"]
+[ext_resource type="Texture2D" uid="uid://3cynwd6ecdea" path="res://assets/sprites/panel.png" id="2_ygja3"]
+[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="3_u6ocw"]
+[ext_resource type="PackedScene" uid="uid://dj554gp0t58y5" path="res://scenes/ui/choice_button.tscn" id="4_qokcm"]
+[ext_resource type="Texture2D" uid="uid://bunrtnbpg7rqv" path="res://assets/sprites/panel3.png" id="5_8vcit"]
+[ext_resource type="Texture2D" uid="uid://ds2lepfjkrk3y" path="res://assets/sprites/panel5.png" id="6_wxi7q"]
+[ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="7_r1poc"]
+[ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="8_k324i"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_rtw6t"]
+font = ExtResource("3_u6ocw")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q4paj"]
+texture = ExtResource("5_8vcit")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_x0lj2"]
+texture = ExtResource("6_wxi7q")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qcbnv"]
+texture = ExtResource("7_r1poc")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f3lip"]
+texture = ExtResource("8_k324i")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[node name="Choice Bubble" type="MarginContainer" unique_id=1523930421]
+z_index = 132
+custom_minimum_size = Vector2(290, 43)
+offset_right = 290.0
+offset_bottom = 43.0
+scale = Vector2(0.25, 0.25)
+script = ExtResource("1_uapag")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=393397437]
+layout_mode = 2
+texture = ExtResource("2_ygja3")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=299367050]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1273803281]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Label" type="Label" parent="VBoxContainer/MarginContainer" unique_id=982916501]
+layout_mode = 2
+text = "little shitling, what do you want today?"
+label_settings = SubResource("LabelSettings_rtw6t")
+horizontal_alignment = 1
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer" unique_id=1544494715]
+layout_mode = 2
+theme_override_constants/margin_bottom = 12
+
+[node name="Choices" type="HBoxContainer" parent="VBoxContainer/MarginContainer2" unique_id=1076847760]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Panel" parent="VBoxContainer/MarginContainer2/Choices" unique_id=2006541894 instance=ExtResource("4_qokcm")]
+layout_mode = 2
+
+[node name="Panel2" type="Button" parent="VBoxContainer/MarginContainer2/Choices" unique_id=2099901004]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_u6ocw")
+theme_override_styles/normal = SubResource("StyleBoxTexture_q4paj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_x0lj2")
+theme_override_styles/hover = SubResource("StyleBoxTexture_qcbnv")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_f3lip")
+text = "[2] Nevermind"

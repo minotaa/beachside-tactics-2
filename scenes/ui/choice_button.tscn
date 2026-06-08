@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://dj554gp0t58y5"]
+
+[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="1_4uoxy"]
+[ext_resource type="Texture2D" uid="uid://bunrtnbpg7rqv" path="res://assets/sprites/panel3.png" id="2_t6oka"]
+[ext_resource type="Texture2D" uid="uid://ds2lepfjkrk3y" path="res://assets/sprites/panel5.png" id="3_2hk6u"]
+[ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="4_ik5ct"]
+[ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="5_gvajq"]
+[ext_resource type="Script" uid="uid://dvhiie00l5epw" path="res://scripts/choice_button.gd" id="6_t6oka"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q4paj"]
+texture = ExtResource("2_t6oka")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_x0lj2"]
+texture = ExtResource("3_2hk6u")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qcbnv"]
+texture = ExtResource("4_ik5ct")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f3lip"]
+texture = ExtResource("5_gvajq")
+texture_margin_left = 32.0
+texture_margin_top = 32.0
+texture_margin_right = 32.0
+texture_margin_bottom = 32.0
+modulate_color = Color(1, 1, 1, 0.8745098)
+
+[node name="Panel" type="Button" unique_id=2006541894]
+theme_override_fonts/font = ExtResource("1_4uoxy")
+theme_override_styles/normal = SubResource("StyleBoxTexture_q4paj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_x0lj2")
+theme_override_styles/hover = SubResource("StyleBoxTexture_qcbnv")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_f3lip")
+text = "[1] Sure"
+script = ExtResource("6_t6oka")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

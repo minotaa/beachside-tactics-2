@@ -531,7 +531,10 @@ func _on_fish_caught() -> void:
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
 			Game.bag.add_item(stack)
-			Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
+			add_child(speech_bubble)
+			speech_bubble.play_line("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
+			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 
 	state = FishState.REELING_BACK
@@ -540,15 +543,15 @@ func _on_fish_caught() -> void:
 
 	var fish := Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
 	var xp_table := {
-		Game.Rarity.COMMON:    5.0,
-		Game.Rarity.UNCOMMON:  10.0,
-		Game.Rarity.RARE:      15.0,
-		Game.Rarity.EPIC:      25.0,
-		Game.Rarity.LEGENDARY: 50.0,
-		Game.Rarity.MYTHIC:    125.0,
-		Game.Rarity.DIVINE:    250.0,
-		Game.Rarity.SUPREME:   500.0,
-		Game.Rarity.SECRET:    1000.0,
+		Game.Rarity.COMMON:    50.0,
+		Game.Rarity.UNCOMMON:  100.0,
+		Game.Rarity.RARE:      150.0,
+		Game.Rarity.EPIC:      250.0,
+		Game.Rarity.LEGENDARY: 500.0,
+		Game.Rarity.MYTHIC:    1250.0,
+		Game.Rarity.DIVINE:    2500.0,
+		Game.Rarity.SUPREME:   5000.0,
+		Game.Rarity.SECRET:    100000.0,
 	}
 	Game.add_xp(xp_table.get(fish.rarity, 0.0))
 
@@ -583,12 +586,13 @@ func set_fishing_rod(id: int) -> void:
 		return
 	if id != -1:
 		if Catalog.get_item(id) is FishingRod:
-			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.equipped_fishing_rod = Catalog.get_item(id)
+			Toast.add("Equipped: [img center region=" + str(Game.equipped_fishing_rod.texture.region.position.x) + "," + str(Game.equipped_fishing_rod.texture.region.position.y) + "," + str(16) + "," + str(16) + "width=16 height=16]res://assets/sprites/items.png[/img] " + str(Catalog.get_item(id).name))
 		else:
 			LimboConsole.error("This doesn't seem to be a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 	else:
-		Toast.add("Removed currently equipped [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
+		if Game.equipped_fishing_rod != null:
+			Toast.add("Removed currently equipped [img center region=" + str(Game.equipped_fishing_rod.texture.region.position.x) + "," + str(Game.equipped_fishing_rod.texture.region.position.y) + "," + str(16) + "," + str(16) + "width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 		Game.equipped_fishing_rod = null
 	update_inventory()
 
@@ -619,7 +623,7 @@ func update_inventory() -> void:
 	if Game.equipped_bait == null:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Bait/Equipped/Name".text = "Nothing"
-		$"UI/Inventory/Container/Bait/Equipped/Description".text = "You have no bait equipped, buy one in the shop."
+		$"UI/Inventory/Container/Bait/Equipped/Description".text = "You have no bait equipped, buy some in the shop."
 		$"UI/Inventory/Container/Bait/Equipped/Stats".text = "Nothing: +0"
 	else:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = Game.equipped_bait.texture
@@ -637,7 +641,7 @@ func update_inventory() -> void:
 	if Game.equipped_fishing_rod == null:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = "Nothing"
-		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod equipped, buy one in the shop."
+		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no Fishing Rod equipped, buy one in the shop."
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = "Nothing: +0"
 	else:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = Game.equipped_fishing_rod.texture
@@ -698,13 +702,13 @@ func near_shop() -> bool:
 
 func _process_ui(delta: float) -> void:
 	$InteractionMark.visible = false
-	if Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY or Game.get_day_time() == Game.TimeOfDay.DAY:
+	if Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY or Game.get_day_time() == Game.TimeOfDay.DAY or Game.get_day_time() == Game.TimeOfDay.EVENING:
 		$PointLight2D.visible = false
 		$PointLight2D2.visible = false
 	else:
 		$PointLight2D.visible = true
 		$PointLight2D2.visible = true
-	if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
+	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable:
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
 		$UI/Main/Bait/HBoxContainer/Label.text = "x" + str(Game.inventory.get_item_stack(Game.equipped_bait).amount)
@@ -897,7 +901,11 @@ func _fishing_timer(location: Game.Location) -> void:
 						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
-						Toast.add("You fished up a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
+						add_child(speech_bubble)
+						speech_bubble.play_line("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
+						#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+						Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 				return
 			else:
 				$Exclaim.emitting = true

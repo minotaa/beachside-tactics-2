@@ -445,7 +445,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bj30b"]
-size = Vector2(5.2, 11)
+size = Vector2(7, 11)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qfm1y"]
 size = Vector2(8, 17)
@@ -719,6 +719,7 @@ collision_mask = 32768
 shape = SubResource("RectangleShape2D_qfm1y")
 
 [node name="Exclaim" type="GPUParticles2D" parent="." unique_id=333409775]
+z_index = 999
 position = Vector2(0, -24)
 emitting = false
 amount = 1
@@ -751,14 +752,10 @@ vertical_alignment = 1
 [node name="Bait" type="Panel" parent="UI/Main" unique_id=411007197]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.162
-anchor_top = 0.178
-anchor_right = 0.24400002
-anchor_bottom = 0.23300001
-offset_left = 0.6399994
-offset_top = -0.16000366
-offset_right = -0.32000732
-offset_bottom = 0.23999023
+offset_left = 208.0
+offset_top = 128.0
+offset_right = 312.0
+offset_bottom = 168.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_487ah")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/Main/Bait" unique_id=1828695915]
@@ -788,12 +785,10 @@ label_settings = SubResource("LabelSettings_g5jhy")
 [node name="Combination" type="NinePatchRect" parent="UI/Main" unique_id=51740318]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.075
-anchor_top = 0.028
-anchor_right = 0.25
-anchor_bottom = 0.178
-offset_top = -0.15999985
-offset_bottom = -2.1600037
+offset_left = 96.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 126.0
 texture = ExtResource("28_md1ol")
 
 [node name="Time" type="HBoxContainer" parent="UI/Main/Combination" unique_id=2001682690]
@@ -848,14 +843,10 @@ vertical_alignment = 1
 [node name="InventoryButton" type="Button" parent="UI/Main" unique_id=444658514]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.256
-anchor_top = 0.032
-anchor_right = 0.294
-anchor_bottom = 0.09900001
-offset_left = 0.3199768
-offset_top = -0.040000916
-offset_right = -0.32000732
-offset_bottom = -0.2800064
+offset_left = 328.0
+offset_top = 23.0
+offset_right = 376.0
+offset_bottom = 71.0
 theme_override_fonts/font = ExtResource("18_i4ail")
 theme_override_icons/icon = ExtResource("19_i4ail")
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
@@ -878,16 +869,13 @@ grow_vertical = 2
 texture = ExtResource("19_i4ail")
 
 [node name="LevelBar" type="TextureProgressBar" parent="UI/Main" unique_id=1396506588]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.020000001
-anchor_top = 0.019000001
-anchor_right = 0.11400001
-anchor_bottom = 0.186
-offset_left = 0.3999977
-offset_top = 0.31999874
-offset_right = 0.07998657
-offset_bottom = 0.08000183
+offset_left = 26.0
+offset_top = 14.0
+offset_right = 146.0
+offset_bottom = 134.0
 value = 75.0
 rounded = true
 fill_mode = 4
@@ -1215,11 +1203,14 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TabContainer" type="TabContainer" parent="UI/Vendor" unique_id=1180614753]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.48900002
+anchor_bottom = 0.48900002
 offset_left = 24.0
-offset_top = 24.0
+offset_top = -328.08002
 offset_right = 664.0
-offset_bottom = 680.0
+offset_bottom = 327.91998
 theme_override_fonts/font = ExtResource("18_i4ail")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
@@ -1448,11 +1439,17 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ItemPreview" type="Panel" parent="UI/Vendor" unique_id=378283025]
-layout_mode = 0
-offset_left = 680.0
-offset_top = 112.0
-offset_right = 1024.0
-offset_bottom = 624.0
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.513
+anchor_top = 0.51100004
+anchor_right = 0.513
+anchor_bottom = 0.51100004
+offset_left = 23.359985
+offset_top = -255.92001
+offset_right = 367.36
+offset_bottom = 256.08
 theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
 
 [node name="Item" type="Control" parent="UI/Vendor/ItemPreview" unique_id=278868404]

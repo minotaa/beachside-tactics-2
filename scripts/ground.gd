@@ -4,7 +4,7 @@ extends TileMapLayer
 @onready var aboveground2 = $"../Aboveground2"
 
 func _use_tile_data_runtime_update(coords: Vector2i) -> bool:
-	return aboveground.get_cell_source_id(coords) != -1 and aboveground2.get_cell_source_id(coords) != -1
+	return aboveground.get_cell_source_id(coords) != -1 or aboveground2.get_cell_source_id(coords) != -1
 
 func _tile_data_runtime_update(coords: Vector2i, tile_data: TileData) -> void:
 	if aboveground.get_cell_source_id(coords) != -1:
