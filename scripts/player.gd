@@ -20,6 +20,8 @@ var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
 var holding_trap: bool = false
+var interacting: bool = false
+var immersive_interact: NPC
 
 var hook_velocity = 0
 var hook_acceleration = 1.75
@@ -302,6 +304,29 @@ func update_catalog() -> void:
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))
 
+func _on_interaction_started(npc: NPC) -> void:
+	$UI/Main.hide()
+	interacting = true
+	immersive_interact = npc
+	print("interaction started")
+	
+func _on_interaction_ended() -> void:
+	$UI/Main.show()
+	interacting = false
+	immersive_interact = null
+	print("interaction ended")
+
+func _on_dialogue_finished(npc: NPC) -> void:
+	interacting = false
+	immersive_interact = null
+	if npc.npc_name == "Sheldon":
+		if not $UI/Vendor.visible:
+			$UI/Vendor.visible = true
+			$UI/Vendor/ItemPreview.visible = false
+			$UI/Inventory.visible = false
+			$UI/Main.visible = false
+			update_catalog()
+
 func _input(event: InputEvent) -> void:
 	# Zoom
 	if event.is_action_pressed("zoom_in"):
@@ -316,18 +341,21 @@ func _input(event: InputEvent) -> void:
 		)
 
 	# Shop interaction toggle
-	if event.is_action_released("interact"):
+	if event.is_action_released("interact") and not interacting:
 		if state == FishState.INACTIVE and not $UI/Inventory.visible:
 			if not $UI/Vendor.visible:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("shop"):
-						body.get_node("..").start_dialogue()
-						await body.get_node("..").dialogue_finished
-						$UI/Vendor.visible = true
-						$UI/Vendor/ItemPreview.visible = false
-						$UI/Inventory.visible = false
-						$UI/Main.visible = false
-						update_catalog()
+						var npc = body.get_node("..") as NPC
+						if not npc.dialogue_finished.is_connected(_on_dialogue_finished):
+							npc.dialogue_finished.connect(_on_dialogue_finished.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_started.is_connected(_on_interaction_started):
+							npc.interaction_started.connect(_on_interaction_started.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_ended.is_connected(_on_interaction_ended):
+							npc.interaction_ended.connect(_on_interaction_ended, CONNECT_ONE_SHOT)
+		
+						npc.start_dialogue()
+						interacting = true
 			else:
 				$UI/Vendor.visible = false
 				$UI/Main.visible = true
@@ -510,6 +538,7 @@ func _is_ui_blocking() -> bool:
 		or state == FishState.FISHING
 		or $UI/Vendor.visible
 		or $UI/Inventory.visible
+		or immersive_interact != null
 	)
 
 ## Frees the bobber and returns the player to INACTIVE.
@@ -719,8 +748,13 @@ func _process_ui(delta: float) -> void:
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
 		var target_pos = global_position + Vector2(offset, 0)
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
+	elif immersive_interact != null:
+		$Camera2D.global_position = $Camera2D.global_position.lerp(immersive_interact.global_position, 5.0 * delta)
+		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(intended_zoom.x + 0.35, intended_zoom.y + 0.35), 0.002)
 	else:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(global_position, 5.0 * delta)
+	if $Camera2D.zoom != intended_zoom and immersive_interact == null:
+		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
 
 	for child in $InteractionMark.get_children():
 		child.visible = false
@@ -728,6 +762,13 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+			$InteractionMark/Book.visible = false
+		if body.is_in_group("bestiary"):
+			$InteractionMark.visible = true
+			$InteractionMark/Coin.visible = false
+			$InteractionMark/Book.visible = true
+	if interacting or $UI/Vendor.visible:
+		$InteractionMark.visible = false
 	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size())) * 100.0
 	if percentage_filled < 50.0:
 		$UI/Main/InventoryButton/TextureRect.texture = preload("res://assets/sprites/backpack.png")
@@ -738,8 +779,6 @@ func _process_ui(delta: float) -> void:
 	#$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
-	if $Camera2D.zoom != intended_zoom:
-		$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.2)
 	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
 	$UI/Main/LevelBar.value = roundi(Game.xp)
 	$UI/Main/LevelBar.max_value = roundi(Game.calculate_xp_for_level(Game.level))

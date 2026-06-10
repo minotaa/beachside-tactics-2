@@ -25,7 +25,10 @@ var blink_timer: float = 15.0
 var is_in_dialogue: bool = false
 var current_tree: String = ""
 var current_entry_index: int = 0
+var is_immersive: bool = false
 
+signal interaction_started
+signal interaction_ended
 signal dialogue_finished
 signal quest_triggered(quest_id: String)
 signal choice_made(choice: Dictionary)
@@ -42,7 +45,7 @@ func _process(delta: float) -> void:
 	if not is_in_dialogue:
 		blink_timer -= delta
 		if blink_timer < 0.0:
-			blink_timer = 15.0
+			blink_timer = randi_range(5, 15.0)
 			$AnimatedSprite2D.play("blink")
 			await get_tree().create_timer(1.0).timeout
 			$AnimatedSprite2D.play("idle")
@@ -50,13 +53,16 @@ func _process(delta: float) -> void:
 func start_dialogue(tree_id: String = "") -> void:
 	if is_in_dialogue:
 		return
-
 	if tree_id == "":
 		tree_id = _pick_available_tree()
 	if tree_id == "" or not dialogue_trees.has(tree_id):
 		return
 
 	is_in_dialogue = true
+	is_immersive = dialogue_trees[tree_id][0].get("immersive", false)
+	if is_immersive:
+		interaction_started.emit()
+
 	current_tree = tree_id
 	current_entry_index = 0
 	_play_entry(dialogue_trees[current_tree][current_entry_index])
@@ -87,7 +93,7 @@ func _play_entry(entry: Dictionary) -> void:
 	else:
 		var bubble = speech_bubble_scene.instantiate()
 		add_child(bubble)
-		await bubble.play_line(text, marker, chars_per_second)
+		await bubble.play_line(text, marker, chars_per_second, is_immersive)
 		if not is_in_dialogue:
 			return
 		_advance(entry.get("next", null))
@@ -129,6 +135,10 @@ func _advance(next) -> void:
 
 func end_dialogue() -> void:
 	is_in_dialogue = false
+	if is_immersive:
+		await get_tree().create_timer(0.1).timeout
+		interaction_ended.emit()
+		is_immersive = false
 	dialogue_finished.emit()
 
 func _check_condition(entry: Dictionary) -> bool:

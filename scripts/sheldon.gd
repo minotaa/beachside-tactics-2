@@ -3,11 +3,12 @@ extends NPC
 func _ready() -> void:
 	npc_name = "Sheldon"
 	dialogue_trees = {
-		"default": [
+		"intro1": [
 			{
 				"text": "Hey, you! Yeah, you, the one just standing there.",
 				"next": "intro2",
-				"condition": "tutorial_not_complete"
+				"condition": "tutorial_not_complete",
+				"immersive": true
 			}
 		],
 		"intro2": [
@@ -51,11 +52,25 @@ func _ready() -> void:
 				"quest_trigger": "open_shop"
 			}
 		],
+		"can_buy_bait1": [
+			{
+				"text": "Hey there! Congrats on reaching Level 5 there kid.",
+				"next": "can_buy_bait2",
+				"condition": "bait_prompt"
+			}
+		],
+		"can_buy_bait2": [
+			{
+				"text": "I got some bait in stock for you, it can help you fish faster.",
+				"next": null,
+				"quest_trigger": "finish_bait"
+			}
+		],
 		"already_has_rod": [
 			{
 				"text": [
 					"Looking for something?",
-					"You fishing or just standing there?",
+					"You gonna fish or just stand there?",
 					"Buy something or git!"
 				],
 				"next": null,
@@ -93,9 +108,10 @@ func _ready() -> void:
 	}
 	default_trees = [
 		"intro_shelly",
+		"can_buy_bait1",
 		"already_has_rod",
 		"reminder",
-		"default"
+		"intro1"
 	]
 	super._ready()
 
@@ -115,6 +131,8 @@ func _evaluate_condition(condition: String) -> bool:
 			return Game.flags.get("got_starter_money", false) and not _has_fishing_rod()
 		"introduce_shelly":
 			return not Game.flags.get("heard_about_shelly", false) and _has_fishing_rod()
+		"bait_prompt":
+			return not Game.flags.get("heard_about_bait", false) and Game.level >= 5
 	return true
 
 func _on_quest_triggered(quest_id: String) -> void:
@@ -127,6 +145,8 @@ func _on_quest_triggered(quest_id: String) -> void:
 			dialogue_finished.connect(_open_shop, CONNECT_ONE_SHOT)
 		"told_about_shelly":
 			Game.flags["heard_about_shelly"] = true
+		"finish_bait":
+			Game.flags["heard_about_bait"] = true
 			
 func _open_shop() -> void:
 	pass

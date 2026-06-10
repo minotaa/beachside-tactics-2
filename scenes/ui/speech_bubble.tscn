@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://j07me2ft5ex2" path="res://scripts/speech_bubble.gd" id="1_n8tpx"]
 [ext_resource type="Texture2D" uid="uid://3cynwd6ecdea" path="res://assets/sprites/panel.png" id="1_ppych"]
 [ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="2_ppych"]
+[ext_resource type="Texture2D" uid="uid://bjjsl1r2eyvd6" path="res://assets/sprites/caret.png" id="4_n8tpx"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_rtw6t"]
 font = ExtResource("2_ppych")
@@ -35,3 +36,11 @@ layout_mode = 2
 text = " "
 label_settings = SubResource("LabelSettings_rtw6t")
 horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=1687911101]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+texture = ExtResource("4_n8tpx")
+expand_mode = 2
+stretch_mode = 2

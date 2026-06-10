@@ -4,7 +4,8 @@ func _ready() -> void:
 	print("Speech bubble ready, size: ", size)
 	$MarginContainer/Label.text = "test"
 
-func play_line(line: String, marker: Vector2, text_speed: float = 20.0, display_duration: float = 1.5) -> void:
+func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5) -> void:
+	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
 
@@ -16,5 +17,16 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, display_
 			marker.y - (size.y * 0.25)
 		)
 		await get_tree().create_timer(1.0 / text_speed).timeout
-	await get_tree().create_timer(display_duration).timeout
+
+	if immersive:
+		var indicator = $MarginContainer/TextureRect
+		indicator.visible = true
+		var tween = create_tween().set_loops()
+		tween.tween_property(indicator, "modulate:a", 0.0, 0.4)
+		tween.tween_property(indicator, "modulate:a", 1.0, 0.4)
+		while not Input.is_action_just_pressed("interact"):
+			await get_tree().process_frame
+	else:
+		await get_tree().create_timer(display_duration).timeout
+
 	queue_free()
