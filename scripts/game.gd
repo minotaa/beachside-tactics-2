@@ -5,11 +5,7 @@ enum Rarity {
 	UNCOMMON,
 	RARE,
 	EPIC,
-	LEGENDARY,
-	MYTHIC,
-	DIVINE,
-	SUPREME,
-	SECRET
+	LEGENDARY
 }
 
 enum Category {
@@ -29,10 +25,7 @@ enum Difficulty {
 	EASY,
 	MEDIUM,
 	HARD,
-	VERY_DIFFICULT,
-	INSANE,
-	IMPOSSIBLE,
-	SUPREME
+	INSANE
 }
 
 enum TimeOfDay {
@@ -61,17 +54,24 @@ var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
 var bestiary = {}
+var acknowledged_bestiary = {}
 var flags = {}
 
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
-func get_rarity_color(rarity: String) -> String:
-	match Game.Rarity.find_key(rarity):
+func get_rarity_color(rarity: Rarity) -> String:
+	match rarity:
 		Game.Rarity.COMMON:
 			return "[color=#ffffffff]"	
-		Game.Rarity.DIVINE:
-			return "[color=#7ce9ffff]"
+		Game.Rarity.UNCOMMON:
+			return "[color=#23ff48]"
+		Game.Rarity.RARE:
+			return "[color=#226acf]"
+		Game.Rarity.EPIC:
+			return "[color=#6818d7]"
+		Game.Rarity.LEGENDARY:
+			return "[color=#f68533]"
 		_:
 			return ""
 
@@ -87,8 +87,8 @@ func get_sky_color() -> Color:
 	var day_factor := sin(t * PI)
 	return DAY_COLOR.lerp(NIGHT_COLOR, 1.0 - day_factor)
 
-func get_time_string() -> String:
-	var total_minutes := int((time / TIME_IN_DAY) * 1440)  # 1440 minutes in a day
+func get_time_string(_time: float = time) -> String:
+	var total_minutes := int((_time / TIME_IN_DAY) * 1440)  # 1440 minutes in a day
 	var hours := total_minutes / 60
 	var minutes := total_minutes % 60
 	minutes = (minutes / 10) * 10
@@ -269,6 +269,8 @@ func load_game() -> void:
 			bag.set_list_from_save(data["bag"])
 		if data.has("bestiary"):
 			bestiary = data["bestiary"]
+		if data.has("acknowledged_bestiary"):
+			acknowledged_bestiary = data["acknowledged_bestiary"]
 		if data.has("flags"):
 			flags = data["flags"]
 		if data.has("equipped_bait"):
@@ -311,6 +313,7 @@ func get_save_data() -> Dictionary:
 		"xp": xp,
 		"level": level,
 		"bestiary": bestiary,
+		"acknowledged_bestiary": acknowledged_bestiary,
 		"flags": flags
 	}
 

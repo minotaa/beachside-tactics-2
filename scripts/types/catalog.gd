@@ -12,14 +12,6 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 			return 25.0
 		Game.Rarity.LEGENDARY:
 			return 5.0
-		Game.Rarity.MYTHIC:
-			return 1.0
-		Game.Rarity.DIVINE:
-			return 0.5
-		Game.Rarity.SUPREME:
-			return 0.0001
-		Game.Rarity.SECRET:
-			return 0.0000001
 	return 100.0  # fallback
 
 func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:

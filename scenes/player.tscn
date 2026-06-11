@@ -1701,19 +1701,20 @@ texture = ExtResource("21_a38lo")
 
 [node name="Name" type="Label" parent="UI/Bestiary/ItemPreview" unique_id=1296117603]
 layout_mode = 0
-offset_left = 31.5
+offset_left = 16.0
 offset_top = 146.0
-offset_right = 312.5
+offset_right = 328.0
 offset_bottom = 194.0
 text = "Flismy Fshing Bod"
 label_settings = SubResource("LabelSettings_fdfoy")
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
 
 [node name="Description" type="RichTextLabel" parent="UI/Bestiary/ItemPreview" unique_id=2567063]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 201.0
+offset_top = 208.0
 offset_right = 320.0
 offset_bottom = 496.0
 theme_override_constants/line_separation = 6
@@ -1820,3 +1821,4 @@ texture_scale = 0.5
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Sell" to="." method="_on_sell_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Close" to="." method="_on_close_shop_pressed"]
 [connection signal="pressed" from="UI/Vendor/ItemPreview/Buy" to="." method="buy_item"]
+[connection signal="pressed" from="UI/Bestiary/List/Close" to="." method="_on_close_shop_pressed"]

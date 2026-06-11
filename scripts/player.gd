@@ -235,9 +235,12 @@ func buy_item() -> void:
 			if i.type == item and i.amount >= item.purchase_limit:
 				Toast.add("You already have too many of this item!")
 				return
-	Game.inventory.add_item(ItemStack.new(item, 1))
+	var added_amount = 1
+	if item.category == Game.Category.BAIT:
+		added_amount = 8
+	Game.inventory.add_item(ItemStack.new(item, added_amount))
 	Game.balance -= item.price
-	Toast.add("You bought: " + str(item.name) + "!")
+	Toast.add("You bought: " + str(added_amount) + "x " + str(item.name) + "!")
 	pass
 
 func update_bestiary() -> void:
@@ -253,26 +256,43 @@ func update_bestiary() -> void:
 		bestiary_item.get_node("Label").text = "x" + str(int(Game.bestiary.get(id, 0)))
 		bestiary_item.connect("pressed", Callable(self, "preview_item").bind(int(id)))
 		$UI/Bestiary/List/ScrollContainer/GridContainer.add_child(bestiary_item)
+	# TODO: Add percentage of completed bestiary in current loc
 	
 var previewed_item
-		
+	
 func preview_item(id: int) -> void:
 	var item = Catalog.get_item(id)
 	if item == null:
 		Toast.add("huh?")
 		return
 	if item == previewed_item:
-		if $UI/Bestiary/ItemPreview.visible:
-			$UI/Bestiary/ItemPreview.visible = false
-		else:
-			$UI/Bestiary/ItemPreview.visible = true
+		$UI/Bestiary/ItemPreview.visible = not $UI/Bestiary/ItemPreview.visible
 		return
 	previewed_item = item
 	$UI/Bestiary/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
-	$UI/Bestiary/ItemPreview/Item/TextureRect.texture = previewed_item.texture
-	$UI/Bestiary/ItemPreview/Name.text = previewed_item.name + " (" + str(previewed_item.id) + ")"
-	$UI/Bestiary/ItemPreview/Description.text = previewed_item.description #+ "\n\n$" + str(previewed_item.sell_price)
-	
+	$UI/Bestiary/ItemPreview/Item/TextureRect.texture = item.texture
+	$UI/Bestiary/ItemPreview/Name.text = item.name
+
+	var catches = Game.bestiary.get(str(item.id), 0)
+	var rarity_name = Game.Rarity.find_key(item.rarity).capitalize()
+	var location_name = Game.Location.find_key(item.location).replace("_", " ")
+
+	var info = ""
+	info += "Sell Price: $" + str(roundi(item.sell_price)) + "\n"
+	info += "Location: " + location_name + "\n"
+	info += "Rod Power Needed: " + str(item.power_needed) + "\n"
+
+	if item is Fish:
+		var hour_start = Game.get_time_string(item.hour_start)
+		var hour_end = Game.get_time_string(item.hour_end)
+		if item.hour_start == 0.0 and item.hour_end == 0.0:
+			info += "Active: Anytime\n"
+		else:
+			info += "Active: " + str(hour_start) + " - " + str(hour_end) + "\n"
+		info += "Difficulty: " + Game.Difficulty.find_key(item.difficulty).capitalize() + "\n"
+
+	$UI/Bestiary/ItemPreview/Description.text = item.description + "\n\n" + info
+	$UI/Bestiary/ItemPreview.visible = true
 
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
@@ -620,7 +640,7 @@ func _on_fish_caught() -> void:
 			Game.bag.add_item(stack)
 			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 			add_child(speech_bubble)
-			speech_bubble.play_line("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
+			speech_bubble.play_line("You caught a %s%s %s!" % [Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 
@@ -632,13 +652,9 @@ func _on_fish_caught() -> void:
 	var xp_table := {
 		Game.Rarity.COMMON:    50.0,
 		Game.Rarity.UNCOMMON:  100.0,
-		Game.Rarity.RARE:      150.0,
-		Game.Rarity.EPIC:      250.0,
-		Game.Rarity.LEGENDARY: 500.0,
-		Game.Rarity.MYTHIC:    1250.0,
-		Game.Rarity.DIVINE:    2500.0,
-		Game.Rarity.SUPREME:   5000.0,
-		Game.Rarity.SECRET:    100000.0,
+		Game.Rarity.RARE:      750.0,
+		Game.Rarity.EPIC:      2000.0,
+		Game.Rarity.LEGENDARY: 7500.0
 	}
 	Game.add_xp(xp_table.get(fish.rarity, 0.0))
 
@@ -1005,7 +1021,7 @@ func _fishing_timer(location: Game.Location) -> void:
 						Game.bag.add_item(stack)
 						var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 						add_child(speech_bubble)
-						speech_bubble.play_line("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
+						speech_bubble.play_line("You caught a %s%s %s!" % [Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
 						#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 						Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 				return
@@ -1021,14 +1037,6 @@ func _fishing_timer(location: Game.Location) -> void:
 					$Exclaim.texture = preload("res://assets/sprites/caught-fish-epic.png")
 				if fish.rarity == Game.Rarity.LEGENDARY:
 					$Exclaim.texture = preload("res://assets/sprites/caught-fish-legendary.png")
-				if fish.rarity == Game.Rarity.MYTHIC:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-mythic.png")
-				if fish.rarity == Game.Rarity.DIVINE:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-divine.png")
-				if fish.rarity == Game.Rarity.SUPREME:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-supreme.png")
-				if fish.rarity == Game.Rarity.SECRET:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-secret.png")
 				state = FishState.FOUND_FISH
 			await get_tree().create_timer(1.5).timeout
 			if state == FishState.FOUND_FISH:

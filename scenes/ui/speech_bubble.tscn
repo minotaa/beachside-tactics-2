@@ -5,9 +5,6 @@
 [ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="2_ppych"]
 [ext_resource type="Texture2D" uid="uid://bjjsl1r2eyvd6" path="res://assets/sprites/caret.png" id="4_n8tpx"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_rtw6t"]
-font = ExtResource("2_ppych")
-
 [node name="Speech Bubble" type="MarginContainer" unique_id=1523930421]
 z_index = 132
 custom_minimum_size = Vector2(290, 43)
@@ -31,10 +28,14 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="Label" type="Label" parent="MarginContainer" unique_id=982916501]
+[node name="Label" type="RichTextLabel" parent="MarginContainer" unique_id=1179285064]
 layout_mode = 2
-text = " "
-label_settings = SubResource("LabelSettings_rtw6t")
+theme_override_fonts/normal_font = ExtResource("2_ppych")
+bbcode_enabled = true
+text = " uhuh"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
 horizontal_alignment = 1
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=1687911101]
