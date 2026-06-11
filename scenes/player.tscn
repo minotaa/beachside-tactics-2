@@ -44,6 +44,7 @@
 [ext_resource type="Texture2D" uid="uid://bbhl3tnt2ng1f" path="res://assets/sprites/baits.png" id="36_fdfoy"]
 [ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="38_giy8y"]
 [ext_resource type="Texture2D" uid="uid://b2kt1y66uo04a" path="res://assets/sprites/light.png" id="39_j2b1d"]
+[ext_resource type="PackedScene" uid="uid://c3x0kaqpwgj4q" path="res://scenes/ui/inventory_button.tscn" id="42_holxr"]
 [ext_resource type="Texture2D" uid="uid://dygfbet0gwv33" path="res://assets/sprites/book.png" id="43_g5jhy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_holxr"]
@@ -1555,6 +1556,182 @@ theme_override_styles/pressed = SubResource("StyleBoxTexture_holxr")
 theme_override_styles/hover = SubResource("StyleBoxTexture_mx1m4")
 theme_override_styles/disabled = SubResource("StyleBoxTexture_4gjji")
 text = "Buy"
+
+[node name="Bestiary" type="Control" parent="UI" unique_id=1877818678]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="List" type="Panel" parent="UI/Bestiary" unique_id=1938504861]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 68.0
+offset_right = 664.0
+offset_bottom = 680.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
+
+[node name="Title" type="Label" parent="UI/Bestiary/List" unique_id=197347939]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -288.0
+offset_top = 32.0
+offset_right = 288.0
+offset_bottom = 89.0
+grow_horizontal = 2
+text = "Bestiary"
+label_settings = SubResource("LabelSettings_a38lo")
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Bestiary/List" unique_id=953975655]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 100.0
+offset_right = 608.0
+offset_bottom = 588.0
+
+[node name="GridContainer" type="GridContainer" parent="UI/Bestiary/List/ScrollContainer" unique_id=252941510]
+layout_mode = 2
+theme_override_constants/h_separation = 22
+theme_override_constants/v_separation = 24
+columns = 5
+
+[node name="Inventory Button" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=226721162 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Inventory Button2" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1479168288 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Inventory Button3" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1852921647 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Inventory Button4" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1290854203 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Inventory Button5" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1244824440 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Inventory Button6" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=900256957 instance=ExtResource("42_holxr")]
+layout_mode = 2
+
+[node name="Close" type="Button" parent="UI/Bestiary/List" unique_id=1354063106]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -88.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = 88.0
+grow_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_bj30b")
+icon = ExtResource("34_giy8y")
+icon_alignment = 1
+expand_icon = true
+
+[node name="ItemPreview" type="Panel" parent="UI/Bestiary" unique_id=434858505]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.513
+anchor_top = 0.51100004
+anchor_right = 0.513
+anchor_bottom = 0.51100004
+offset_left = 23.359985
+offset_top = -255.92001
+offset_right = 367.36
+offset_bottom = 256.08
+theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
+
+[node name="Item" type="Control" parent="UI/Bestiary/ItemPreview" unique_id=2109385076]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -60.0
+offset_top = 24.0
+offset_right = 60.0
+offset_bottom = 144.0
+grow_horizontal = 2
+
+[node name="Panel" type="Panel" parent="UI/Bestiary/ItemPreview/Item" unique_id=699806804]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Rarity" type="NinePatchRect" parent="UI/Bestiary/ItemPreview/Item" unique_id=552172390]
+modulate = Color(1, 1, 1, 0.4627451)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("36_2dvfe")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="UI/Bestiary/ItemPreview/Item" unique_id=467855902]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -44.0
+offset_top = -44.0
+offset_right = 44.0
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("21_a38lo")
+
+[node name="Name" type="Label" parent="UI/Bestiary/ItemPreview" unique_id=1296117603]
+layout_mode = 0
+offset_left = 31.5
+offset_top = 146.0
+offset_right = 312.5
+offset_bottom = 194.0
+text = "Flismy Fshing Bod"
+label_settings = SubResource("LabelSettings_fdfoy")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="RichTextLabel" parent="UI/Bestiary/ItemPreview" unique_id=2567063]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 201.0
+offset_right = 320.0
+offset_bottom = 496.0
+theme_override_constants/line_separation = 6
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+text = "w3 thgeu bmost basicic fishing rod eviurer ,f ywaouwah c4wasso,yul2danada444w't wagdwgaadwet3h mordakwdae baoring thw324ddjnrwhaaan thisio455hgah9w wadw"
+autowrap_mode = 2
+
+[node name="Price" type="Label" parent="UI/Bestiary/ItemPreview" unique_id=1035346455]
+visible = false
+layout_mode = 0
+offset_left = 24.0
+offset_top = 432.0
+offset_right = 328.0
+offset_bottom = 448.0
+text = "Price: $200"
+label_settings = SubResource("LabelSettings_hhpqf")
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="Interaction" type="Area2D" parent="." unique_id=1380827311]
 collision_mask = 2

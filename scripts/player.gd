@@ -240,6 +240,40 @@ func buy_item() -> void:
 	Toast.add("You bought: " + str(item.name) + "!")
 	pass
 
+func update_bestiary() -> void:
+	for children in $UI/Bestiary/List/ScrollContainer/GridContainer.get_children():
+		children.queue_free()
+	for id in Game.bestiary.keys():
+		var bestiary_item = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		var item = Catalog.get_item(int(id))
+		bestiary_item.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+		bestiary_item.get_node("TextureRect").texture = item.texture
+		bestiary_item.get_node("Equipped").visible = false
+		bestiary_item.get_node("Label").visible = true
+		bestiary_item.get_node("Label").text = "x" + str(int(Game.bestiary.get(id, 0)))
+		bestiary_item.connect("pressed", Callable(self, "preview_item").bind(int(id)))
+		$UI/Bestiary/List/ScrollContainer/GridContainer.add_child(bestiary_item)
+	
+var previewed_item
+		
+func preview_item(id: int) -> void:
+	var item = Catalog.get_item(id)
+	if item == null:
+		Toast.add("huh?")
+		return
+	if item == previewed_item:
+		if $UI/Bestiary/ItemPreview.visible:
+			$UI/Bestiary/ItemPreview.visible = false
+		else:
+			$UI/Bestiary/ItemPreview.visible = true
+		return
+	previewed_item = item
+	$UI/Bestiary/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+	$UI/Bestiary/ItemPreview/Item/TextureRect.texture = previewed_item.texture
+	$UI/Bestiary/ItemPreview/Name.text = previewed_item.name + " (" + str(previewed_item.id) + ")"
+	$UI/Bestiary/ItemPreview/Description.text = previewed_item.description #+ "\n\n$" + str(previewed_item.sell_price)
+	
+
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
@@ -326,6 +360,13 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Inventory.visible = false
 			$UI/Main.visible = false
 			update_catalog()
+	if npc.npc_name == "Shelly":
+		if not $UI/Bestiary.visible:
+			$UI/Bestiary.visible = true
+			$UI/Bestiary/ItemPreview.visible = false
+			$UI/Inventory.visible = false
+			$UI/Main.visible = false
+			update_bestiary()
 
 func _input(event: InputEvent) -> void:
 	# Zoom
@@ -358,6 +399,22 @@ func _input(event: InputEvent) -> void:
 						interacting = true
 			else:
 				$UI/Vendor.visible = false
+				$UI/Main.visible = true
+			if not $UI/Bestiary.visible:
+				for body in $Interaction.get_overlapping_areas():
+					if body.is_in_group("bestiary"):
+						var npc = body.get_node("..") as NPC
+						if not npc.dialogue_finished.is_connected(_on_dialogue_finished):
+							npc.dialogue_finished.connect(_on_dialogue_finished.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_started.is_connected(_on_interaction_started):
+							npc.interaction_started.connect(_on_interaction_started.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_ended.is_connected(_on_interaction_ended):
+							npc.interaction_ended.connect(_on_interaction_ended, CONNECT_ONE_SHOT)
+		
+						npc.start_dialogue()
+						interacting = true
+			else:
+				$UI/Bestiary.visible = false
 				$UI/Main.visible = true
 
 	# Let UI consume input first
@@ -537,6 +594,7 @@ func _is_ui_blocking() -> bool:
 		state == FishState.REELING
 		or state == FishState.FISHING
 		or $UI/Vendor.visible
+		or $UI/Bestiary.visible
 		or $UI/Inventory.visible
 		or immersive_interact != null
 	)
@@ -748,6 +806,11 @@ func _process_ui(delta: float) -> void:
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
 		var target_pos = global_position + Vector2(offset, 0)
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
+	elif $UI/Bestiary.visible:
+		var panel_width = -$UI/Bestiary/List.size.x
+		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
+		var target_pos = global_position + Vector2(offset, 0)
+		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
 	elif immersive_interact != null:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(immersive_interact.global_position, 5.0 * delta)
 		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(intended_zoom.x + 0.35, intended_zoom.y + 0.35), 0.002)
@@ -767,7 +830,7 @@ func _process_ui(delta: float) -> void:
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = false
 			$InteractionMark/Book.visible = true
-	if interacting or $UI/Vendor.visible:
+	if interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
 		$InteractionMark.visible = false
 	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size())) * 100.0
 	if percentage_filled < 50.0:
@@ -821,7 +884,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
-	if Input.is_action_just_released("inventory") and not $UI/Vendor.visible:
+	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible or not $UI/Bestiary.visible):
 		if not $UI/Inventory.visible:
 			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()
@@ -1002,7 +1065,7 @@ func get_fishing_direction() -> String:
 
 func _on_base_animation_finished() -> void:
 	var prefix := body_type + "_fish_"
-	if $UI/Vendor.visible or $UI/Inventory.visible:
+	if $UI/Bestiary.visible or $UI/Vendor.visible or $UI/Inventory.visible:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
