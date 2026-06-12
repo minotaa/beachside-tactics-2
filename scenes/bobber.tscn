@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bnjj7rcgbffea" path="res://assets/sprites/bobber.png" id="1_2wku4"]
 [ext_resource type="Texture2D" uid="uid://euj7eqr64ro2" path="res://assets/sprites/ripple.png" id="2_rn3pg"]
+[ext_resource type="Texture2D" uid="uid://cdv6sl0kdiy6g" path="res://assets/sprites/caught-fish-common.png" id="3_1y8pg"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_2wku4"]
 radius = 1.5
@@ -52,6 +53,28 @@ properties/0/path = NodePath("Line2D:points")
 properties/0/spawn = true
 properties/0/replication_mode = 1
 
+[sub_resource type="Curve" id="Curve_5btnv"]
+_data = [Vector2(0, 0.5041608), 0.0, 1.7109706, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_4f4en"]
+curve = SubResource("Curve_5btnv")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_4o5is"]
+particle_flag_disable_z = true
+angle_min = -89.99999
+angle_max = 90.000015
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 60.0
+initial_velocity_max = 120.0
+gravity = Vector3(0, 150, 0)
+damping_min = 10.0
+damping_max = 30.000002
+scale_min = 0.29999998
+scale_max = 0.79999995
+scale_curve = SubResource("CurveTexture_4f4en")
+color = Color(0.8901961, 1, 1, 1)
+
 [node name="Bobber" type="RigidBody2D" unique_id=1601675114]
 z_index = 1
 collision_layer = 0
@@ -92,3 +115,12 @@ process_material = SubResource("ParticleProcessMaterial_4f4en")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=2067705923]
 replication_config = SubResource("SceneReplicationConfig_rn3pg")
+
+[node name="Exclaim" type="GPUParticles2D" parent="." unique_id=521202112]
+z_index = 9
+emitting = false
+amount = 16
+texture = ExtResource("3_1y8pg")
+lifetime = 1.5
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_4o5is")

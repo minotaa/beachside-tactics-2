@@ -47,6 +47,18 @@
 [ext_resource type="PackedScene" uid="uid://c3x0kaqpwgj4q" path="res://scenes/ui/inventory_button.tscn" id="42_holxr"]
 [ext_resource type="Texture2D" uid="uid://dygfbet0gwv33" path="res://assets/sprites/book.png" id="43_g5jhy"]
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fulsm"]
+particle_flag_disable_z = true
+angle_min = -89.99999
+angle_max = 90.000015
+direction = Vector3(1, -1, 0)
+initial_velocity_min = -45.0
+initial_velocity_max = 45.0
+gravity = Vector3(0, -98, 0)
+scale_min = 0.19999999
+scale_max = 0.79999995
+color = Color(0.8901961, 1, 1, 1)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_holxr"]
 atlas = ExtResource("3_y4r1p")
 region = Rect2(0, 0, 32, 38)
@@ -452,13 +464,6 @@ size = Vector2(7, 11)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qfm1y"]
 size = Vector2(8, 17)
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fulsm"]
-particle_flag_disable_z = true
-gravity = Vector3(0, -98, 0)
-scale_min = 0.7
-scale_max = 0.7
-color = Color(0.8901961, 1, 1, 1)
-
 [sub_resource type="LabelSettings" id="LabelSettings_60mlk"]
 line_spacing = 5.0
 font = ExtResource("18_ke2ow")
@@ -648,6 +653,15 @@ texture_filter = 1
 motion_mode = 1
 script = ExtResource("1_qlg0r")
 
+[node name="Exclaim" type="GPUParticles2D" parent="." unique_id=333409775]
+position = Vector2(0, 8)
+emitting = false
+amount = 16
+texture = ExtResource("17_4r5pv")
+lifetime = 1.5
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_fulsm")
+
 [node name="Shadow" type="Sprite2D" parent="." unique_id=1695943233]
 position = Vector2(0, 11)
 scale = Vector2(1.1, 1.1)
@@ -723,16 +737,6 @@ collision_mask = 32768
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Minigame/Hook/Area2D" unique_id=316947869]
 shape = SubResource("RectangleShape2D_qfm1y")
-
-[node name="Exclaim" type="GPUParticles2D" parent="." unique_id=333409775]
-z_index = 999
-position = Vector2(0, -24)
-emitting = false
-amount = 1
-texture = ExtResource("17_4r5pv")
-lifetime = 1.5
-one_shot = true
-process_material = SubResource("ParticleProcessMaterial_fulsm")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1683135539]
 

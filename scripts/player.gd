@@ -64,8 +64,6 @@ func _ready() -> void:
 		#$Username.show()
 		if is_multiplayer_authority():
 			$Camera2D.make_current()
-			$PointLight2D.visible = false
-			$PointLight2D2.visible = false
 		else:
 			$UI.hide()
 			$InteractionMark.hide()
@@ -986,7 +984,10 @@ func _process_ui(delta: float) -> void:
 				line_gravity = 0.01
 				line_stiffness = 0.95
 			var direction_to_rod = (get_rod_tip(get_fishing_direction()) - bobber.global_position).normalized()
-			bobber.global_position += direction_to_rod * 80.0 * delta
+			if Game.bestiary.get(bobber.get_node("Bobber Fish").get_meta("fish_id"), 0) > 9:
+				bobber.global_position += direction_to_rod * 160.0 * delta
+			else:
+				bobber.global_position += direction_to_rod * 80.0 * delta
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			bobber.get_node("Splashes").restart()
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) <= 10:
@@ -1054,7 +1055,7 @@ func _fishing_timer(location: Game.Location) -> void:
 				Game.add_xp(3)
 				state = FishState.REELING_BACK
 				if bobber != null:
-					if Game.equipped_bait != null:
+					if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
 						Game.inventory.take_item(Game.equipped_bait, 1)
 						if not Game.inventory.has_item(Game.equipped_bait):
 							Game.equipped_bait = null
@@ -1079,17 +1080,17 @@ func _fishing_timer(location: Game.Location) -> void:
 						)
 				return
 			else:
-				$Exclaim.emitting = true
+				bobber.get_node("Exclaim").emitting = true
 				if fish.rarity == Game.Rarity.COMMON:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-common.png")
+					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-common.png")
 				if fish.rarity == Game.Rarity.UNCOMMON:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-uncommon.png")
+					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-uncommon.png")
 				if fish.rarity == Game.Rarity.RARE:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-rare.png")
+					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-rare.png")
 				if fish.rarity == Game.Rarity.EPIC:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-epic.png")
+					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-epic.png")
 				if fish.rarity == Game.Rarity.LEGENDARY:
-					$Exclaim.texture = preload("res://assets/sprites/caught-fish-legendary.png")
+					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-legendary.png")
 				state = FishState.FOUND_FISH
 			await get_tree().create_timer(1.5).timeout
 			if state == FishState.FOUND_FISH:
@@ -1100,7 +1101,7 @@ func _fishing_timer(location: Game.Location) -> void:
 				your_odds = 0
 				odds = randi_range(250, 1000)
 			else:
-				if Game.equipped_bait != null:
+				if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
 					Game.inventory.take_item(Game.equipped_bait, 1)
 					if not Game.inventory.has_item(Game.equipped_bait):
 						Game.equipped_bait = null
