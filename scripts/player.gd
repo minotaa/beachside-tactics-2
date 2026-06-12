@@ -946,7 +946,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
-	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible or not $UI/Bestiary.visible):
+	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible):
 		if not $UI/Inventory.visible:
 			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()

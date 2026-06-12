@@ -1739,6 +1739,7 @@ offset_right = 320.0
 offset_bottom = 496.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
+bbcode_enabled = true
 text = "w3 thgeu bmost basicic fishing rod eviurer ,f ywaouwah c4wasso,yul2danada444w't wagdwgaadwet3h mordakwdae baoring thw324ddjnrwhaaan thisio455hgah9w wadw"
 autowrap_mode = 2
 
