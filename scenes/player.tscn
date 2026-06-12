@@ -612,6 +612,10 @@ texture_margin_top = 12.0
 texture_margin_right = 12.0
 texture_margin_bottom = 12.0
 
+[sub_resource type="LabelSettings" id="LabelSettings_holxr"]
+font = ExtResource("18_i4ail")
+font_size = 24
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_4r5pv"]
 radius = 23.0
 
@@ -1586,6 +1590,22 @@ offset_bottom = 89.0
 grow_horizontal = 2
 text = "Bestiary"
 label_settings = SubResource("LabelSettings_a38lo")
+vertical_alignment = 1
+
+[node name="Completion" type="Label" parent="UI/Bestiary/List" unique_id=142369250]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -288.0
+offset_top = 32.0
+offset_right = 216.0
+offset_bottom = 89.0
+grow_horizontal = 2
+text = "0%"
+label_settings = SubResource("LabelSettings_holxr")
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Bestiary/List" unique_id=953975655]

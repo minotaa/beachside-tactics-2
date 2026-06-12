@@ -14,6 +14,19 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 		if line[i] == "[":
 			var close = line.find("]", i)
 			if close != -1:
+				var tag = line.substr(i + 1, close - i - 1).strip_edges()
+				if tag.begins_with("img"):
+					# skip the entire [img...]...[/img] block
+					var end_tag = line.find("[/img]", close)
+					if end_tag != -1:
+						i = end_tag + 6
+						$MarginContainer/Label.text = line.substr(0, i)
+						await get_tree().process_frame
+						global_position = Vector2(
+							marker.x - (size.x * 0.1166),
+							marker.y - (size.y * 0.25)
+						)
+						continue
 				$MarginContainer/Label.text = line.substr(0, close + 1)
 				await get_tree().process_frame
 				global_position = Vector2(

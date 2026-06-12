@@ -18,7 +18,15 @@ func _ready() -> void:
 		],
 		"default": [
 			{
-				"text": "Hey there! Here's some information on the fish you caught!",
+				"text": [
+					"Hey there! Come to check on your catches?",
+					"Every fish tells a story, you know.",
+					"The sea's full of surprises. Keep fishing!",
+					"I've been cataloguing fish here for years. Never gets old.",
+					"My husband sells the rods, I keep the records. Fair trade.",
+					"You'd be surprised what's hiding in these waters.",
+					"A good fisherman always checks their bestiary."
+				],
 				"immersive": false
 			}
 		]
@@ -49,27 +57,30 @@ func calculate_money_earned() -> float:
 	var total = 0.0
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
-		if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
-			if Game.acknowledged_bestiary.get(id, null) == null:
-				total += money_table.get(catchable.rarity)
+		if catchable is Fish:
+			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+				if Game.acknowledged_bestiary.get(id, null) == null:
+					total += money_table.get(catchable.rarity)
 	return total
 
 func calculate_xp_earned() -> float:
 	var total = 0.0
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
-		if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
-			if Game.acknowledged_bestiary.get(id, null) == null:
-				total += xp_table.get(catchable.rarity)
+		if catchable is Fish:
+			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+				if Game.acknowledged_bestiary.get(id, null) == null:
+					total += xp_table.get(catchable.rarity)
 	return total
 				
 func get_unacknowledged_fish() -> Array:
 	var to_ack = []
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
-		if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
-			if Game.acknowledged_bestiary.get(id, null) == null:
-				to_ack.append(catchable)
+		if catchable is Fish:
+			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+				if Game.acknowledged_bestiary.get(id, null) == null:
+					to_ack.append(catchable)
 	return to_ack
 
 func _evaluate_condition(condition: String) -> bool:
@@ -87,5 +98,9 @@ func _on_quest_triggered(quest_id: String) -> void:
 			Game.add_xp(xp)
 			Toast.add("You received $%s and %s XP!" % [roundi(money), roundi(xp)])
 
+			var before = Game.inventory_upgrade_bestiary_bonus
 			for id in Game.bestiary:
 				Game.acknowledged_bestiary[id] = true
+			Game.inventory_upgrade_bestiary_bonus = (Game.acknowledged_bestiary.size() / 5) * 5
+			if Game.inventory_upgrade_bestiary_bonus > before:
+				Toast.add("Your tackle box grew! +%d slots." % (Game.inventory_upgrade_bestiary_bonus - before))

@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bcbvv7olwxf7r"]
+
+[ext_resource type="Shader" uid="uid://b8soepk4ovv2j" path="res://scenes/ui/blackout.gdshader" id="1_737mn"]
+
+[resource]
+shader = ExtResource("1_737mn")

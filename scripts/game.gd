@@ -55,7 +55,9 @@ var inventory = Inventory.new() # Dumb solution because I don't feel like doing 
 var game_loaded: bool = false
 var bestiary = {}
 var acknowledged_bestiary = {}
+var highest_star = {}
 var flags = {}
+var inventory_upgrade_bestiary_bonus = 0
 
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
@@ -113,6 +115,29 @@ func get_day_time() -> TimeOfDay:
 	else:						# 3:00 PM - 9:00 PM
 		return TimeOfDay.EVENING
 
+func get_star_chance() -> float:
+	return 10.0
+
+func get_one_star_chance() -> float:
+	return 60.0
+
+func get_two_star_chance() -> float:
+	return 30.0
+
+func get_three_star_chance() -> float:
+	return 10.0
+
+func roll_stars() -> int:
+	if randf() * 100.0 < get_star_chance():
+		var roll = randf() * 100.0
+		if roll < get_three_star_chance():
+			return 3
+		elif roll < get_three_star_chance() + get_two_star_chance():
+			return 2
+		elif roll < get_three_star_chance() + get_two_star_chance() + get_one_star_chance():
+			return 1
+	return 0
+
 func get_junk_chance() -> float:
 	var junk_chance = 0.0
 	if equipped_fishing_rod != null:
@@ -158,7 +183,9 @@ func add_xp(amount: float) -> void:
 		level_up()
 
 func get_max_inventory_size() -> int:
-	return 25
+	var size = 25
+	size += inventory_upgrade_bestiary_bonus
+	return size
 
 func is_mobile() -> bool:
 	return OS.get_name() == "Android" or OS.get_name() == "iOS"
@@ -273,6 +300,8 @@ func load_game() -> void:
 			acknowledged_bestiary = data["acknowledged_bestiary"]
 		if data.has("flags"):
 			flags = data["flags"]
+		if data.has("inventory_upgrade_bestiary_bonus"):
+			inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
 			if bait_id != null:  # null means no bait equipped
@@ -297,6 +326,8 @@ func load_game() -> void:
 			level = data["level"]
 		if data.has("xp"):
 			xp = data["xp"]
+		if data.has("highest_star"):
+			highest_star = data["highest_star"]
 	print("Loaded save data.")
 		
 func get_save_data() -> Dictionary:
@@ -314,7 +345,9 @@ func get_save_data() -> Dictionary:
 		"level": level,
 		"bestiary": bestiary,
 		"acknowledged_bestiary": acknowledged_bestiary,
-		"flags": flags
+		"flags": flags,
+		"inventory_upgrade_bestiary_bonus": inventory_upgrade_bestiary_bonus,
+		"highest_star": highest_star
 	}
 
 func _notification(what: int) -> void:

@@ -19,10 +19,9 @@ func get_item_stack(item: ItemType) -> ItemStack:
 	return null
 
 func add_item(item: ItemStack) -> void:
-	for i in list: # Checks for existing items.
-		if i.type.id == item.type.id:
-			var prev = list[list.find(i)]
-			prev.amount += item.amount
+	for i in list:
+		if i.type.id == item.type.id and i.data.get("stars", 0) == item.data.get("stars", 0):
+			i.amount += item.amount
 			return
 	list.append(item)
 

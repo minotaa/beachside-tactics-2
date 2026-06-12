@@ -246,17 +246,33 @@ func buy_item() -> void:
 func update_bestiary() -> void:
 	for children in $UI/Bestiary/List/ScrollContainer/GridContainer.get_children():
 		children.queue_free()
+	var not_unlocked_fish = []
+	for item in Catalog.items:
+		if item is Fish:
+			not_unlocked_fish.append(item)
+	
 	for id in Game.bestiary.keys():
 		var bestiary_item = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 		var item = Catalog.get_item(int(id))
-		bestiary_item.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
-		bestiary_item.get_node("TextureRect").texture = item.texture
+		if item is Fish:
+			not_unlocked_fish = not_unlocked_fish.filter(func(f): return f.id != item.id)
+			bestiary_item.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+			bestiary_item.get_node("TextureRect").texture = item.texture
+			bestiary_item.get_node("Equipped").visible = false
+			bestiary_item.get_node("Label").visible = true
+			bestiary_item.get_node("Label").text = "x" + str(int(Game.bestiary.get(id, 0)))
+			bestiary_item.connect("pressed", Callable(self, "preview_item").bind(int(id)))
+			$UI/Bestiary/List/ScrollContainer/GridContainer.add_child(bestiary_item)
+	for fish in not_unlocked_fish:
+		var bestiary_item = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		bestiary_item.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(fish.rarity).to_lower() + ".png")
+		bestiary_item.get_node("TextureRect").texture = fish.texture
+		bestiary_item.get_node("TextureRect").material = load("res://scenes/ui/blackout.tres")
 		bestiary_item.get_node("Equipped").visible = false
-		bestiary_item.get_node("Label").visible = true
-		bestiary_item.get_node("Label").text = "x" + str(int(Game.bestiary.get(id, 0)))
-		bestiary_item.connect("pressed", Callable(self, "preview_item").bind(int(id)))
+		bestiary_item.disabled = true
 		$UI/Bestiary/List/ScrollContainer/GridContainer.add_child(bestiary_item)
 	# TODO: Add percentage of completed bestiary in current loc
+	
 	
 var previewed_item
 	
@@ -278,6 +294,10 @@ func preview_item(id: int) -> void:
 	var location_name = Game.Location.find_key(item.location).replace("_", " ")
 
 	var info = ""
+	var best_stars = Game.highest_star.get(str(item.id), 0)
+	if best_stars > 0:
+		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		info += "Best Catch: " + star_icon.repeat(best_stars) + "\n"
 	info += "Sell Price: $" + str(roundi(item.sell_price)) + "\n"
 	info += "Location: " + location_name + "\n"
 	info += "Rod Power Needed: " + str(item.power_needed) + "\n"
@@ -350,14 +370,27 @@ func update_catalog() -> void:
 	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
 	for item in bag:
 		if item.type.category == Game.Category.JUNK or item.type.category == Game.Category.FISH:
-			total += roundi(item.type.sell_price)
+			var mult = 1.0
+			match int(item.data.get("stars", 0)):
+				1: mult = 1.25
+				2: mult = 1.5
+				3: mult = 2.0
+			print(item.type.name)
+			print(str(mult))
+			print(str(item.data.get("stars", 0)))
+			var unit_price = item.type.sell_price * mult
+			var stack_price = unit_price * item.amount
+			total += stack_price
+			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
+			var stars_str = star_icon.repeat(item.data.get("stars", 0))
 			var sell_entry = preload("res://scenes/ui/sell_entry.tscn").instantiate()
-			sell_entry.get_node("HBoxContainer/Label").text = str(item) + ": $" + str(roundi(item.type.sell_price)) + " = $" + str(roundi(item.type.sell_price * item.amount)) 
+			var separator = " " if item.data.get("stars", 0) > 0 else ""
+			sell_entry.get_node("HBoxContainer/Label").text = stars_str + separator + str(item) + ": $" + str(roundi(unit_price)) + " = $" + str(roundi(stack_price))
 			sell_entry.get_node("HBoxContainer/TextureRect").texture = item.type.texture
 			sell_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))
-
+	
 func _on_interaction_started(npc: NPC) -> void:
 	$UI/Main.hide()
 	interacting = true
@@ -634,16 +667,22 @@ func _on_fish_caught() -> void:
 	print("Caught the fish.")
 	if bobber != null:
 		var stack := ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
+		stack.data["stars"] = Game.roll_stars()
 		if Game.bag.total_size() > Game.get_max_inventory_size():
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
 			Game.bag.add_item(stack)
 			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 			add_child(speech_bubble)
-			speech_bubble.play_line("You caught a %s%s %s!" % [Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
+			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+			var stars = " " + star_icon.repeat(stack.data.get("stars", 0)) if stack.data.get("stars", 0) > 0 else ""
+			speech_bubble.play_line("You caught a%s %s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
-
+			Game.highest_star[str(stack.type.id)] = max(
+				Game.highest_star.get(str(stack.type.id), 0),
+				stack.data.get("stars", 0)
+			)
 	state = FishState.REELING_BACK
 	bobber.get_node("Splashes").amount = 64
 	Game.catches += 1
@@ -764,11 +803,19 @@ func update_inventory() -> void:
 	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
 	var total = 0.0
 	for item in bag:
+		var mult = 1.0
+		match int(item.data.get("stars", 0)):
+			1: mult = 1.25
+			2: mult = 1.5
+			3: mult = 2.0
+		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		var stars_str = star_icon.repeat(item.data.get("stars", 0))
+		var separator = " " if item.data.get("stars", 0) > 0 else ""
 		var inventory_entry = preload("res://scenes/ui/inventory_entry.tscn").instantiate()
-		inventory_entry.get_node("Label").text = str(item.amount) + "x " + str(item.type.name)
+		inventory_entry.get_node("Label").text = stars_str + separator + str(item.amount) + "x " + str(item.type.name)
 		inventory_entry.get_node("TextureRect").texture = item.type.texture
 		inventory_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
-		total += item.type.sell_price
+		total += item.type.sell_price * mult * item.amount
 		$UI/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 	$UI/Inventory/Amount.text = "Total: $" + str(roundi(total))
 	var inventory = Game.inventory.list.duplicate()
@@ -805,12 +852,11 @@ func near_shop() -> bool:
 
 func _process_ui(delta: float) -> void:
 	$InteractionMark.visible = false
-	if Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY or Game.get_day_time() == Game.TimeOfDay.DAY or Game.get_day_time() == Game.TimeOfDay.EVENING:
-		$PointLight2D.visible = false
-		$PointLight2D2.visible = false
-	else:
-		$PointLight2D.visible = true
-		$PointLight2D2.visible = true
+	var t = Game.time / Game.TIME_IN_DAY
+	var day_factor = sin(t * PI)
+	var light_energy = lerp(0.2, 0.0, day_factor)
+	$PointLight2D.energy = light_energy
+	$PointLight2D2.energy = light_energy
 	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable:
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
@@ -1015,15 +1061,22 @@ func _fishing_timer(location: Game.Location) -> void:
 							Toast.add("You ran out of bait!")		
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
+					stack.data["stars"] = Game.roll_stars()
 					if Game.bag.total_size() > Game.get_max_inventory_size():
 						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
 						var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 						add_child(speech_bubble)
-						speech_bubble.play_line("You caught a %s%s %s!" % [Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
+						var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+						var stars = " " + star_icon.repeat(stack.data.get("stars", 0)) if stack.data.get("stars", 0) > 0 else ""
+						speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
 						#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 						Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
+						Game.highest_star[str(stack.type.id)] = max(
+							Game.highest_star.get(str(stack.type.id), 0),
+							stack.data.get("stars", 0)
+						)
 				return
 			else:
 				$Exclaim.emitting = true
@@ -1202,17 +1255,20 @@ func _on_base_animation_finished() -> void:
 func _on_sell_pressed() -> void:
 	var amount_earned = 0.0
 	var to_remove = []
-	print(Game.bag.list)
 	for item in Game.bag.list:
-		print(item)
 		if item.type.category == Game.Category.FISH or item.type.category == Game.Category.JUNK:
-			Game.balance += item.amount * item.type.sell_price
-			amount_earned += item.amount * item.type.sell_price
+			var mult = 1.0
+			match item.data.get("stars", 0):
+				1: mult = 1.25
+				2: mult = 1.5
+				3: mult = 2.0
+			var earned = item.amount * item.type.sell_price * mult
+			Game.balance += earned
+			amount_earned += earned
 			to_remove.append(item)
 	if not to_remove.is_empty():
-		print(to_remove)
 		for item in to_remove:
-			Game.bag.take_item(item.type, item.amount)
+			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")

@@ -4,9 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://d4jmtgjd4em2i" path="res://assets/sprites/fish.png" id="2_qu4uu"]
 [ext_resource type="Texture2D" uid="uid://112re7f4y6v4" path="res://assets/sprites/panel-common.png" id="2_sh57s"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_53sba"]
-font = ExtResource("1_53sba")
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_7y1c0"]
 atlas = ExtResource("2_qu4uu")
 region = Rect2(0, 0, 16, 16)
@@ -31,19 +28,18 @@ offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="." unique_id=288936257]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.518
-anchor_bottom = 0.518
+[node name="Label" type="RichTextLabel" parent="." unique_id=369247735]
+layout_mode = 0
 offset_left = 66.0
-offset_top = -27.008
+offset_top = 2.0
 offset_right = 322.0
-offset_bottom = 26.992
-grow_horizontal = 0
-grow_vertical = 2
+offset_bottom = 56.0
+theme_override_fonts/normal_font = ExtResource("1_53sba")
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
 text = "2x Cod"
-label_settings = SubResource("LabelSettings_53sba")
+fit_content = true
+autowrap_mode = 0
 vertical_alignment = 1
 
 [node name="Rarity" type="NinePatchRect" parent="." unique_id=413406123]
