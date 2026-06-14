@@ -362,3 +362,80 @@ func _enter_tree() -> void:
 		}
 	}
 	items.append(worms)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(192.0, 0.0, 16.0, 16.0)
+	var anchovy = Fish.new(16, "Anchovy", atlas)
+	anchovy.description = "A tiny, glittering fish that moves in dense schools near the surface. Out in force whenever the sun's up, vanishes the moment it sets."
+	anchovy.sell_price = 12.0
+	anchovy.rarity = Game.Rarity.COMMON
+	anchovy.difficulty = Game.Difficulty.EASY
+	anchovy.location = Game.Location.Crystalwater_Beach
+	anchovy.category = Game.Category.FISH
+	anchovy.hour_start = 0.25
+	anchovy.hour_end = 0.75
+	anchovy.threshold = 5.0
+	anchovy.power_needed = 0.0
+	items.append(anchovy)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(208.0, 0.0, 16.0, 16.0)
+	var mullet = Fish.new(17, "Mullet", atlas)
+	mullet.description = "A plain, sturdy fish that grazes along the bottom no matter the hour. Not exciting, but always there when you need it."
+	mullet.sell_price = 18.0
+	mullet.rarity = Game.Rarity.COMMON
+	mullet.difficulty = Game.Difficulty.EASY
+	mullet.location = Game.Location.Crystalwater_Beach
+	mullet.category = Game.Category.FISH
+	mullet.hour_start = 0.0
+	mullet.hour_end = 0.0
+	mullet.power_needed = 0.0
+	mullet.threshold = 8.0
+	items.append(mullet)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(224.0, 0.0, 16.0, 16.0)
+	var flounder = Fish.new(18, "Flounder", atlas)
+	flounder.description = "A flat, camouflaged fish that lies still against the seabed. Most active in the cool hours just after sunrise."
+	flounder.sell_price = 55.0
+	flounder.rarity = Game.Rarity.UNCOMMON
+	flounder.difficulty = Game.Difficulty.MEDIUM
+	flounder.category = Game.Category.FISH
+	flounder.hour_start = 0.125
+	flounder.hour_end = 0.417
+	flounder.power_needed = 0.0
+	flounder.threshold = 40.0
+	items.append(flounder)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(240.0, 0.0, 16.0, 16.0)
+	var mackerel = Fish.new(19, "Mackerel", atlas)
+	mackerel.description = "A streamlined fish that travels in fast-moving schools through open water. Bites hardest as the afternoon stretches into evening."
+	mackerel.sell_price = 50.0
+	mackerel.rarity = Game.Rarity.UNCOMMON
+	mackerel.difficulty = Game.Difficulty.MEDIUM
+	mackerel.category = Game.Category.FISH
+	mackerel.hour_start = 0.5 
+	mackerel.hour_end = 0.833
+	mackerel.power_needed = 0.0
+	mackerel.threshold = 35.0
+	items.append(mackerel)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(0.0, 16.0, 16.0, 16.0)
+	var perch = Fish.new(20, "Perch", atlas)
+	perch.description = "A modest fish with a taste for calmer waters. Feeds steadily from sunrise through midday before settling down."
+	perch.sell_price = 45.0
+	perch.rarity = Game.Rarity.UNCOMMON
+	perch.difficulty = Game.Difficulty.MEDIUM
+	perch.category = Game.Category.FISH
+	perch.hour_start = 0.167
+	perch.hour_end = 0.5
+	perch.power_needed = 0.0
+	perch.threshold = 30.0
+	items.append(perch)

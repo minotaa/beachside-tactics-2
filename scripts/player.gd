@@ -166,7 +166,7 @@ func get_rod_tip(fish_dir: String) -> Vector2:
 	elif fish_dir == "right":
 		return Vector2(global_position.x + 14, global_position.y + 4.5)
 	elif fish_dir == "up":
-		return Vector2(global_position.x, global_position.y - 7.6)
+		return Vector2(global_position.x, global_position.y - 5.6)
 	elif fish_dir == "down":
 		return Vector2(global_position.x, global_position.y + 22)
 	return global_position
@@ -674,7 +674,7 @@ func _on_fish_caught() -> void:
 			add_child(speech_bubble)
 			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
 			var stars = " " + star_icon.repeat(stack.data.get("stars", 0)) if stack.data.get("stars", 0) > 0 else ""
-			speech_bubble.play_line("You caught a%s %s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
+			speech_bubble.play_line("You caught a %s %s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 			Game.highest_star[str(stack.type.id)] = max(
