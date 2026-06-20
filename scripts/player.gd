@@ -19,7 +19,7 @@ var state: FishState = FishState.INACTIVE
 var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
-var holding_trap: bool = false
+var holding_trap: bool = true	
 var interacting: bool = false
 var immersive_interact: NPC
 

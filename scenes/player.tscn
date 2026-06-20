@@ -46,6 +46,7 @@
 [ext_resource type="Texture2D" uid="uid://b2kt1y66uo04a" path="res://assets/sprites/light.png" id="39_j2b1d"]
 [ext_resource type="PackedScene" uid="uid://c3x0kaqpwgj4q" path="res://scenes/ui/inventory_button.tscn" id="42_holxr"]
 [ext_resource type="Texture2D" uid="uid://dygfbet0gwv33" path="res://assets/sprites/book.png" id="43_g5jhy"]
+[ext_resource type="Texture2D" uid="uid://byw5u2jj6d2l7" path="res://assets/sprites/trap.png" id="45_mx1m4"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fulsm"]
 particle_flag_disable_z = true
@@ -1807,7 +1808,7 @@ texture = ExtResource("43_g5jhy")
 
 [node name="Trap" type="Sprite2D" parent="." unique_id=382535271]
 visible = false
-texture = ExtResource("20_i4ail")
+texture = ExtResource("45_mx1m4")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1472449290]
 replication_config = SubResource("SceneReplicationConfig_a38lo")

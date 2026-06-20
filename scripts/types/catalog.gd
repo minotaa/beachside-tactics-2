@@ -331,7 +331,7 @@ func _enter_tree() -> void:
 	decent_fishing_rod.rarity = Game.Rarity.UNCOMMON
 	decent_fishing_rod.category = Game.Category.RODS
 	decent_fishing_rod.junk_chance = 20.0
-	decent_fishing_rod.price = 2500.0
+	decent_fishing_rod.price = 2000.0
 	decent_fishing_rod.sell_price = 125.0
 	decent_fishing_rod.baitable = true
 	decent_fishing_rod.shoddy = false
@@ -404,6 +404,7 @@ func _enter_tree() -> void:
 	flounder.rarity = Game.Rarity.UNCOMMON
 	flounder.difficulty = Game.Difficulty.MEDIUM
 	flounder.category = Game.Category.FISH
+	flounder.location = Game.Location.Crystalwater_Beach
 	flounder.hour_start = 0.125
 	flounder.hour_end = 0.417
 	flounder.power_needed = 0.0
@@ -419,6 +420,7 @@ func _enter_tree() -> void:
 	mackerel.rarity = Game.Rarity.UNCOMMON
 	mackerel.difficulty = Game.Difficulty.MEDIUM
 	mackerel.category = Game.Category.FISH
+	mackerel.location = Game.Location.Crystalwater_Beach
 	mackerel.hour_start = 0.5 
 	mackerel.hour_end = 0.833
 	mackerel.power_needed = 0.0
@@ -434,8 +436,57 @@ func _enter_tree() -> void:
 	perch.rarity = Game.Rarity.UNCOMMON
 	perch.difficulty = Game.Difficulty.MEDIUM
 	perch.category = Game.Category.FISH
+	perch.location = Game.Location.Crystalwater_Beach
 	perch.hour_start = 0.167
 	perch.hour_end = 0.5
 	perch.power_needed = 0.0
 	perch.threshold = 30.0
 	items.append(perch)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(16.0, 16.0, 16.0, 16.0)
+	var swordfish = Fish.new(21, "Swordfish", atlas)
+	swordfish.description = "A powerful, long-billed predator that cuts through the water with surprising speed. Only surfaces when the sun is at its highest."
+	swordfish.sell_price = 150.0
+	swordfish.rarity = Game.Rarity.RARE
+	swordfish.difficulty = Game.Difficulty.HARD
+	swordfish.category = Game.Category.FISH
+	swordfish.location = Game.Location.Crystalwater_Beach
+	swordfish.hour_start = 0.375 
+	swordfish.hour_end = 0.625
+	swordfish.power_needed = 5.0
+	swordfish.threshold = 150.0
+	items.append(swordfish)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(16.0, 16.0, 16.0, 16.0)
+	var tuna = Fish.new(22, "Tuna", atlas)
+	tuna.description = "A muscular, relentless swimmer built for distance and speed. Most active as daylight fades into night."
+	tuna.sell_price = 175.0
+	tuna.rarity = Game.Rarity.RARE
+	tuna.difficulty = Game.Difficulty.HARD
+	tuna.category = Game.Category.FISH
+	tuna.location = Game.Location.Crystalwater_Beach
+	tuna.hour_start = 0.625
+	tuna.hour_end = 0.125
+	tuna.power_needed = 5.0
+	tuna.threshold = 175.0
+	items.append(tuna)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(16.0, 16.0, 16.0, 16.0)
+	var barracuda = Fish.new(23, "Barracuda", atlas)
+	barracuda.description = "A sleek, razor-toothed hunter with a nasty temper. Patrols the dark waters at night and won't go down without a fight."
+	barracuda.sell_price = 300.0
+	barracuda.rarity = Game.Rarity.EPIC
+	barracuda.difficulty = Game.Difficulty.HARD
+	barracuda.location = Game.Location.Crystalwater_Beach
+	barracuda.hour_start = 0.75
+	barracuda.hour_end = 0.208
+	barracuda.category = Game.Category.FISH
+	barracuda.power_needed = 12.0
+	barracuda.threshold = 300.0
+	items.append(barracuda)
