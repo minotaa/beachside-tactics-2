@@ -19,7 +19,8 @@ var state: FishState = FishState.INACTIVE
 var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
-var holding_trap: bool = true	
+var holding_trap: bool = true
+var selected_tile: Vector2i
 var interacting: bool = false
 var immersive_interact: NPC
 
@@ -186,12 +187,12 @@ func play_animation(_name: String, backwards: bool = false, speed: float = 1) ->
 
 var selected_item
 
-func select_item(id: int) -> void:
+func select_item(id: int, ignore: bool = false) -> void:
 	var item = Catalog.get_item(id)
 	if item == null:
 		Toast.add("huh?")
 		return
-	if item == selected_item:
+	if item == selected_item and not ignore:
 		if $UI/Vendor/ItemPreview.visible:
 			$UI/Vendor/ItemPreview.visible = false
 		else:
@@ -239,6 +240,8 @@ func buy_item() -> void:
 	Game.inventory.add_item(ItemStack.new(item, added_amount))
 	Game.balance -= item.price
 	Toast.add("You bought: " + str(added_amount) + "x " + str(item.name) + "!")
+	update_catalog()
+	select_item(selected_item.id, true)
 	pass
 
 func update_bestiary() -> void:
@@ -317,13 +320,19 @@ func update_catalog() -> void:
 		children.queue_free()
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
+	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer".get_children():
+		children.queue_free()
 	for children in $UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
 	if Game.level < 5:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = true
-	
+	if Game.level >= 10:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = true
+	else:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = false
+	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
 			var cant_buy = false
@@ -359,6 +368,25 @@ func update_catalog() -> void:
 			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 			if not cant_buy:
 				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
+		if (item as ItemType).category == Game.Category.TRAPS:
+			var cant_buy = false
+			if item.purchase_limit != -1:
+				for i in Game.inventory.list:
+					if i.type == item and i.amount >= item.purchase_limit:
+						cant_buy = true
+			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
+			#if roundi((item as ItemType).price) > Game.balance:
+				#shop_entry.get_node("Panel").disabled = true
+			#else:
+				#shop_entry.get_node("Panel").disabled = false
+			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+			shop_entry.get_node("TextureRect").texture = item.texture
+			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
+			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
+			if not cant_buy:
+				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer".add_child(shop_entry)
+			
+	await get_tree().process_frame
 	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer.get_children().size() == 0:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
 	else:
@@ -489,27 +517,30 @@ func _input(event: InputEvent) -> void:
 		$Minigame.scale = Vector2(0.1, 0.1)
 		var fish: Fish = Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
 		if fish.difficulty == Game.Difficulty.EASY:
-			add_fish(5, 40, 2, 6)
+			add_fish(10, 40, 3, 3)
 		elif fish.difficulty == Game.Difficulty.MEDIUM:
-			add_fish(10, 50, 3, 4)
+			add_fish(20, 50, 5, 2.5)
 		elif fish.difficulty == Game.Difficulty.HARD:
-			add_fish(20, 60, 4, 3.5)
+			add_fish(30, 60, 6, 2.0)
+		elif fish.difficulty == Game.Difficulty.INSANE:
+			add_fish(40, 70, 8, 1.2)
 		else:
 			print("Unsupported fish difficulty.")
 
 	# Begin charging cast
-	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
 		$FishPowerBar.visible = true
 		$FishPowerBar.value = 0
 		hantenjutsushiki = false
 
 	# Release cast
-	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe:
+	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
 		$FishPowerBar.visible = false
 		hantenjutsushiki = false
 		var fish_dir := last_direction
 		bobber_safe = true
 		play_animation(body_type + "_fish_" + fish_dir)
+		fish_control_safe = false
 		if bobber != null:
 			bobber.queue_free()
 
@@ -535,6 +566,12 @@ func _process_input(delta: float) -> void:
 			var tile_map := get_parent().get_node("Ground") as TileMapLayer
 			var bobber_pos := tile_map.to_local(bobber.global_position)
 			var data := tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_pos))
+			var aboveground = get_parent().get_node("Aboveground") as TileMapLayer
+			var aboveground2 = get_parent().get_node("Aboveground2") as TileMapLayer
+			if aboveground.get_cell_source_id(tile_map.local_to_map(bobber_pos)) != -1:
+				data = aboveground.get_cell_tile_data(tile_map.local_to_map(bobber_pos))
+			if aboveground2.get_cell_source_id(tile_map.local_to_map(bobber_pos)) != -1:
+				data = aboveground2.get_cell_tile_data(tile_map.local_to_map(bobber_pos))
 			if not (data and data.get_custom_data("water")):
 				_cancel_bobber("The bobber landed on an invalid location.")
 			elif round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) == 0:
@@ -582,17 +619,24 @@ func _process_input(delta: float) -> void:
 			child.queue_free()
 
 	# Trap placement highlight
-	if holding_trap:
+	if Game.equipped_trap != null:
 		$Trap.show()
 		var tilemap := get_parent().get_node("Ground") as TileMapLayer
 		var mouse_tile := tilemap.local_to_map(tilemap.get_local_mouse_position())
 		var data := tilemap.get_cell_tile_data(mouse_tile)
-		if data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
+		var aboveground = get_parent().get_node("Aboveground") as TileMapLayer
+		var aboveground2 = get_parent().get_node("Aboveground2") as TileMapLayer
+		var no_aboveground = aboveground.get_cell_source_id(mouse_tile) == -1 and aboveground2.get_cell_source_id(mouse_tile) == -1
+		if no_aboveground and data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
 			$Trap.global_position = tilemap.map_to_local(mouse_tile)
+			selected_tile = mouse_tile
 		else:
 			$Trap.hide()
+			selected_tile = Vector2i(0, 0)
 	else:
 		$Trap.hide()
+		selected_tile = Vector2i(0, 0)
+
 
 	# Movement animations & state reset on move
 	if is_moving:
@@ -629,9 +673,23 @@ func _process_input(delta: float) -> void:
 					hantenjutsushiki = true
 
 	# Hide power bar if inventory opens mid-charge
-	if $FishPowerBar.visible and $UI/Inventory.visible:
+	if $FishPowerBar.visible and ($UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
 		$FishPowerBar.hide()
 		hantenjutsushiki = false
+
+	# Trap placement
+	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish"):
+		var placed_trap = preload("res://scenes/trap.tscn").instantiate()
+		placed_trap.trap = Game.equipped_trap
+		var tilemap := get_parent().get_node("Ground") as TileMapLayer
+		var data := tilemap.get_cell_tile_data(selected_tile)
+		placed_trap.location = Game.Location.get(data.get_custom_data("location"))
+		print(selected_tile)
+		placed_trap.global_position = tilemap.map_to_local(selected_tile)
+		get_parent().add_child(placed_trap, true)
+		Game.inventory.take_item(Game.equipped_trap, 1)
+		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
+		Game.equipped_trap = null
 
 	move_and_slide()
 	global_position = round(global_position / 2) * 2
@@ -673,8 +731,8 @@ func _on_fish_caught() -> void:
 			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 			add_child(speech_bubble)
 			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
-			var stars = " " + star_icon.repeat(stack.data.get("stars", 0)) if stack.data.get("stars", 0) > 0 else ""
-			speech_bubble.play_line("You caught a %s %s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 40)
+			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
+			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
 			Game.highest_star[str(stack.type.id)] = max(
@@ -702,6 +760,21 @@ func _on_fish_lost() -> void:
 	print("Lost the fish.")
 	Game.whiffs += 1
 var i_float_timer = 0.0
+
+func set_trap(id: int) -> void:
+	if state != FishState.INACTIVE:
+		Toast.add("You can't equip a trap while fishing.")
+		return
+	if id != -1:
+		if Catalog.get_item(id) is Trap:
+			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
+			Game.equipped_trap = Catalog.get_item(id)
+		else:
+			LimboConsole.error("This doesn't seem to be a trap.")
+	else:
+		Toast.add("Unequipped your trap.")
+		Game.equipped_trap = null
+	update_inventory()
 
 func set_bait(id: int) -> void:
 	if state != FishState.INACTIVE:
@@ -743,6 +816,19 @@ func update_inventory() -> void:
 		child.queue_free()
 	for child in $"UI/Inventory/Container/Bait/GridContainer".get_children():
 		child.queue_free()
+	for child in $"UI/Inventory/Container/Traps/GridContainer".get_children():
+		child.queue_free()
+	for i in range($UI/Inventory/Container.get_tab_count()):
+		if $UI/Inventory/Container.get_tab_title(i) == "Bait":
+			if Game.level < 5:
+				$UI/Inventory/Container.set_tab_hidden(i, true)
+			else:
+				$UI/Inventory/Container.set_tab_hidden(i, false)
+		if $UI/Inventory/Container.get_tab_title(i) == "Traps":
+			if Game.level < 10:
+				$UI/Inventory/Container.set_tab_hidden(i, true)
+			else:
+				$UI/Inventory/Container.set_tab_hidden(i, false)
 	$UI/Inventory/Title.text = "Tackle Box (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + "):"
 	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
@@ -759,6 +845,14 @@ func update_inventory() -> void:
 		inventory_button.get_node("Equipped").hide()
 	inventory_button.connect("pressed", Callable(self, "set_bait").bind(-1))
 	$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
+	
+	inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+	inventory_button.get_node("Rarity").texture = null
+	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
+	if Game.equipped_bait != null:
+		inventory_button.get_node("Equipped").hide()
+	inventory_button.connect("pressed", Callable(self, "set_trap").bind(-1))
+	$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
 
 	if Game.equipped_bait == null:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
@@ -777,7 +871,25 @@ func update_inventory() -> void:
 			if index < Game.equipped_bait.data["extra_stats"].keys().size():
 				$"UI/Inventory/Container/Bait/Equipped/Stats".text += "\n"
 
-
+	if Game.equipped_trap == null:
+		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
+		$"UI/Inventory/Container/Traps/Equipped/Name".text = "Nothing"
+		$"UI/Inventory/Container/Traps/Equipped/Description".text = "You have no trap equipped, they're probably all being cast, but if you don't have any, buy one in the shop."
+		$"UI/Inventory/Container/Traps/Equipped/Stats".text = "Nothing: +0"
+	else:
+		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = Game.equipped_trap.texture
+		$"UI/Inventory/Container/Traps/Equipped/Name".text = Game.equipped_trap.name
+		$"UI/Inventory/Container/Traps/Equipped/Description".text = Game.equipped_trap.description
+		if randf() < 0.2:
+			$"UI/Inventory/Container/Traps/Equipped/Description".text = $"UI/Inventory/Container/Traps/Equipped/Description".text.replace("flimsy", "flismy")
+		$"UI/Inventory/Container/Traps/Equipped/Stats".text = ""
+		var index = 0
+		for key in Game.equipped_trap.data["extra_stats"].keys():
+			index += 1
+			$"UI/Inventory/Container/Traps/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_trap.data["extra_stats"][key])
+			if index < Game.equipped_trap.data["extra_stats"].keys().size():
+				$"UI/Inventory/Container/Traps/Equipped/Stats".text += "\n"
+				
 	if Game.equipped_fishing_rod == null:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = "Nothing"
@@ -840,6 +952,19 @@ func update_inventory() -> void:
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_bait").bind(item.type.id))
 			$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
+		if item.type.category == Game.Category.TRAPS:
+			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+			inventory_button.get_node("TextureRect").texture = item.type.texture
+			if Game.equipped_trap != item.type:
+				inventory_button.get_node("Equipped").hide()
+			if item.amount == 1:
+				inventory_button.get_node("Label").visible = false
+			else:	
+				inventory_button.get_node("Label").visible = true
+				inventory_button.get_node("Label").text = "x" + str(item.amount)
+			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+			inventory_button.connect("pressed", Callable(self, "set_trap").bind(item.type.id))
+			$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
 	
 
 func near_shop() -> bool:
@@ -855,7 +980,7 @@ func _process_ui(delta: float) -> void:
 	var light_energy = lerp(0.2, 0.0, day_factor)
 	$PointLight2D.energy = light_energy
 	$PointLight2D2.energy = light_energy
-	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable:
+	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable and not _is_ui_blocking():
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
 		$UI/Main/Bait/HBoxContainer/Label.text = "x" + str(Game.inventory.get_item_stack(Game.equipped_bait).amount)
@@ -909,6 +1034,8 @@ func _process_ui(delta: float) -> void:
 		$UI/Main/LevelBar/TextureRect.texture = Game.equipped_fishing_rod.texture
 	else:
 		$UI/Main/LevelBar/TextureRect.texture = preload("res://assets/sprites/cross.png")
+	if Game.equipped_trap != null:
+		$UI/Main/LevelBar/TextureRect.texture = Game.equipped_trap.texture
 	var symbol
 	match (Game.get_day_time()):
 		Game.TimeOfDay.MORNING:
@@ -1039,8 +1166,10 @@ func _fishing_timer(location: Game.Location) -> void:
 	var rod_power = Game.get_fishing_power()
 
 	while (state == FishState.FISHING):
-		if bobber != null and not bobber.get_node("Ripple").emitting:
-			bobber.get_node("Ripple").restart()
+		if bobber != null:
+			if not bobber.get_node("Ripple").emitting:
+				bobber.get_node("Ripple").restart()
+			
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
 			var fish = Catalog.get_fish_drop(location, rod_power)
@@ -1070,7 +1199,7 @@ func _fishing_timer(location: Game.Location) -> void:
 						var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 						add_child(speech_bubble)
 						var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
-						var stars = " " + star_icon.repeat(stack.data.get("stars", 0)) if stack.data.get("stars", 0) > 0 else ""
+						var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 						speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
 						#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 						Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
@@ -1195,7 +1324,7 @@ func _on_base_animation_finished() -> void:
 					var current_x = lerp(start_pos.x, target_pos.x, t)
 					var current_y_base = lerp(start_pos.y, target_pos.y, t)
 					# Arc peaks at t=0.5, using sine for smooth curve
-					var arc_offset = -sin(t * PI) * arc_height
+					var arc_offset = (-sin(t * PI) * arc_height) + 10.0
 					bobber.global_position = Vector2(current_x, current_y_base + arc_offset)
 					# Simulate velocity for line physics
 					bobber.linear_velocity = (bobber.global_position - start_pos) / max(t, 0.01)
@@ -1241,6 +1370,12 @@ func _on_base_animation_finished() -> void:
 			var tile_map = get_parent().get_node("Ground") as TileMapLayer
 			var bobber_position = tile_map.to_local(bobber.global_position)
 			var data = tile_map.get_cell_tile_data(tile_map.local_to_map(bobber_position))
+			var aboveground = get_parent().get_node("Aboveground") as TileMapLayer
+			var aboveground2 = get_parent().get_node("Aboveground2") as TileMapLayer
+			if aboveground.get_cell_source_id(tile_map.local_to_map(bobber_position)) != -1:
+				data = aboveground.get_cell_tile_data(tile_map.local_to_map(bobber_position))
+			if aboveground2.get_cell_source_id(tile_map.local_to_map(bobber_position)) != -1:
+				data = aboveground2.get_cell_tile_data(tile_map.local_to_map(bobber_position))
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
 				_fishing_timer(Game.Location.get(data.get_custom_data("location")))

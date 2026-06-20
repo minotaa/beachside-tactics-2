@@ -13,7 +13,8 @@ enum Category {
 	UPGRADES,
 	FISH,
 	JUNK,
-	BAIT
+	BAIT,
+	TRAPS
 }
 
 enum Location {
@@ -48,6 +49,7 @@ var whiffs: int = 0
 var balance: float = 0.0
 var equipped_fishing_rod: FishingRod
 var equipped_bait: Bait
+var equipped_trap: Trap
 var time: float = TIME_IN_DAY * 0.55
 var days: int = 0
 var bag = Inventory.new()
@@ -306,6 +308,10 @@ func load_game() -> void:
 			var bait_id = data["equipped_bait"]
 			if bait_id != null:  # null means no bait equipped
 				equipped_bait = Catalog.get_item(bait_id)
+		if data.has("equipped_trap"):
+			var trap_id = data["equipped_trap"]
+			if trap_id != null:  # null means no trap equipped
+				equipped_trap = Catalog.get_item(trap_id)
 		if data.has("equipped_fishing_rod"):
 			var rod_id = data["equipped_fishing_rod"]
 			if rod_id != null:  # null means no rod equipped
@@ -339,6 +345,7 @@ func get_save_data() -> Dictionary:
 		"catches": catches,
 		"equipped_fishing_rod": equipped_fishing_rod.id if equipped_fishing_rod else null,
 		"equipped_bait": equipped_bait.id if equipped_bait else null,
+		"equipped_trap": equipped_trap.id if equipped_trap else null,
 		"days": days,
 		"time": time,
 		"xp": xp,

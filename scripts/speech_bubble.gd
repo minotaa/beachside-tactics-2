@@ -1,7 +1,6 @@
 extends MarginContainer
 
 func _ready() -> void:
-	print("Speech bubble ready, size: ", size)
 	$MarginContainer/Label.text = "test"
 
 func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5) -> void:

@@ -66,6 +66,26 @@ func _ready() -> void:
 				"quest_trigger": "finish_bait"
 			}
 		],
+		"can_buy_traps1": [
+			{
+				"text": "Hey kid, congrats on reaching Level 10.",
+				"next": "can_buy_traps2",
+				"condition": "trap_prompt"
+			}
+		],
+		"can_buy_traps2": [
+			{
+				"text": "You're working your way up in the world and such, I got something new in stock for ya.",
+				"next": "can_buy_traps3"
+			}
+		],
+		"can_buy_traps3": [
+			{
+				"text": "They're fishing traps, they let you catch fish a little passively. Give them a try.",
+				"next": null,
+				"quest_trigger": "finish_traps"
+			}
+		],
 		"already_has_rod": [
 			{
 				"text": [
@@ -109,6 +129,7 @@ func _ready() -> void:
 	default_trees = [
 		"intro_shelly",
 		"can_buy_bait1",
+		"can_buy_traps1",
 		"already_has_rod",
 		"reminder",
 		"intro1"
@@ -133,6 +154,8 @@ func _evaluate_condition(condition: String) -> bool:
 			return not Game.flags.get("heard_about_shelly", false) and _has_fishing_rod()
 		"bait_prompt":
 			return not Game.flags.get("heard_about_bait", false) and Game.level >= 5
+		"trap_prompt":
+			return not Game.flags.get("heard_about_traps", false) and Game.level >= 10
 	return true
 
 func _on_quest_triggered(quest_id: String) -> void:
@@ -147,6 +170,8 @@ func _on_quest_triggered(quest_id: String) -> void:
 			Game.flags["heard_about_shelly"] = true
 		"finish_bait":
 			Game.flags["heard_about_bait"] = true
+		"finish_traps":
+			Game.flags["heard_about_traps"] = true
 			
 func _open_shop() -> void:
 	pass

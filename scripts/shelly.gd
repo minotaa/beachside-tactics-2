@@ -86,7 +86,7 @@ func get_unacknowledged_fish() -> Array:
 func _evaluate_condition(condition: String) -> bool:
 	match condition:
 		"has_unacknowledged_fish": 
-			return not get_unacknowledged_fish().is_empty()
+			return not get_unacknowledged_fish().is_empty() and get_unacknowledged_fish().size() >= 5
 	return true
 
 func _on_quest_triggered(quest_id: String) -> void:

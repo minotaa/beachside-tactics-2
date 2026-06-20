@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5ts8q1nqtsew"
-path="res://.godot/imported/trap.png-88fcb0cb8865086650ec49326e93010b.ctex"
+uid="uid://byw5u2jj6d2l7"
+path="res://.godot/imported/traps.png-8b8f5994d7a7efcb4dcf68c9f460a6a7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/trap.png"
-dest_files=["res://.godot/imported/trap.png-88fcb0cb8865086650ec49326e93010b.ctex"]
+source_file="res://assets/sprites/traps.png"
+dest_files=["res://.godot/imported/traps.png-8b8f5994d7a7efcb4dcf68c9f460a6a7.ctex"]
 
 [params]
 

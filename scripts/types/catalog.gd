@@ -490,3 +490,28 @@ func _enter_tree() -> void:
 	barracuda.power_needed = 12.0
 	barracuda.threshold = 300.0
 	items.append(barracuda)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/traps.png")
+	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
+	var common_trap = Trap.new(24, "Common Trap", atlas)
+	common_trap.description = "A common flimsy fish trap for catching fish. Refill it with bait automatically to keep catching fish!"
+	common_trap.fishing_power = 12.0
+	common_trap.fishing_speed = 2.0
+	common_trap.space = 3
+	common_trap.bait_storage = 12
+	common_trap.purchase_limit = 10
+	common_trap.purchasable = true
+	common_trap.rarity = Game.Rarity.COMMON
+	common_trap.category = Game.Category.TRAPS
+	common_trap.price = 2500
+	common_trap.sell_price = 250.0
+	common_trap.data = { 
+		"extra_stats": {
+			"Space": "3",
+			"Rod Power": "12.5",
+			"Bait Storage": "+12",
+			"Fishing Speed": "2"
+		}
+	}
+	items.append(common_trap)
