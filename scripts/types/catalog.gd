@@ -24,38 +24,41 @@ func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 func get_fish(location: Game.Location, rod_power: int) -> Fish:
 	var catchable_fish = []
 	var current_time := Game.time / Game.TIME_IN_DAY
-	
+
 	for item in items:
 		if item is Fish:
 			if item.location == location and rod_power >= item.power_needed:
-				# hour_start == hour_end means always available
-				var time_ok = item.hour_start == item.hour_end
-				if not time_ok:
-					if item.hour_start < item.hour_end:
-						time_ok = current_time >= item.hour_start and current_time < item.hour_end
-					else:
-						# Wraps midnight e.g. 0.9 -> 0.1
-						time_ok = current_time >= item.hour_start or current_time < item.hour_end
-				if time_ok:
-					catchable_fish.append(item)
-	
+				catchable_fish.append(item)
+
 	if catchable_fish.is_empty():
 		return null
-	
+
 	var total_weight = 0.0
 	for fish in catchable_fish:
-		total_weight += get_rarity_weight(fish.rarity)
-	
+		total_weight += _get_weighted_rarity(fish, current_time)
+
 	var random_value = randf() * total_weight
 	var current_weight = 0.0
 	catchable_fish.shuffle()
-	
+
 	for fish in catchable_fish:
-		current_weight += get_rarity_weight(fish.rarity)
+		current_weight += _get_weighted_rarity(fish, current_time)
 		if random_value < current_weight:
 			return fish
-	
+
 	return null
+
+
+func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
+	var base = get_rarity_weight(fish.rarity)
+	if fish.hour_start == fish.hour_end:
+		return base
+	var in_peak: bool
+	if fish.hour_start < fish.hour_end:
+		in_peak = current_time >= fish.hour_start and current_time < fish.hour_end
+	else:
+		in_peak = current_time >= fish.hour_start or current_time < fish.hour_end
+	return base * (2.0 if in_peak else 0.25)
 
 func get_junk(location: Game.Location, rod_power: int) -> ItemType:
 	var catchable_junk = []
