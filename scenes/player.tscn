@@ -47,6 +47,7 @@
 [ext_resource type="PackedScene" uid="uid://c3x0kaqpwgj4q" path="res://scenes/ui/inventory_button.tscn" id="42_holxr"]
 [ext_resource type="Texture2D" uid="uid://dygfbet0gwv33" path="res://assets/sprites/book.png" id="43_g5jhy"]
 [ext_resource type="Texture2D" uid="uid://5ts8q1nqtsew" path="res://assets/sprites/trap.png" id="45_mx1m4"]
+[ext_resource type="Texture2D" uid="uid://cpf0vvnvdfa4n" path="res://assets/sprites/minigame-fish-icon.png" id="45_u2ulf"]
 [ext_resource type="Texture2D" uid="uid://byw5u2jj6d2l7" path="res://assets/sprites/traps.png" id="46_4gjji"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fulsm"]
@@ -1964,6 +1965,22 @@ offset_bottom = 3.008
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("21_a38lo")
+
+[node name="Fish" type="TextureRect" parent="InteractionMark" unique_id=1688260418]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.437
+anchor_right = 0.5
+anchor_bottom = 0.437
+offset_left = -4.0
+offset_top = -4.992
+offset_right = 4.0
+offset_bottom = 3.008
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("45_u2ulf")
+expand_mode = 2
 
 [node name="Book" type="TextureRect" parent="InteractionMark" unique_id=627607132]
 layout_mode = 1

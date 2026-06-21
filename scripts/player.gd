@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 const BASE_WALKING_SPEED := 100.0
-const BASE_TRAP_PLACE_DISTANCE = 50.0
+const BASE_TRAP_PLACE_DISTANCE = 35.0
 const DIRECTIONS = {
 	"left": Vector2.LEFT,
 	"right": Vector2.RIGHT,
@@ -56,6 +56,16 @@ func _ready() -> void:
 	for i in range(line_segments):
 		line_points.append(Vector2.ZERO)
 		line_velocities.append(Vector2.ZERO)
+	
+	# Initialize traps
+	for trap in Game.traps:
+		var placed_trap = preload("res://scenes/trap.tscn").instantiate()
+		placed_trap.trap = trap["trap"]
+		placed_trap.location = trap["location"]
+		placed_trap.global_position = Vector2(trap["x"], trap["y"])
+		placed_trap.inventory = trap["inventory"]
+		placed_trap.bait_inventory = trap["bait_inventory"]
+		get_parent().add_child(placed_trap, true)
 	
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
@@ -391,6 +401,10 @@ func update_catalog() -> void:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = true
+	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer.get_children().size() == 0:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = false
+	else:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = true
 	var total = 0.0
 	var bag = Game.bag.list.duplicate()
 	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
@@ -679,17 +693,28 @@ func _process_input(delta: float) -> void:
 
 	# Trap placement
 	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish"):
+		if Game.traps.size() >= Game.get_max_traps():
+			Toast.add("You have too many traps down!")
+			return
 		var placed_trap = preload("res://scenes/trap.tscn").instantiate()
 		placed_trap.trap = Game.equipped_trap
 		var tilemap := get_parent().get_node("Ground") as TileMapLayer
 		var data := tilemap.get_cell_tile_data(selected_tile)
 		placed_trap.location = Game.Location.get(data.get_custom_data("location"))
-		print(selected_tile)
 		placed_trap.global_position = tilemap.map_to_local(selected_tile)
 		get_parent().add_child(placed_trap, true)
 		Game.inventory.take_item(Game.equipped_trap, 1)
+		Game.traps.append({
+			"x": placed_trap.global_position.x,
+			"y": placed_trap.global_position.y,
+			"location": placed_trap.location,
+			"inventory": placed_trap.inventory,
+			"bait_inventory": placed_trap.bait_inventory,
+			"trap": placed_trap.trap
+		})
 		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
 		Game.equipped_trap = null
+		fish_control_safe = false
 
 	move_and_slide()
 	global_position = round(global_position / 2) * 2
@@ -1010,11 +1035,18 @@ func _process_ui(delta: float) -> void:
 		if body.is_in_group("shop"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = true
+			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = false
 		if body.is_in_group("bestiary"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = false
+			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = true
+		if body.is_in_group("trap"):
+			$InteractionMark.visible = true
+			$InteractionMark/Coin.visible = false
+			$InteractionMark/Fish.visible = true
+			$InteractionMark/Book.visible = false
 	if interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
 		$InteractionMark.visible = false
 	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size())) * 100.0

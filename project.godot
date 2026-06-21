@@ -60,6 +60,7 @@ enabled=PackedStringArray("res://addons/epic-online-services-godot/plugin.cfg", 
 shop=""
 players=""
 bestiary=""
+trap=""
 
 [input]
 

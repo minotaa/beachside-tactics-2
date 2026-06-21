@@ -16,9 +16,8 @@ func _process(delta: float) -> void:
 	time_to_decrement += (sqrt(trap.fishing_speed) * 3.5) * 0.001
 	if bait_inventory.total_size() > 0:
 		time_to_decrement += (sqrt(((bait_inventory.get_item(0).type) as Bait).extra_fishing_speed) * 3.5) * 0.001
-	print(delta)
-	print(time_to_decrement)
 	timer -= time_to_decrement
+	$Sprite2D.position.y = 1.0 * sin(timer)
 	if timer < 0.0:
 		timer = BASE_CATCH_TIME
 		if inventory.total_size() < trap.space:

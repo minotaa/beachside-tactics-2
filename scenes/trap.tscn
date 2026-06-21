@@ -10,7 +10,7 @@ atlas = ExtResource("2_aucmg")
 region = Rect2(0, 0, 16, 16)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_s6527"]
-radius = 11.18034
+radius = 16.0
 
 [node name="Trap" type="Node2D" unique_id=291842965]
 script = ExtResource("1_62q8x")
@@ -44,7 +44,7 @@ grow_vertical = 2
 texture = ExtResource("4_1sb0t")
 expand_mode = 2
 
-[node name="Area2D" type="Area2D" parent="." unique_id=1727853674]
+[node name="Area2D" type="Area2D" parent="." unique_id=1727853674 groups=["trap"]]
 collision_layer = 2
 collision_mask = 0
 

@@ -18,8 +18,7 @@ enum Category {
 }
 
 enum Location {
-	Crystalwater_Beach,
-	Crystalwater_Shore # Instead of making a different system for trap fish, I'll just make a location that you can't fish in.
+	Crystalwater_Beach
 }
 
 enum Difficulty {
@@ -59,6 +58,7 @@ var bestiary = {}
 var acknowledged_bestiary = {}
 var highest_star = {}
 var flags = {}
+var traps = []
 var inventory_upgrade_bestiary_bonus = 0
 
 var game_scene = preload("res://scenes/game.tscn")
@@ -184,6 +184,9 @@ func add_xp(amount: float) -> void:
 	while xp >= calculate_xp_for_level(level):
 		level_up()
 
+func get_max_traps() -> int:
+	return 5
+
 func get_max_inventory_size() -> int:
 	var size = 25
 	size += inventory_upgrade_bestiary_bonus
@@ -302,6 +305,21 @@ func load_game() -> void:
 			acknowledged_bestiary = data["acknowledged_bestiary"]
 		if data.has("flags"):
 			flags = data["flags"]
+		if data.has("traps"):
+			for trap in data["traps"]:
+				var trap_object = {}
+				var inventory = Inventory.new()
+				var bait_inventory = Inventory.new()
+				inventory.set_list_from_save(trap["inventory"])
+				bait_inventory.set_list_from_save(trap["bait_inventory"])
+				trap_object["inventory"] = inventory
+				trap_object["bait_inventory"] = bait_inventory
+				trap_object["x"] = trap["x"]
+				trap_object["y"] = trap["y"]
+				print(trap["location"])
+				trap_object["location"] = trap["location"]
+				trap_object["trap"] = Catalog.get_item(trap["trap"])
+				traps.append(trap_object)
 		if data.has("inventory_upgrade_bestiary_bonus"):
 			inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
 		if data.has("equipped_bait"):
@@ -337,7 +355,17 @@ func load_game() -> void:
 	print("Loaded save data.")
 		
 func get_save_data() -> Dictionary:
-	return {
+	var traps_data = []
+	for trap in traps:
+		var trap_object = {}
+		trap_object["x"] = trap["x"]
+		trap_object["y"] = trap["y"]
+		trap_object["trap"] = trap["trap"].id
+		trap_object["inventory"] = trap["inventory"].to_list()
+		trap_object["bait_inventory"] = trap["bait_inventory"].to_list()
+		trap_object["location"] = trap["location"]
+		traps_data.append(trap_object)
+	var save_data = {
 		"bag": bag.to_list(),
 		"inventory": inventory.to_list(),
 		"balance": balance,
@@ -354,8 +382,10 @@ func get_save_data() -> Dictionary:
 		"acknowledged_bestiary": acknowledged_bestiary,
 		"flags": flags,
 		"inventory_upgrade_bestiary_bonus": inventory_upgrade_bestiary_bonus,
-		"highest_star": highest_star
+		"highest_star": highest_star,
+		"traps": traps_data
 	}
+	return save_data
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:

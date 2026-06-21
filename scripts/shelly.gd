@@ -58,7 +58,7 @@ func calculate_money_earned() -> float:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+			if catchable.location == Game.Location.Crystalwater_Beach:
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					total += money_table.get(catchable.rarity)
 	return total
@@ -68,7 +68,7 @@ func calculate_xp_earned() -> float:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+			if catchable.location == Game.Location.Crystalwater_Beach:
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					total += xp_table.get(catchable.rarity)
 	return total
@@ -78,7 +78,7 @@ func get_unacknowledged_fish() -> Array:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach or catchable.location == Game.Location.Crystalwater_Shore:
+			if catchable.location == Game.Location.Crystalwater_Beach:
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					to_ack.append(catchable)
 	return to_ack

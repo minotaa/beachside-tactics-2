@@ -30,7 +30,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_kr8rm")
 }],
-"loop": true,
+"loop": 1,
 "name": &"blink",
 "speed": 5.0
 }, {
@@ -41,13 +41,13 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_yi601")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 1.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rw3ai"]
-size = Vector2(14, 24)
+size = Vector2(6, 19)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_popqq"]
 size = Vector2(18, 25)
@@ -69,7 +69,7 @@ sprite_frames = SubResource("SpriteFrames_t4id3")
 animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1169953044]
-position = Vector2(0, 4)
+position = Vector2(0, 6.5)
 shape = SubResource("RectangleShape2D_rw3ai")
 
 [node name="Bestiary" type="Area2D" parent="." unique_id=145546351 groups=["bestiary"]]

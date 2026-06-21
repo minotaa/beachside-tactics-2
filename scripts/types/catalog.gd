@@ -21,13 +21,13 @@ func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 	else:
 		return get_fish(location, rod_power)
 
-func get_fish(location: Game.Location, rod_power: int) -> Fish:
+func get_fish(location: Game.Location, rod_power: int, trap: bool = false) -> Fish:
 	var catchable_fish = []
 	var current_time := Game.time / Game.TIME_IN_DAY
 
 	for item in items:
 		if item is Fish:
-			if item.location == location and rod_power >= item.power_needed:
+			if item.location == location and rod_power >= item.power_needed and item.trap_only == trap:
 				catchable_fish.append(item)
 
 	if catchable_fish.is_empty():
@@ -47,7 +47,6 @@ func get_fish(location: Game.Location, rod_power: int) -> Fish:
 			return fish
 
 	return null
-
 
 func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
 	var base = get_rarity_weight(fish.rarity)
