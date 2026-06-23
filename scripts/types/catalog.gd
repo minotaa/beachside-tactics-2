@@ -27,7 +27,7 @@ func get_fish(location: Game.Location, rod_power: int, trap: bool = false) -> Fi
 
 	for item in items:
 		if item is Fish:
-			if item.location == location and rod_power >= item.power_needed and item.trap_only == trap:
+			if item.location == location and rod_power >= item.power_needed and (trap or not item.trap_only):
 				catchable_fish.append(item)
 
 	if catchable_fish.is_empty():
@@ -463,7 +463,7 @@ func _enter_tree() -> void:
 	
 	atlas = AtlasTexture.new()
 	atlas.atlas = preload("res://assets/sprites/fish.png")
-	atlas.region = Rect2(16.0, 16.0, 16.0, 16.0)
+	atlas.region = Rect2(32.0, 16.0, 16.0, 16.0)
 	var tuna = Fish.new(22, "Tuna", atlas)
 	tuna.description = "A muscular, relentless swimmer built for distance and speed. Most active as daylight fades into night."
 	tuna.sell_price = 175.0
@@ -479,7 +479,7 @@ func _enter_tree() -> void:
 	
 	atlas = AtlasTexture.new()
 	atlas.atlas = preload("res://assets/sprites/fish.png")
-	atlas.region = Rect2(16.0, 16.0, 16.0, 16.0)
+	atlas.region = Rect2(48.0, 16.0, 16.0, 16.0)
 	var barracuda = Fish.new(23, "Barracuda", atlas)
 	barracuda.description = "A sleek, razor-toothed hunter with a nasty temper. Patrols the dark waters at night and won't go down without a fight."
 	barracuda.sell_price = 300.0
@@ -501,7 +501,7 @@ func _enter_tree() -> void:
 	common_trap.fishing_power = 12.0
 	common_trap.fishing_speed = 2.0
 	common_trap.space = 3
-	common_trap.bait_storage = 12
+	common_trap.bait_storage = 8
 	common_trap.purchase_limit = 10
 	common_trap.purchasable = true
 	common_trap.rarity = Game.Rarity.COMMON

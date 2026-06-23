@@ -461,6 +461,87 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			update_bestiary()
 
+var last_trap: Node2D
+
+func update_trap() -> void:
+	for child in $UI/Trap/Container/Inventory/ScrollContainer/GridContainer.get_children():
+		child.queue_free()
+	for child in $UI/Trap/Container/Bait/ScrollContainer/GridContainer.get_children():
+		child.queue_free()
+	for child in $UI/Trap/Container/Bait/ScrollContainer2/GridContainer.get_children():
+		child.queue_free()
+	$UI/Trap/Container/Inventory/Title.text = "Trap (" + str(roundi(last_trap.inventory.total_size())) + "/" + str(roundi(last_trap.trap.space)) + ")"
+	$UI/Trap/Container/Bait/Title.text = "Bait (" + str(roundi(last_trap.bait_inventory.total_size())) + "/" + str(roundi(last_trap.trap.bait_storage)) + ")"
+	for item in last_trap.inventory.list:
+		var fish = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		
+		fish.get_node("TextureRect").texture = item.type.texture
+		fish.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+		fish.connect("pressed", Callable(self, "collect_from_trap").bind(item.type, item.amount))
+		fish.get_node("Equipped").hide()
+		fish.get_node("Label").show()
+		fish.get_node("Label").text = "x" + str(roundi(item.amount))
+		$UI/Trap/Container/Inventory/ScrollContainer/GridContainer.add_child(fish)
+	
+	for item in last_trap.bait_inventory.list:
+		var btn = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		btn.get_node("TextureRect").texture = item.type.texture
+		btn.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+		btn.connect("pressed", Callable(self, "remove_bait_from_trap").bind(item.type, item.amount))
+		btn.get_node("Equipped").hide()
+		btn.get_node("Label").show()
+		btn.get_node("Label").text = "x" + str(roundi(item.amount))
+		$UI/Trap/Container/Bait/ScrollContainer/GridContainer.add_child(btn)
+
+	for item in Game.inventory.list:
+		if not item.type is Bait:
+			continue
+		var btn = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		btn.get_node("TextureRect").texture = item.type.texture
+		btn.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
+		btn.connect("pressed", Callable(self, "insert_bait_into_trap").bind(item.type, item.amount))
+		btn.get_node("Equipped").hide()
+		btn.get_node("Label").show()
+		btn.get_node("Label").text = "x" + str(roundi(item.amount))
+		$UI/Trap/Container/Bait/ScrollContainer2/GridContainer.add_child(btn)
+	
+func insert_bait_into_trap(item: ItemType, amount: int) -> void:
+	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
+	if last_trap.bait_inventory.total_size() + take_amount > last_trap.trap.bait_storage:
+		Toast.add("The trap's bait storage is full!")
+		return
+	Game.inventory.take_item(item, take_amount)
+	last_trap.bait_inventory.add_item(ItemStack.new(item, take_amount))
+	update_trap()
+
+func remove_bait_from_trap(item: ItemType, amount: int) -> void:
+	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
+	last_trap.bait_inventory.take_item(item, take_amount)
+	Game.inventory.add_item(ItemStack.new(item, take_amount))
+	update_trap()
+	
+func collect_from_trap(item: ItemType, amount: int) -> void:
+	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
+	if not Game.bag.would_fit(ItemStack.new(item, take_amount), Game.get_max_inventory_size()):
+		Toast.add("Your tackle box doesn't have enough space!")
+		return
+	last_trap.inventory.take_item(item, take_amount)
+	Game.bag.add_item(ItemStack.new(item, take_amount))
+	update_trap()
+	
+func pickup_trap() -> void:
+	if not Game.bag.would_fit_all(last_trap.inventory, Game.get_max_inventory_size()):
+		Toast.add("Your tackle box doesn't have enough space to pick up this trap!")
+		return
+	last_trap.inventory.transfer_limited_to(Game.bag, Game.get_max_inventory_size())
+	last_trap.bait_inventory.transfer_all_to(Game.inventory)
+	Game.inventory.add_item(ItemStack.new(last_trap.trap, 1))
+	Toast.add("You picked up a: " + last_trap.trap.name)
+	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
+	last_trap.queue_free()
+	$UI/Trap.hide()
+	$UI/Main.show()
+	
 func _input(event: InputEvent) -> void:
 	# Zoom
 	if event.is_action_pressed("zoom_in"):
@@ -508,6 +589,31 @@ func _input(event: InputEvent) -> void:
 						interacting = true
 			else:
 				$UI/Bestiary.visible = false
+				$UI/Main.visible = true
+			if not $UI/Trap.visible:
+				var closest_trap = null
+				var closest_distance = INF
+
+				for body in $Interaction.get_overlapping_areas():
+					if body.is_in_group("trap"):
+						var distance = global_position.distance_squared_to(body.global_position)
+
+						if distance < closest_distance:
+							closest_distance = distance
+							closest_trap = body
+
+				if closest_trap:
+					last_trap = closest_trap.get_node("..")
+					if not last_trap.is_connected("trap_updated", update_trap):
+						last_trap.connect("trap_updated", update_trap)
+					else:
+						last_trap.disconnect("trap_updated", update_trap)
+						last_trap.connect("trap_updated", update_trap)
+					update_trap()
+					$UI/Main.visible = false
+					$UI/Trap.visible = true
+			else:
+				$UI/Trap.visible = false
 				$UI/Main.visible = true
 
 	# Let UI consume input first
@@ -641,7 +747,8 @@ func _process_input(delta: float) -> void:
 		var aboveground = get_parent().get_node("Aboveground") as TileMapLayer
 		var aboveground2 = get_parent().get_node("Aboveground2") as TileMapLayer
 		var no_aboveground = aboveground.get_cell_source_id(mouse_tile) == -1 and aboveground2.get_cell_source_id(mouse_tile) == -1
-		if no_aboveground and data and data.get_custom_data("water") and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
+		var tile_occupied = Game.traps.any(func(t): return tilemap.local_to_map(tilemap.to_local(Vector2(t["x"], t["y"]))) == mouse_tile)
+		if no_aboveground and data and data.get_custom_data("water") and not tile_occupied and global_position.distance_to(tilemap.map_to_local(mouse_tile)) < BASE_TRAP_PLACE_DISTANCE:
 			$Trap.global_position = tilemap.map_to_local(mouse_tile)
 			selected_tile = mouse_tile
 		else:
@@ -730,6 +837,7 @@ func _is_ui_blocking() -> bool:
 		or $UI/Vendor.visible
 		or $UI/Bestiary.visible
 		or $UI/Inventory.visible
+		or $UI/Trap.visible
 		or immersive_interact != null
 	)
 
@@ -990,7 +1098,6 @@ func update_inventory() -> void:
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_trap").bind(item.type.id))
 			$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
-	
 
 func near_shop() -> bool:
 	for body in $Interaction.get_overlapping_areas():
@@ -1018,6 +1125,11 @@ func _process_ui(delta: float) -> void:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
 	elif $UI/Bestiary.visible:
 		var panel_width = -$UI/Bestiary/List.size.x
+		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
+		var target_pos = global_position + Vector2(offset, 0)
+		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
+	elif $UI/Trap.visible:
+		var panel_width = -$UI/Trap/Container.size.x
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
 		var target_pos = global_position + Vector2(offset, 0)
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
@@ -1103,7 +1215,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
-	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible):
+	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible):
 		if not $UI/Inventory.visible:
 			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()

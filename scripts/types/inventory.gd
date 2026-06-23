@@ -3,6 +3,28 @@ class_name Inventory
 
 var list = []
 
+func would_fit(item: ItemStack, max_size: int) -> bool:
+	return total_size() + item.amount <= max_size
+
+func would_fit_all(other: Inventory, max_size: int) -> bool:
+	return total_size() + other.total_size() <= max_size
+
+func transfer_all_to(other: Inventory) -> void:
+	for item in list:
+		other.add_item(item)
+	list = []
+
+func transfer_limited_to(other: Inventory, max_size: int) -> void:
+	var remaining := []
+
+	for item in list:
+		if other.total_size() + item.amount <= max_size:
+			other.add_item(item)
+		else:
+			remaining.append(item)
+
+	list = remaining
+
 func total_size() -> int:
 	var size = 0
 	for item in list:
