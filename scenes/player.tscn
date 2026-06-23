@@ -1945,6 +1945,7 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="Trap" type="Control" parent="UI" unique_id=215917783]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -1971,10 +1972,9 @@ theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
 theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_fdfoy")
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="Inventory" type="Control" parent="UI/Trap/Container" unique_id=1702520141]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -2066,6 +2066,7 @@ label_settings = SubResource("LabelSettings_a38lo")
 vertical_alignment = 1
 
 [node name="Bait" type="Control" parent="UI/Trap/Container" unique_id=1360505671]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -2255,5 +2256,5 @@ texture_scale = 0.5
 [connection signal="pressed" from="UI/Bestiary/List/Close" to="." method="_on_close_shop_pressed"]
 [connection signal="pressed" from="UI/Trap/Container/Inventory/Close" to="." method="_on_close_shop_pressed"]
 [connection signal="pressed" from="UI/Trap/Container/Inventory/Pickup" to="." method="pickup_trap"]
-[connection signal="pressed" from="UI/Trap/Container/Inventory/Pickup2" to="." method="pickup_trap"]
+[connection signal="pressed" from="UI/Trap/Container/Inventory/Pickup2" to="." method="collect_all_from_trap"]
 [connection signal="pressed" from="UI/Trap/Container/Bait/Close" to="." method="_on_close_shop_pressed"]

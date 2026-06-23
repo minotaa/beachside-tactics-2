@@ -520,6 +520,18 @@ func remove_bait_from_trap(item: ItemType, amount: int) -> void:
 	Game.inventory.add_item(ItemStack.new(item, take_amount))
 	update_trap()
 	
+func collect_all_from_trap() -> void:
+	var full = false
+	for item in last_trap.inventory.list.duplicate():
+		if Game.bag.would_fit(ItemStack.new(item.type, item.amount), Game.get_max_inventory_size()):
+			last_trap.inventory.take_item(item.type, item.amount)
+			Game.bag.add_item(ItemStack.new(item.type, item.amount))
+		else:
+			full = true
+	if full:
+		Toast.add("Your tackle box is full, some fish were left behind!")
+	update_trap()
+	
 func collect_from_trap(item: ItemType, amount: int) -> void:
 	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
 	if not Game.bag.would_fit(ItemStack.new(item, take_amount), Game.get_max_inventory_size()):
