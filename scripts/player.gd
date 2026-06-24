@@ -520,11 +520,21 @@ func remove_bait_from_trap(item: ItemType, amount: int) -> void:
 	Game.inventory.add_item(ItemStack.new(item, take_amount))
 	update_trap()
 	
+var xp_table := {
+	Game.Rarity.COMMON:    50.0,
+	Game.Rarity.UNCOMMON:  100.0,
+	Game.Rarity.RARE:      750.0,
+	Game.Rarity.EPIC:      2000.0,
+	Game.Rarity.LEGENDARY: 7500.0
+}
+	
 func collect_all_from_trap() -> void:
 	var full = false
 	for item in last_trap.inventory.list.duplicate():
 		if Game.bag.would_fit(ItemStack.new(item.type, item.amount), Game.get_max_inventory_size()):
 			last_trap.inventory.take_item(item.type, item.amount)
+			Game.catches += item.amount
+			Game.add_xp(xp_table.get(item.type.rarity, 0.0) * item.amount)
 			Game.bag.add_item(ItemStack.new(item.type, item.amount))
 		else:
 			full = true
@@ -538,7 +548,9 @@ func collect_from_trap(item: ItemType, amount: int) -> void:
 		Toast.add("Your tackle box doesn't have enough space!")
 		return
 	last_trap.inventory.take_item(item, take_amount)
+	Game.catches += take_amount
 	Game.bag.add_item(ItemStack.new(item, take_amount))
+	Game.add_xp(xp_table.get(item.rarity, 0.0) * take_amount)
 	update_trap()
 	
 func pickup_trap() -> void:

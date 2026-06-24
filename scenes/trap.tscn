@@ -20,7 +20,7 @@ z_index = 999
 texture = SubResource("AtlasTexture_s6527")
 
 [node name="InteractionMark" type="TextureRect" parent="." unique_id=127980685]
-z_index = 127
+z_index = 1288
 offset_left = -8.0
 offset_top = -26.0
 offset_right = 8.0

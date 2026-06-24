@@ -508,6 +508,10 @@ func _enter_tree() -> void:
 	common_trap.category = Game.Category.TRAPS
 	common_trap.price = 2500
 	common_trap.sell_price = 250.0
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/submerged-traps.png")
+	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
+	common_trap.submerged_texture = atlas
 	common_trap.data = { 
 		"extra_stats": {
 			"Space": "3",
@@ -517,3 +521,82 @@ func _enter_tree() -> void:
 		}
 	}
 	items.append(common_trap)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/bait.png")
+	atlas.region = Rect2(16.0, 0.0, 16.0, 16.0)
+	var snails = Bait.new(25, "Snails", atlas)
+	snails.category = Game.Category.BAIT
+	snails.rarity = Game.Rarity.COMMON
+	snails.purchasable = true
+	snails.extra_fishing_speed = 100.0
+	snails.extra_quick_bite = 5.0
+	snails.description = "A garden-variety mollusk. Helpful for attracting a larger variety of fish."
+	snails.price = 100.0
+	snails.data = { 
+		"extra_stats": {
+			"Fishing Speed": "+100",
+			"Quick Bite": "+5"
+		}
+	}
+	items.append(snails)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/bait.png")
+	atlas.region = Rect2(32.0, 0.0, 16.0, 16.0)
+	var peanuts = Bait.new(26, "Peanuts", atlas)
+	peanuts.category = Game.Category.BAIT
+	peanuts.rarity = Game.Rarity.COMMON
+	peanuts.purchasable = true
+	peanuts.extra_fishing_speed = 200.0
+	peanuts.extra_quick_bite = 15.0
+	peanuts.description = "The return. Dense, oily, and crunchy. Fish love this stuff."
+	peanuts.price = 300.0
+	peanuts.data = { 
+		"extra_stats": {
+			"Fishing Speed": "+200",
+			"Quick Bite": "+15"
+		}
+	}
+	items.append(peanuts)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/items.png")
+	atlas.region = Rect2(48.0, 0.0, 16.0, 16.0)
+	var turtle_fishing_rod = FishingRod.new(27, "Turtle Rod", atlas)
+	turtle_fishing_rod.fishing_power = 100.0
+	turtle_fishing_rod.description = "Shelly's old fishing rod, designed with turtle coloring."
+	turtle_fishing_rod.purchase_limit = 1
+	turtle_fishing_rod.purchasable = true
+	turtle_fishing_rod.rarity = Game.Rarity.UNCOMMON
+	turtle_fishing_rod.category = Game.Category.RODS
+	turtle_fishing_rod.junk_chance = 25.0
+	turtle_fishing_rod.price = 5000.0
+	turtle_fishing_rod.sell_price = 125.0
+	turtle_fishing_rod.baitable = true
+	turtle_fishing_rod.shoddy = false
+	turtle_fishing_rod.data = { 
+		"extra_stats": {
+			"Baitable": "Yes",
+			"Rod Power": "+100",
+			"Extra Junk Chance": "+25"
+		}
+	}
+	items.append(turtle_fishing_rod)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(64.0, 16.0, 16.0, 16.0)
+	var shrimp = Fish.new(28, "Shrimp", atlas)
+	shrimp.description = "A tiny little bottom feeder. A well known delicacy for its rich taste."
+	shrimp.sell_price = 200.0
+	shrimp.rarity = Game.Rarity.UNCOMMON
+	shrimp.difficulty = Game.Difficulty.INSANE
+	shrimp.trap_only = true
+	shrimp.location = Game.Location.Crystalwater_Beach
+	shrimp.hour_start = 0.0
+	shrimp.hour_end = 0.0
+	shrimp.category = Game.Category.FISH
+	shrimp.power_needed = 0.0
+	shrimp.threshold = 0.0
+	items.append(shrimp)

@@ -20,6 +20,7 @@ func _process(delta: float) -> void:
 		speed_bonus += ((bait_inventory.get_item(0).type) as Bait).extra_fishing_speed * 0.5
 	time_to_decrement += (sqrt(speed_bonus) * 3.5) * 0.001
 	timer -= time_to_decrement
+	$Sprite2D.texture = trap.submerged_texture
 	$Sprite2D.position.y = 1.0 * sin(timer)
 	if timer < 0.0:
 		timer = BASE_CATCH_TIME
