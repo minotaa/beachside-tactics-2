@@ -1,10 +1,11 @@
 extends Node2D
 
-func _process(delta: float) -> void:
-	if Game.dev_mode:
-		await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
-
 func _ready():
+	if Game.dev_mode:
+		$UI/Control/Label.visible = false
+		await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
+		return
+
 	$AnimatedSprite2D.play("default")
 	$UI/Control/Label.modulate = Color(0, 0, 0, 0)
 	$AnimatedSprite2D.global_position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2)
@@ -17,7 +18,7 @@ func _ready():
 		.set_ease(Tween.EASE_OUT)
 	tween = get_tree().create_tween()
 	tween.tween_property($UI/Control/Label, "modulate:a", 1.0, 1.5) \
-			.set_trans(Tween.TRANS_QUINT) \
-			.set_ease(Tween.EASE_OUT)
+		.set_trans(Tween.TRANS_QUINT) \
+		.set_ease(Tween.EASE_OUT)
 	await get_tree().create_timer(2.0).timeout
 	await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
