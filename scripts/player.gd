@@ -47,6 +47,30 @@ enum FishState {
 	INACTIVE # You're not doing anything.
 }
 
+func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.stream = load(path)
+	player.pitch_scale = randf_range(0.92, 1.08)
+	player.volume_db = volume
+	var stream_length := player.stream.get_length()
+	var start := from_position if from_position >= 0.0 else randf_range(0.0, stream_length - duration)
+	player.play(start)
+	await get_tree().create_timer(duration).timeout
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -80.0, 1.5)
+	await tween.finished
+	player.queue_free()
+
+func play_sfx(path: String, volume: float = -20.0) -> void:
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.stream = load(path)
+	player.volume_db = volume
+	player.pitch_scale = randf_range(0.92, 1.08)
+	player.play()
+	await player.finished
+	player.queue_free()
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(name))
@@ -234,6 +258,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
+	play_sfx("res://assets/sounds/cashregister.ogg", -10)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -448,6 +473,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
+			play_sfx("res://assets/sounds/jingle.ogg", -10)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -455,6 +481,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible:
+			play_sfx("res://assets/sounds/bookopen.ogg", -10)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -750,11 +777,15 @@ func _process_input(delta: float) -> void:
 			$Minigame/Progress.value += 145 * delta
 			$Minigame/Column.get_children()[0].set_vibrate(true)
 			Input.vibrate_handheld(10)
+			if randf() > 0.3:
+				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -18)
 			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
 				_on_fish_caught()
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
 			$Minigame/Progress.value -= 85 * delta
+			if randf() > 0.3:
+				play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, -30)
 			if $Minigame/Progress.value <= 0:
 				_on_fish_lost()
 	else:
@@ -896,6 +927,7 @@ func _on_fish_caught() -> void:
 				Game.highest_star.get(str(stack.type.id), 0),
 				stack.data.get("stars", 0)
 			)
+			play_sfx("res://assets/sounds/catch.ogg")
 	state = FishState.REELING_BACK
 	bobber.get_node("Splashes").amount = 64
 	Game.catches += 1
@@ -1337,7 +1369,9 @@ func _fishing_timer(location: Game.Location) -> void:
 		if bobber != null:
 			if not bobber.get_node("Ripple").emitting:
 				bobber.get_node("Ripple").restart()
-			
+		if randf() < 0.2:
+			play_sfx_briefly("res://assets/sounds/ripples.ogg", 1.3, -20)
+		
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
 			var fish = Catalog.get_fish_drop(location, rod_power)
@@ -1375,8 +1409,10 @@ func _fishing_timer(location: Game.Location) -> void:
 							Game.highest_star.get(str(stack.type.id), 0),
 							stack.data.get("stars", 0)
 						)
+						play_sfx("res://assets/sounds/catch.ogg")
 				return
 			else:
+				play_sfx("res://assets/sounds/oh.ogg", -20.0)
 				bobber.get_node("Exclaim").emitting = true
 				if fish.rarity == Game.Rarity.COMMON:
 					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-common.png")
@@ -1547,6 +1583,7 @@ func _on_base_animation_finished() -> void:
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
 				_fishing_timer(Game.Location.get(data.get_custom_data("location")))
+				play_sfx("res://assets/sounds/bobberland.ogg", -35)
 			else:
 				print("Invalid tile to fish on, stopping fishing")
 				state = FishState.INACTIVE
@@ -1575,6 +1612,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
+		play_sfx("res://assets/sounds/cashregister.ogg", -10)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()

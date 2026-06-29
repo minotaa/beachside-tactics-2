@@ -64,6 +64,31 @@ var inventory_upgrade_bestiary_bonus = 0
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
+func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.stream = load(path)
+	player.pitch_scale = randf_range(0.92, 1.08)
+	player.volume_db = volume
+	var stream_length := player.stream.get_length()
+	var start := from_position if from_position >= 0.0 else randf_range(0.0, stream_length - duration)
+	player.play(start)
+	await get_tree().create_timer(duration).timeout
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -80.0, 1.5)
+	await tween.finished
+	player.queue_free()
+
+func play_sfx(path: String, volume: float = -20.0) -> void:
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.stream = load(path)
+	player.volume_db = volume
+	player.pitch_scale = randf_range(0.92, 1.08)
+	player.play()
+	await player.finished
+	player.queue_free()
+
 func get_rarity_color(rarity: Rarity) -> String:
 	match rarity:
 		Game.Rarity.COMMON:
@@ -177,6 +202,7 @@ func level_up():
 	level += 1
 	Toast.add("You leveled up! You are now Level %d!" % [roundi(level)])
 	print("Level up! Now level ", level)
+	play_sfx("res://assets/sounds/levelup.ogg", -8.0)
 
 @rpc("authority", "call_local")
 func add_xp(amount: float) -> void:

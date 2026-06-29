@@ -96,6 +96,7 @@ func _on_quest_triggered(quest_id: String) -> void:
 			var xp = calculate_xp_earned()
 			Game.balance += money
 			Game.add_xp(xp)
+			Game.play_sfx("res://assets/sounds/reward2.ogg", -10)
 			Toast.add("You received $%s and %s XP!" % [roundi(money), roundi(xp)])
 
 			var before = Game.inventory_upgrade_bestiary_bonus
