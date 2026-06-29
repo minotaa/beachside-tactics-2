@@ -21,7 +21,7 @@ func _ready() -> void:
 			{
 				"text": "You got a fishing rod on you?",
 				"choices": [
-					{ "label": "Yeah.", "next": "called_out" },
+					{ "label": ["Yeah.", "ye", "Ye", "Yes."].pick_random(), "next": "called_out" },
 					{ "label": "No, sorry.", "next": "honest" }
 				]
 			}

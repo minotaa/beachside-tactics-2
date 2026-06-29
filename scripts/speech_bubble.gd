@@ -49,7 +49,7 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 		var tween = create_tween().set_loops()
 		tween.tween_property(indicator, "modulate:a", 0.0, 0.4)
 		tween.tween_property(indicator, "modulate:a", 1.0, 0.4)
-		while not Input.is_action_just_pressed("interact"):
+		while not Input.is_action_just_pressed("interact") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			await get_tree().process_frame
 	else:
 		await get_tree().create_timer(display_duration).timeout
