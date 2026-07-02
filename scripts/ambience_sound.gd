@@ -16,18 +16,35 @@ func _ready() -> void:
 	play()
 
 func bake_ocean_distances() -> void:
-	var tile_map = get_parent().get_parent().get_node("Ground") as TileMapLayer
-	var water_cells := tile_map.get_used_cells_by_id(0, WATER_ATLAS_COORDS)
-	var water_set := {}
-	for cell in water_cells:
-		water_set[cell] = true
+	var ground := get_parent().get_parent().get_node("Ground") as TileMapLayer
+	var above1 := get_parent().get_parent().get_node("Aboveground") as TileMapLayer
+	var above2 := get_parent().get_parent().get_node("Aboveground2") as TileMapLayer
 
-	for cell in tile_map.get_used_cells():
-		if water_set.has(cell):
+	var layers := [ground, above1, above2]
+
+	# Union of every cell that exists on any layer
+	var all_cells := {}
+	for layer in layers:
+		for cell in layer.get_used_cells():
+			all_cells[cell] = true
+
+	# A cell counts as water if ANY layer at that coord is flagged water
+	var water_cells: Array[Vector2i] = []
+	for cell in all_cells.keys():
+		for layer in layers:
+			var data = layer.get_cell_tile_data(cell)
+			if data and data.get_custom_data("water"):
+				water_cells.append(cell)
+				break
+
+	distance_cache.clear()
+	for cell in all_cells.keys():
+		if cell in water_cells:
+			distance_cache[cell] = 0.0
 			continue
 		var closest := INF
 		for water in water_cells:
-			var d := (cell - water).length()
+			var d = (cell - water).length()
 			if d < MAX_SEARCH_TILES:
 				closest = minf(closest, d)
 		distance_cache[cell] = closest

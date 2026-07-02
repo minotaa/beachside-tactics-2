@@ -258,7 +258,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	play_sfx("res://assets/sounds/cashregister.ogg", -10)
+	play_sfx("res://assets/sounds/cashregister.ogg", -20)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -363,10 +363,6 @@ func update_catalog() -> void:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = true
-	if Game.level >= 10:
-		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = true
-	else:
-		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = false
 	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
 	for item in Catalog.items:
 		if (item as ItemType).category == Game.Category.RODS:
@@ -426,7 +422,7 @@ func update_catalog() -> void:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = true
-	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer.get_children().size() == 0:
+	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer.get_children().size() == 0 or Game.level < 10:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = true
@@ -473,7 +469,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
-			play_sfx("res://assets/sounds/jingle.ogg", -10)
+			play_sfx("res://assets/sounds/jingle.ogg", -2)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -481,7 +477,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible:
-			play_sfx("res://assets/sounds/bookopen.ogg", -10)
+			play_sfx("res://assets/sounds/bookopen.ogg", -2)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -588,6 +584,7 @@ func pickup_trap() -> void:
 	last_trap.bait_inventory.transfer_all_to(Game.inventory)
 	Game.inventory.add_item(ItemStack.new(last_trap.trap, 1))
 	Toast.add("You picked up a: " + last_trap.trap.name)
+	play_sfx("res://assets/sounds/clang.ogg", -1)
 	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
 	last_trap.queue_free()
 	$UI/Trap.hide()
@@ -654,6 +651,7 @@ func _input(event: InputEvent) -> void:
 							closest_trap = body
 
 				if closest_trap:
+					play_sfx("res://assets/sounds/cageopen.ogg", -1)
 					last_trap = closest_trap.get_node("..")
 					if not last_trap.is_connected("trap_updated", update_trap):
 						last_trap.connect("trap_updated", update_trap)
@@ -730,6 +728,8 @@ func _process_input(delta: float) -> void:
 	# Hold fish button to reel bobber back manually
 	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
 		if bobber != null:
+			if randf() < 0.2:
+				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -20)
 			bobber.global_position = bobber.global_position.move_toward(
 				get_rod_tip(get_fishing_direction()),
 				40.0 * delta
@@ -777,15 +777,15 @@ func _process_input(delta: float) -> void:
 			$Minigame/Progress.value += 145 * delta
 			$Minigame/Column.get_children()[0].set_vibrate(true)
 			Input.vibrate_handheld(10)
-			if randf() > 0.3:
-				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -18)
+			if randf() < 0.2:
+				play_sfx_briefly("res://assets/sounds/squeak.ogg", 0.2, -20)
 			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
 				_on_fish_caught()
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
 			$Minigame/Progress.value -= 85 * delta
-			if randf() > 0.3:
-				play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, -30)
+			if randf() < 0.2:
+				play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, -20)
 			if $Minigame/Progress.value <= 0:
 				_on_fish_lost()
 	else:
@@ -874,6 +874,7 @@ func _process_input(delta: float) -> void:
 			"bait_inventory": placed_trap.bait_inventory,
 			"trap": placed_trap.trap
 		})
+		play_sfx("res://assets/sounds/dunk.ogg", -15)
 		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
 		Game.equipped_trap = null
 		fish_control_safe = false
@@ -973,6 +974,7 @@ func set_bait(id: int) -> void:
 		if Catalog.get_item(id) is Bait:
 			Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.equipped_bait = Catalog.get_item(id)
+			play_sfx("res://assets/sounds/squelch.ogg", -1)
 			if not Game.equipped_fishing_rod.baitable:
 				Toast.add("The bait won't work unless you have a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod that can be baited.")
 		else:
@@ -1317,6 +1319,8 @@ func _process_ui(delta: float) -> void:
 				bobber.global_position += direction_to_rod * 80.0 * delta
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			bobber.get_node("Splashes").restart()
+			if randf() < 0.3:
+				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -4)
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) <= 10:
 				state = FishState.INACTIVE
 				bobber_safe = true
@@ -1464,6 +1468,7 @@ func _on_base_animation_finished() -> void:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
+		play_sfx_briefly("res://assets/sounds/reeling.ogg", 1.5, -15)
 		bobber = preload("res://scenes/bobber.tscn").instantiate()
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
 		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
@@ -1612,7 +1617,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
-		play_sfx("res://assets/sounds/cashregister.ogg", -10)
+		play_sfx("res://assets/sounds/cashregister.ogg", -20)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()
