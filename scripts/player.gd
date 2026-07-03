@@ -260,7 +260,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	play_sfx("res://assets/sounds/cashregister.ogg", 4)
+	play_sfx("res://assets/sounds/cashregister.ogg", 2)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -471,15 +471,15 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
-			play_sfx("res://assets/sounds/jingle.ogg", 5)
+			play_sfx("res://assets/sounds/jingle.ogg", 2)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
 			$UI/Main.visible = false
 			update_catalog()
 	if npc.npc_name == "Shelly":
-		if not $UI/Bestiary.visible:
-			play_sfx("res://assets/sounds/bookopen.ogg", 5)
+		if not $UI/Bestiary.visible: 
+			play_sfx("res://assets/sounds/bookopen.ogg", 2)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -1640,7 +1640,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
-		play_sfx("res://assets/sounds/cashregister.ogg", 3)
+		play_sfx("res://assets/sounds/cashregister.ogg", 2)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()
