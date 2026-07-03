@@ -260,7 +260,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	play_sfx("res://assets/sounds/cashregister.ogg", 5)
+	play_sfx("res://assets/sounds/cashregister.ogg", 4)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -471,7 +471,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
-			play_sfx("res://assets/sounds/jingle.ogg", 15)
+			play_sfx("res://assets/sounds/jingle.ogg", 5)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -479,7 +479,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible:
-			play_sfx("res://assets/sounds/bookopen.ogg", 10)
+			play_sfx("res://assets/sounds/bookopen.ogg", 5)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -587,7 +587,7 @@ func pickup_trap() -> void:
 	last_trap.bait_inventory.transfer_all_to(Game.inventory)
 	Game.inventory.add_item(ItemStack.new(last_trap.trap, 1))
 	Toast.add("You picked up a: " + last_trap.trap.name)
-	play_sfx("res://assets/sounds/clang.ogg", 10.0)
+	play_sfx("res://assets/sounds/clang.ogg", 2.0)
 	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
 	last_trap.queue_free()
 	$UI/Trap.hide()
@@ -654,7 +654,7 @@ func _input(event: InputEvent) -> void:
 							closest_trap = body
 
 				if closest_trap:
-					play_sfx("res://assets/sounds/cageopen.ogg", 12.0)
+					play_sfx("res://assets/sounds/cageopen.ogg", 2.0)
 					last_trap = closest_trap.get_node("..")
 					if not last_trap.is_connected("trap_updated", update_trap):
 						last_trap.connect("trap_updated", update_trap)
@@ -1640,7 +1640,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
-		play_sfx("res://assets/sounds/cashregister.ogg", 5)
+		play_sfx("res://assets/sounds/cashregister.ogg", 3)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()
