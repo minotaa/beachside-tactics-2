@@ -1301,6 +1301,7 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/LevelBar.hide()
 			$UI/Main/InventoryButton.hide()
 			$UI/Inventory.show()
+			play_sfx("res://assets/sounds/open.ogg", 5.0)
 			update_inventory()
 		else:
 			$UI/Main/Combination.show()
@@ -1490,7 +1491,7 @@ func _on_base_animation_finished() -> void:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
-		play_sfx_briefly("res://assets/sounds/reeling.ogg", 1.5, 1.0)
+		play_sfx("res://assets/sounds/whoosh.ogg", 1.0)
 		bobber = preload("res://scenes/bobber.tscn").instantiate()
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
 		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
