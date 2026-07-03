@@ -996,7 +996,7 @@ func set_bait(id: int) -> void:
 				if not Game.equipped_fishing_rod.baitable:
 					Toast.add("The bait won't work unless you have a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod that can be baited.")
 			Game.equipped_bait = Catalog.get_item(id)
-			play_sfx("res://assets/sounds/squelch.ogg", 20.0)
+			play_sfx("res://assets/sounds/squelch.ogg", 3.0)
 		else:
 			LimboConsole.error("This doesn't seem to be bait.")
 	else:
