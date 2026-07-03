@@ -3,7 +3,7 @@ extends AudioStreamPlayer
 const WATER_ATLAS_COORDS := Vector2i(0, 13)
 const MAX_SEARCH_TILES := 20
 
-@export var max_volume_db: float = -18.0
+@export var max_volume_db: float = 5.0
 @export var min_volume_db: float = -80.0
 @export var max_distance: float = 250.0
 @export var min_distance: float = 120.0
