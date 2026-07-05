@@ -3,7 +3,7 @@ extends MarginContainer
 func _ready() -> void:
 	$MarginContainer/Label.text = "test"
 
-func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5) -> void:
+func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5, dialogue: bool = false) -> void:
 	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
@@ -42,7 +42,9 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 		)
 		await get_tree().create_timer(1.0 / text_speed).timeout
 		i += 1
-	
+		if dialogue:
+			Game.play_sfx("res://assets/sounds/a.ogg", 1, true, true, 0.9, 1.0)
+		
 	if immersive:
 		var indicator = $MarginContainer/TextureRect
 		indicator.visible = true

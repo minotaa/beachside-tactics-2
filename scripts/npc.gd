@@ -93,7 +93,7 @@ func _play_entry(entry: Dictionary) -> void:
 	else:
 		var bubble = speech_bubble_scene.instantiate()
 		add_child(bubble)
-		await bubble.play_line(text, marker, chars_per_second, is_immersive)
+		await bubble.play_line(text, marker, chars_per_second, is_immersive, 1.5, true)
 		if not is_in_dialogue:
 			return
 		_advance(entry.get("next", null))

@@ -49,4 +49,4 @@ spawn_path = NodePath("..")
 position = Vector2(-152, 138)
 
 [node name="Shelly" parent="." unique_id=1178087110 instance=ExtResource("5_iywne")]
-position = Vector2(-72, 140)
+position = Vector2(-73, 140)

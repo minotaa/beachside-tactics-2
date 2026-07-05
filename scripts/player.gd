@@ -49,9 +49,13 @@ enum FishState {
 	INACTIVE # You're not doing anything.
 }
 
+var _charging: bool = false
+@onready var _charge_buildup: AudioStreamPlayer = $ChargeBuildup
+
 func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
 	var player := AudioStreamPlayer.new()
 	add_child(player)
+	player.bus = "SFX"
 	player.stream = load(path)
 	player.pitch_scale = randf_range(0.92, 1.08)
 	player.volume_db = volume
@@ -67,6 +71,7 @@ func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0
 func play_sfx(path: String, volume: float = -20.0) -> void:
 	var player := AudioStreamPlayer.new()
 	add_child(player)
+	player.bus = "SFX"
 	player.stream = load(path)
 	player.volume_db = volume
 	player.pitch_scale = randf_range(0.92, 1.08)
@@ -260,7 +265,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	play_sfx("res://assets/sounds/cashregister.ogg", 2)
+	play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -310,7 +315,6 @@ func update_bestiary() -> void:
 		bestiary_item.disabled = true
 		$UI/Bestiary/List/ScrollContainer/GridContainer.add_child(bestiary_item)
 	# TODO: Add percentage of completed bestiary in current loc
-	
 	
 var previewed_item
 	
@@ -438,9 +442,6 @@ func update_catalog() -> void:
 				1: mult = 1.25
 				2: mult = 1.5
 				3: mult = 2.0
-			print(item.type.name)
-			print(str(mult))
-			print(str(item.data.get("stars", 0)))
 			var unit_price = item.type.sell_price * mult
 			var stack_price = unit_price * item.amount
 			total += stack_price
@@ -471,7 +472,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
-			play_sfx("res://assets/sounds/jingle.ogg", 2)
+			play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -479,7 +480,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible: 
-			play_sfx("res://assets/sounds/bookopen.ogg", 2)
+			play_sfx("res://assets/sounds/bookopen.ogg", -1)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -839,17 +840,30 @@ func _process_input(delta: float) -> void:
 
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 
-	# Power bar charge (held fish button while idle)
 	if not near_shop() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+			if not _charging:
+				_charging = true
+				_charge_buildup.play()
+
 			if hantenjutsushiki:
-				$FishPowerBar.value -= randi_range(1, 3)
+				if $FishPowerBar.value >= ($FishPowerBar.max_value / 2):
+					$FishPowerBar.value -= randi_range(1, 3)
+				else:
+					$FishPowerBar.value -= 1.25
 				if $FishPowerBar.value <= 0:
 					hantenjutsushiki = false
 			else:
-				$FishPowerBar.value += randi_range(1, 3)
+				if $FishPowerBar.value <= ($FishPowerBar.max_value / 2):
+					$FishPowerBar.value += randi_range(1, 3)
+				else:
+					$FishPowerBar.value += 1.25
 				if $FishPowerBar.value >= 100:
 					hantenjutsushiki = true
+					_charge_buildup.stop()
+		elif _charging:
+			_charging = false
+			_charge_buildup.stop()
 
 	# Hide power bar if inventory opens mid-charge
 	if $FishPowerBar.visible and ($UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
@@ -1640,7 +1654,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
-		play_sfx("res://assets/sounds/cashregister.ogg", 2)
+		play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()

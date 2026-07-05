@@ -42,7 +42,7 @@ theme_override_font_sizes/bold_italics_font_size = 48
 theme_override_font_sizes/italics_font_size = 48
 theme_override_font_sizes/mono_font_size = 48
 bbcode_enabled = true
-text = "[wave amp=25.0 freq=8.0 connected=0]Beachside Tactics [b]2[/b][/wave]"
+text = "Beachside Tactics"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -63,4 +63,47 @@ theme_override_fonts/font = ExtResource("1_l6cm7")
 theme_override_font_sizes/font_size = 24
 text = "play"
 
+[node name="Settings" type="VBoxContainer" parent="UI/Main" unique_id=329438994]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -192.0
+offset_top = -67.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Fullscreen" type="HBoxContainer" parent="UI/Main/Settings" unique_id=1359813852]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Main/Settings/Fullscreen" unique_id=816869084]
+layout_mode = 2
+text = "Fullscreen"
+
+[node name="CheckButton" type="CheckButton" parent="UI/Main/Settings/Fullscreen" unique_id=903272130]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(-5, 1)
+
+[node name="SFX" type="HBoxContainer" parent="UI/Main/Settings" unique_id=148001092]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Main/Settings/SFX" unique_id=379108461]
+layout_mode = 2
+text = "SFX"
+
+[node name="Slider" type="HSlider" parent="UI/Main/Settings/SFX" unique_id=1094466403]
+custom_minimum_size = Vector2(144, 0)
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, 4)
+value = 100.0
+
 [connection signal="pressed" from="UI/Main/Play" to="." method="_on_play_pressed"]
+[connection signal="toggled" from="UI/Main/Settings/Fullscreen/CheckButton" to="." method="_on_fullscreen_toggled"]
+[connection signal="drag_ended" from="UI/Main/Settings/SFX/Slider" to="." method="_on_sfx_drag_ended"]
+[connection signal="value_changed" from="UI/Main/Settings/SFX/Slider" to="." method="_on_sfx_value_changed"]

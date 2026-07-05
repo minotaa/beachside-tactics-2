@@ -40,6 +40,8 @@ const DAY_COLOR := Color.WHITE
 const NIGHT_COLOR := Color(0.192, 0.149, 0.502, 1.0)
 const TIME_IN_DAY = 1200 
 
+var sfx_volume: float = 100.0
+var fullscreen: bool = false
 var dev_mode: bool = false
 var level: int = 0
 var xp: float = 0.0
@@ -67,6 +69,7 @@ var main_menu_scene = preload("res://scenes/main_menu.tscn")
 func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
 	var player := AudioStreamPlayer.new()
 	add_child(player)
+	player.bus = "SFX"
 	player.stream = load(path)
 	player.pitch_scale = randf_range(0.92, 1.08)
 	player.volume_db = volume
@@ -79,14 +82,24 @@ func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0
 	await tween.finished
 	player.queue_free()
 
-func play_sfx(path: String, volume: float = -20.0) -> void:
+var _sfx_in_progress: Dictionary = {}
+
+func play_sfx(path: String, volume: float = -20.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
+	if no_overlap and _sfx_in_progress.get(path, false):
+		return
+	if no_overlap:
+		_sfx_in_progress[path] = true
 	var player := AudioStreamPlayer.new()
 	add_child(player)
+	player.bus = "SFX"
 	player.stream = load(path)
 	player.volume_db = volume
-	player.pitch_scale = randf_range(0.92, 1.08)
+	if pitch_rand:
+		player.pitch_scale = randf_range(pitch_lower, pitch_higher)
 	player.play()
 	await player.finished
+	if no_overlap:
+		_sfx_in_progress[path] = false
 	player.queue_free()
 
 func get_rarity_color(rarity: Rarity) -> String:
@@ -348,6 +361,20 @@ func load_game() -> void:
 				traps.append(trap_object)
 		if data.has("inventory_upgrade_bestiary_bonus"):
 			inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
+		if data.has("fullscreen"):
+			fullscreen = data["fullscreen"]
+			if fullscreen:
+				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+			else:
+				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		if data.has("sfx_volume"):
+			sfx_volume = data["sfx_volume"]
+			if sfx_volume <= 0.0:
+				AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), true)
+			else:
+				AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), false)
+				var db_value = lerp(-55.0, 0.0, sfx_volume / 100.0)
+				AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), db_value)
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
 			if bait_id != null:  # null means no bait equipped
@@ -392,6 +419,8 @@ func get_save_data() -> Dictionary:
 		trap_object["location"] = trap["location"]
 		traps_data.append(trap_object)
 	var save_data = {
+		"sfx_volume": sfx_volume,
+		"fullscreen": fullscreen,
 		"bag": bag.to_list(),
 		"inventory": inventory.to_list(),
 		"balance": balance,
