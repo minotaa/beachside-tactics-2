@@ -667,6 +667,9 @@ func _input(event: InputEvent) -> void:
 
 	# Begin charging cast
 	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
+		for children in get_children():
+			if children.name.begins_with("Speech Bubble"):
+				children.queue_free()
 		$FishPowerBar.visible = true
 		$FishPowerBar.value = 0
 		hantenjutsushiki = false
@@ -678,6 +681,8 @@ func _input(event: InputEvent) -> void:
 		var fish_dir := last_direction
 		bobber_safe = true
 		play_animation(body_type + "_fish_" + fish_dir)
+		print($FishPowerBar.value)
+		
 		fish_control_safe = false
 		if bobber != null:
 			bobber.queue_free()
@@ -804,6 +809,9 @@ func _process_input(delta: float) -> void:
 
 	if not near_npc() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+			for children in get_children():
+				if children.name.begins_with("Speech Bubble"):
+					children.queue_free()
 
 			if hantenjutsushiki:
 				if $FishPowerBar.value >= ($FishPowerBar.max_value / 2):
@@ -909,7 +917,7 @@ func _on_fish_caught() -> void:
 		else:
 			Game.bag.add_item(stack)
 			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
-			add_child(speech_bubble)
+			add_child(speech_bubble, true)
 			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
 			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
