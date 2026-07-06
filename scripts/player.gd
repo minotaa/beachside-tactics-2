@@ -9,6 +9,8 @@ const DIRECTIONS = {
 	"down": Vector2.DOWN
 }
 
+var _charging: bool = false
+@onready var _charge_buildup = $ChargeBuildup
 var current_log_path: String
 var original_zoom := Vector2(3.25, 3.25)
 var intended_zoom := Vector2(3.25, 3.25)
@@ -48,36 +50,6 @@ enum FishState {
 	REELING_BACK, # You're currently reeling the fish back in.
 	INACTIVE # You're not doing anything.
 }
-
-var _charging: bool = false
-@onready var _charge_buildup: AudioStreamPlayer = $ChargeBuildup
-
-func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
-	var player := AudioStreamPlayer.new()
-	add_child(player)
-	player.bus = "SFX"
-	player.stream = load(path)
-	player.pitch_scale = randf_range(0.92, 1.08)
-	player.volume_db = volume
-	var stream_length := player.stream.get_length()
-	var start := from_position if from_position >= 0.0 else randf_range(0.0, stream_length - duration)
-	player.play(start)
-	await get_tree().create_timer(duration).timeout
-	var tween := create_tween()
-	tween.tween_property(player, "volume_db", -80.0, 1.5)
-	await tween.finished
-	player.queue_free()
-
-func play_sfx(path: String, volume: float = -20.0) -> void:
-	var player := AudioStreamPlayer.new()
-	add_child(player)
-	player.bus = "SFX"
-	player.stream = load(path)
-	player.volume_db = volume
-	player.pitch_scale = randf_range(0.92, 1.08)
-	player.play()
-	await player.finished
-	player.queue_free()
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(name))
@@ -135,31 +107,28 @@ func update_fishing_line(delta):
 	var rod_tip = get_rod_tip(get_fishing_direction())
 	var bobber_pos = bobber.global_position
 	
-	# Safety check: ensure line physics is initialized at rod tip
 	if line_points.is_empty():
 		for i in range(line_segments):
-			# Initialize all points along a straight line from rod to bobber
 			var t = float(i) / float(line_segments - 1)
 			line_points.append(lerp(rod_tip, bobber_pos, t))
 			line_velocities.append(Vector2.ZERO)
 		
-	# Set endpoints
 	line_points[0] = rod_tip
 	line_points[line_segments - 1] = bobber_pos
 	
-	# Physics simulation for middle points
-	for i in range(1, line_segments - 1):
-		# Apply gravity (makes line sag)
-		line_velocities[i].y += line_gravity * delta
-		
-		# Apply velocity
-		line_points[i] += line_velocities[i] * delta
-		
-		# Damping (air resistance)
-		line_velocities[i] *= line_damping
+	if state == FishState.REELING_BACK or (state == FishState.FISHING and Input.is_action_pressed("fish")):
+		# Skip spring physics entirely, snap mid points toward a straight line fast
+		for i in range(1, line_segments - 1):
+			var t = float(i) / float(line_segments - 1)
+			var target = lerp(rod_tip, bobber_pos, t)
+			line_points[i] = line_points[i].lerp(target, 20.0 * delta)
+			line_velocities[i] = Vector2.ZERO
+	else:
+		for i in range(1, line_segments - 1):
+			line_velocities[i].y += line_gravity * delta
+			line_points[i] += line_velocities[i] * delta
+			line_velocities[i] *= line_damping
 	
-	# Constraint pass - keep segments connected (run multiple times for stability)
-	# More iterations = stiffer, fewer = more loose
 	var iterations = 5 if state == FishState.REELING or state == FishState.REELING_BACK else 3
 	for iteration in range(iterations):
 		for i in range(line_segments - 1):
@@ -169,19 +138,16 @@ func update_fishing_line(delta):
 			
 			var delta_pos = next_point - current_point
 			var current_distance = delta_pos.length()
-			if current_distance < 0.01:  # Prevent division by zero
+			if current_distance < 0.01:
 				continue
 			var difference = (current_distance - segment_length) / current_distance
-			
 			var offset = delta_pos * difference * line_stiffness
 			
-			# Don't move endpoints, apply smooth interpolation to middle points
 			if i > 0:
 				line_points[i] += offset * 0.5
 			if i < line_segments - 2:
 				line_points[i + 1] -= offset * 0.5
 	
-	# Update Line2D visual with smooth interpolation
 	if bobber.has_node("Line2D"):
 		var line = bobber.get_node("Line2D")
 		line.clear_points()
@@ -238,7 +204,6 @@ func select_item(id: int, ignore: bool = false) -> void:
 			$UI/Vendor/ItemPreview.visible = false
 		else:
 			$UI/Vendor/ItemPreview.visible = true
-		return
 	selected_item = item
 	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
@@ -248,7 +213,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	if item.data.has("extra_stats"):
 		for key in item.data["extra_stats"].keys():
 			index += 1
-			$UI/Vendor/ItemPreview/Description.text += str(key) + ": " + str(item.data["extra_stats"][key])
+			$UI/Vendor/ItemPreview/Description.text += str("[color=#828282]" + key) + "[/color][color=white]:[/color] " + str(item.data["extra_stats"][key])
 			if index < item.data["extra_stats"].keys().size():
 				$UI/Vendor/ItemPreview/Description.text += "\n"
 
@@ -265,7 +230,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
+	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
 	print("buying " + str(selected_item))
 	var item = selected_item
 	if item.price > Game.balance:
@@ -472,7 +437,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	immersive_interact = null
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
-			play_sfx("res://assets/sounds/jingle.ogg", -1)
+			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -480,7 +445,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible: 
-			play_sfx("res://assets/sounds/bookopen.ogg", -1)
+			Game.play_sfx("res://assets/sounds/bookopen.ogg", -1)
 			$UI/Bestiary.visible = true
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
@@ -536,7 +501,7 @@ func insert_bait_into_trap(item: ItemType, amount: int) -> void:
 	if last_trap.bait_inventory.total_size() + take_amount > last_trap.trap.bait_storage:
 		Toast.add("The trap's bait storage is full!")
 		return
-	play_sfx("res://assets/sounds/squelch.ogg", 1.0)
+	Game.play_sfx("res://assets/sounds/squelch.ogg", 1.0)
 	Game.inventory.take_item(item, take_amount)
 	last_trap.bait_inventory.add_item(ItemStack.new(item, take_amount))
 	update_trap()
@@ -588,7 +553,7 @@ func pickup_trap() -> void:
 	last_trap.bait_inventory.transfer_all_to(Game.inventory)
 	Game.inventory.add_item(ItemStack.new(last_trap.trap, 1))
 	Toast.add("You picked up a: " + last_trap.trap.name)
-	play_sfx("res://assets/sounds/clang.ogg", 2.0)
+	Game.play_sfx("res://assets/sounds/clang.ogg", 2.0)
 	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
 	last_trap.queue_free()
 	$UI/Trap.hide()
@@ -655,7 +620,7 @@ func _input(event: InputEvent) -> void:
 							closest_trap = body
 
 				if closest_trap:
-					play_sfx("res://assets/sounds/cageopen.ogg", 2.0)
+					Game.play_sfx("res://assets/sounds/cageopen.ogg", 2.0)
 					last_trap = closest_trap.get_node("..")
 					if not last_trap.is_connected("trap_updated", update_trap):
 						last_trap.connect("trap_updated", update_trap)
@@ -679,7 +644,7 @@ func _input(event: InputEvent) -> void:
 			Toast.add("You can't fish without a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 		return
 
-	if near_shop():
+	if near_npc():
 		return
 
 	# Confirm catch & start minigame
@@ -732,8 +697,7 @@ func _process_input(delta: float) -> void:
 	# Hold fish button to reel bobber back manually
 	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
 		if bobber != null:
-			if randf() < 0.2:
-				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -2)
+			Game.play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -2, -1.0, true, true)
 			bobber.global_position = bobber.global_position.move_toward(
 				get_rod_tip(get_fishing_direction()),
 				40.0 * delta
@@ -781,15 +745,13 @@ func _process_input(delta: float) -> void:
 			$Minigame/Progress.value += 145 * delta
 			$Minigame/Column.get_children()[0].set_vibrate(true)
 			Input.vibrate_handheld(10)
-			if randf() < 0.1:
-				play_sfx_briefly("res://assets/sounds/squeak.ogg", 0.2, 1)
+			Game.play_sfx_briefly("res://assets/sounds/squeak.ogg", 0.2, 1, -1, true, true)
 			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
 				_on_fish_caught()
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
 			$Minigame/Progress.value -= 85 * delta
-			if randf() < 0.1:
-				play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, 1.5)
+			Game.play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, 1.5, -1, true, true)
 			if $Minigame/Progress.value <= 0:
 				_on_fish_lost()
 	else:
@@ -840,11 +802,8 @@ func _process_input(delta: float) -> void:
 
 	velocity = velocity.normalized() * BASE_WALKING_SPEED
 
-	if not near_shop() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
+	if not near_npc() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
 		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
-			if not _charging:
-				_charging = true
-				_charge_buildup.play()
 
 			if hantenjutsushiki:
 				if $FishPowerBar.value >= ($FishPowerBar.max_value / 2):
@@ -860,15 +819,16 @@ func _process_input(delta: float) -> void:
 					$FishPowerBar.value += 1.25
 				if $FishPowerBar.value >= 100:
 					hantenjutsushiki = true
-					_charge_buildup.stop()
 		elif _charging:
 			_charging = false
 			_charge_buildup.stop()
 
 	# Hide power bar if inventory opens mid-charge
-	if $FishPowerBar.visible and ($UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
+	if $FishPowerBar.visible and (near_npc() or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
 		$FishPowerBar.hide()
+		_charging = false
 		hantenjutsushiki = false
+		fish_control_safe = false
 
 	# Trap placement
 	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish"):
@@ -891,7 +851,7 @@ func _process_input(delta: float) -> void:
 			"bait_inventory": placed_trap.bait_inventory,
 			"trap": placed_trap.trap
 		})
-		play_sfx("res://assets/sounds/dunk.ogg", 8)
+		Game.play_sfx("res://assets/sounds/dunk.ogg", 8)
 		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
 		Game.equipped_trap = null
 		fish_control_safe = false
@@ -905,7 +865,7 @@ func _process_input(delta: float) -> void:
 				"res://assets/sounds/walk3.wav",
 				"res://assets/sounds/walk4.wav"
 			]
-			play_sfx(footsteps.pick_random(), -5)
+			Game.play_sfx(footsteps.pick_random(), -5)
 			step_timer = step_interval + randf_range(0.02, 0.08)
 	else:
 		step_timer = 0.0
@@ -959,7 +919,7 @@ func _on_fish_caught() -> void:
 				Game.highest_star.get(str(stack.type.id), 0),
 				stack.data.get("stars", 0)
 			)
-			play_sfx("res://assets/sounds/catch.ogg", 2)
+			Game.play_sfx("res://assets/sounds/catch.ogg", 2)
 	state = FishState.REELING_BACK
 	bobber.get_node("Splashes").amount = 64
 	Game.catches += 1
@@ -989,9 +949,9 @@ func set_trap(id: int) -> void:
 	if id != -1:
 		if Catalog.get_item(id) is Trap:
 			if Game.equipped_trap != Catalog.get_item(id):
+				Game.equipped_trap = Catalog.get_item(id)
 				Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
-			Game.equipped_trap = Catalog.get_item(id)
-			play_sfx("res://assets/sounds/cageopen.ogg", 12)
+			Game.play_sfx("res://assets/sounds/cageopen.ogg", 12)
 		else:
 			LimboConsole.error("This doesn't seem to be a trap.")
 	else:
@@ -1006,11 +966,11 @@ func set_bait(id: int) -> void:
 	if id != -1:
 		if Catalog.get_item(id) is Bait:
 			if Game.equipped_bait != Catalog.get_item(id):
+				Game.equipped_bait = Catalog.get_item(id)
 				Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 				if not Game.equipped_fishing_rod.baitable:
 					Toast.add("The bait won't work unless you have a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod that can be baited.")
-			Game.equipped_bait = Catalog.get_item(id)
-			play_sfx("res://assets/sounds/squelch.ogg", 3.0)
+			Game.play_sfx("res://assets/sounds/squelch.ogg", 3.0)
 		else:
 			LimboConsole.error("This doesn't seem to be bait.")
 	else:
@@ -1024,10 +984,10 @@ func set_fishing_rod(id: int) -> void:
 		return
 	if id != -1:
 		if Catalog.get_item(id) is FishingRod:
-			play_sfx("res://assets/sounds/clunk.ogg", 1.0)
+			Game.play_sfx("res://assets/sounds/clunk.ogg", 1.0)
 			if Game.equipped_fishing_rod != Catalog.get_item(id):
+				Game.equipped_fishing_rod = Catalog.get_item(id)
 				Toast.add("Equipped: [img center region=" + str(Game.equipped_fishing_rod.texture.region.position.x) + "," + str(Game.equipped_fishing_rod.texture.region.position.y) + "," + str(16) + "," + str(16) + "width=16 height=16]res://assets/sprites/items.png[/img] " + str(Catalog.get_item(id).name))
-			Game.equipped_fishing_rod = Catalog.get_item(id)
 		else:
 			LimboConsole.error("This doesn't seem to be a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 	else:
@@ -1193,9 +1153,11 @@ func update_inventory() -> void:
 			inventory_button.connect("pressed", Callable(self, "set_trap").bind(item.type.id))
 			$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
 
-func near_shop() -> bool:
+func near_npc() -> bool:
 	for body in $Interaction.get_overlapping_areas():
 		if body.is_in_group("shop"):
+			return true
+		if body.is_in_group("bestiary"):
 			return true
 	return false
 
@@ -1315,7 +1277,7 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/LevelBar.hide()
 			$UI/Main/InventoryButton.hide()
 			$UI/Inventory.show()
-			play_sfx("res://assets/sounds/open.ogg", 5.0)
+			Game.play_sfx("res://assets/sounds/open.ogg", 5.0)
 			update_inventory()
 		else:
 			$UI/Main/Combination.show()
@@ -1357,7 +1319,7 @@ func _process_ui(delta: float) -> void:
 			bobber.get_node("Bobber Fish").get_node("Sprite2D").visible = true
 			bobber.get_node("Splashes").restart()
 			if randf() < 0.3:
-				play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, 0.25)
+				Game.play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, 0.25)
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) <= 10:
 				state = FishState.INACTIVE
 				bobber_safe = true
@@ -1411,7 +1373,7 @@ func _fishing_timer(location: Game.Location) -> void:
 			if not bobber.get_node("Ripple").emitting:
 				bobber.get_node("Ripple").restart()
 		if randf() < 0.2:
-			play_sfx_briefly("res://assets/sounds/ripples.ogg", 1.3, -20)
+			Game.play_sfx_briefly("res://assets/sounds/ripples.ogg", 1.3, -20)
 		
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
@@ -1450,10 +1412,10 @@ func _fishing_timer(location: Game.Location) -> void:
 							Game.highest_star.get(str(stack.type.id), 0),
 							stack.data.get("stars", 0)
 						)
-						play_sfx("res://assets/sounds/catch.ogg", 2)
+						Game.play_sfx("res://assets/sounds/catch.ogg", 2)
 				return
 			else:
-				play_sfx("res://assets/sounds/oh.ogg", 2.0)
+				Game.play_sfx("res://assets/sounds/oh.ogg", 2.0)
 				bobber.get_node("Exclaim").emitting = true
 				if fish.rarity == Game.Rarity.COMMON:
 					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-common.png")
@@ -1505,7 +1467,7 @@ func _on_base_animation_finished() -> void:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
-		play_sfx("res://assets/sounds/whoosh.ogg", 1.0)
+		Game.play_sfx("res://assets/sounds/whoosh.ogg", 1.0)
 		bobber = preload("res://scenes/bobber.tscn").instantiate()
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
 		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
@@ -1625,7 +1587,7 @@ func _on_base_animation_finished() -> void:
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
 				_fishing_timer(Game.Location.get(data.get_custom_data("location")))
-				play_sfx("res://assets/sounds/bobberland.ogg", 1)
+				Game.play_sfx("res://assets/sounds/bobberland.ogg", 1)
 			else:
 				print("Invalid tile to fish on, stopping fishing")
 				state = FishState.INACTIVE
@@ -1654,7 +1616,7 @@ func _on_sell_pressed() -> void:
 			Game.bag.remove_item(item)
 	
 	if amount_earned > 0.0:
-		play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
+		Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
 		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
 	_on_close_shop_pressed()
 	update_catalog()

@@ -66,17 +66,24 @@ var inventory_upgrade_bestiary_bonus = 0
 var game_scene = preload("res://scenes/game.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
-func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0) -> void:
+func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
+	if no_overlap and _sfx_in_progress.get(path, false):
+		return
+	if no_overlap:
+		_sfx_in_progress[path] = true
 	var player := AudioStreamPlayer.new()
 	add_child(player)
 	player.bus = "SFX"
 	player.stream = load(path)
-	player.pitch_scale = randf_range(0.92, 1.08)
+	if pitch_rand:
+		player.pitch_scale = randf_range(pitch_lower, pitch_higher)
 	player.volume_db = volume
 	var stream_length := player.stream.get_length()
 	var start := from_position if from_position >= 0.0 else randf_range(0.0, stream_length - duration)
 	player.play(start)
 	await get_tree().create_timer(duration).timeout
+	if no_overlap:
+		_sfx_in_progress[path] = false
 	var tween := create_tween()
 	tween.tween_property(player, "volume_db", -80.0, 1.5)
 	await tween.finished

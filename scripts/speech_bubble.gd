@@ -4,6 +4,11 @@ func _ready() -> void:
 	$MarginContainer/Label.text = "test"
 
 func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5, dialogue: bool = false) -> void:
+	visible = false
+	$MarginContainer/TextureRect.visible = false
+	$MarginContainer/Label.text = ""
+	await get_tree().process_frame
+	
 	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
@@ -25,6 +30,7 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 							marker.x - (size.x * 0.1166),
 							marker.y - (size.y * 0.25)
 						)
+						visible = true
 						continue
 				$MarginContainer/Label.text = line.substr(0, close + 1)
 				await get_tree().process_frame
@@ -33,6 +39,7 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 					marker.y - (size.y * 0.25)
 				)
 				i = close + 1
+				visible = true
 				continue
 		$MarginContainer/Label.text = line.substr(0, i + 1)
 		await get_tree().process_frame
@@ -40,6 +47,7 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 			marker.x - (size.x * 0.1166),
 			marker.y - (size.y * 0.25)
 		)
+		visible = true
 		await get_tree().create_timer(1.0 / text_speed).timeout
 		i += 1
 		if dialogue:

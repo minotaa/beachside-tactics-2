@@ -580,7 +580,8 @@ func _enter_tree() -> void:
 			"Baitable": "Yes",
 			"Rod Power": "+100",
 			"Extra Junk Chance": "+25",
-			"Turtle": "Yes"
+			"Turtle": "Yes",
+			"How Turtle?": "Very"
 		}
 	}
 	items.append(turtle_fishing_rod)
