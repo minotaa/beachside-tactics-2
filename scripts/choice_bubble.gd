@@ -6,6 +6,7 @@ var _chosen: Dictionary = {}
 var choice_button_scene = preload("res://scenes/ui/choice_button.tscn")
 
 func show_choices(text: String, choices: Array, marker: Vector2, chars_per_second: float = 30.0) -> Dictionary:
+	visible = false
 	$VBoxContainer/MarginContainer2.visible = false
 
 	for child in $VBoxContainer/MarginContainer2/Choices.get_children():
@@ -21,6 +22,8 @@ func show_choices(text: String, choices: Array, marker: Vector2, chars_per_secon
 			marker.x - (size.x * 0.1166),
 			marker.y - (size.y * 0.60)
 		)
+		Game.play_sfx("res://assets/sounds/a.ogg", 1, true, true, 0.9, 1.0)
+		visible = true
 		await get_tree().create_timer(1.0 / chars_per_second).timeout
 
 	for i in range(choices.size()):
