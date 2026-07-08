@@ -9,8 +9,8 @@ const DIRECTIONS = {
 	"down": Vector2.DOWN
 }
 
-var _charging: bool = false
-@onready var _charge_buildup = $ChargeBuildup
+var nailed_it: bool = false
+var charging_cast: bool = false
 var current_log_path: String
 var original_zoom := Vector2(3.25, 3.25)
 var intended_zoom := Vector2(3.25, 3.25)
@@ -676,13 +676,16 @@ func _input(event: InputEvent) -> void:
 
 	# Release cast
 	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
+		nailed_it = false
 		$FishPowerBar.visible = false
 		hantenjutsushiki = false
 		var fish_dir := last_direction
 		bobber_safe = true
 		play_animation(body_type + "_fish_" + fish_dir)
 		print($FishPowerBar.value)
-		
+		if $FishPowerBar.value >= 97:
+			nailed_it = true
+			print("Nailed it")
 		fish_control_safe = false
 		if bobber != null:
 			bobber.queue_free()
@@ -813,6 +816,12 @@ func _process_input(delta: float) -> void:
 				if children.name.begins_with("Speech Bubble"):
 					children.queue_free()
 
+			if not charging_cast:
+				charging_cast = true
+				$ChargeBuildup.stream = load("res://assets/sounds/chargingup.ogg")
+				$ChargeBuildup.volume_db = -2
+				$ChargeBuildup.play()
+
 			if hantenjutsushiki:
 				if $FishPowerBar.value >= ($FishPowerBar.max_value / 2):
 					$FishPowerBar.value -= randi_range(1, 3)
@@ -820,6 +829,9 @@ func _process_input(delta: float) -> void:
 					$FishPowerBar.value -= 1.25
 				if $FishPowerBar.value <= 0:
 					hantenjutsushiki = false
+					$ChargeBuildup.stop()
+					$ChargeBuildup.stream = load("res://assets/sounds/chargingup.ogg")
+					$ChargeBuildup.play()
 			else:
 				if $FishPowerBar.value <= ($FishPowerBar.max_value / 2):
 					$FishPowerBar.value += randi_range(1, 3)
@@ -827,14 +839,16 @@ func _process_input(delta: float) -> void:
 					$FishPowerBar.value += 1.25
 				if $FishPowerBar.value >= 100:
 					hantenjutsushiki = true
-		elif _charging:
-			_charging = false
-			_charge_buildup.stop()
+					$ChargeBuildup.stop()
+					$ChargeBuildup.stream = load("res://assets/sounds/chargingup.ogg")
+					$ChargeBuildup.play()
+		elif charging_cast:
+			charging_cast = false
+			$ChargeBuildup.stop()
 
 	# Hide power bar if inventory opens mid-charge
 	if $FishPowerBar.visible and (near_npc() or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
 		$FishPowerBar.hide()
-		_charging = false
 		hantenjutsushiki = false
 		fish_control_safe = false
 
@@ -867,13 +881,13 @@ func _process_input(delta: float) -> void:
 	if velocity.length() > 0:
 		step_timer -= delta
 		if step_timer <= 0.0:
-			var footsteps = [
-				"res://assets/sounds/walk1.wav",
-				"res://assets/sounds/walk2.wav",
-				"res://assets/sounds/walk3.wav",
-				"res://assets/sounds/walk4.wav"
-			]
-			Game.play_sfx(footsteps.pick_random(), -5)
+			#var footsteps = [
+				#"res://assets/sounds/walk1.wav",
+				#"res://assets/sounds/walk2.wav",
+				#"res://assets/sounds/walk3.wav",
+				#"res://assets/sounds/walk4.wav"
+			#]
+			#Game.play_sfx(footsteps.pick_random(), -5)
 			step_timer = step_interval + randf_range(0.02, 0.08)
 	else:
 		step_timer = 0.0
@@ -1455,7 +1469,8 @@ func _fishing_timer(location: Game.Location) -> void:
 		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite()) * 0.025))
 		await get_tree().create_timer(tick_interval).timeout
 		var tick_bonus = sqrt(Game.get_fishing_speed()) * 3.5
-		your_odds += randi_range(15, 25) + ($FishPowerBar.value * 0.25) + tick_bonus
+		var fish_power_bonus = $FishPowerBar.value * 0.3 if nailed_it else $FishPowerBar.value * 0.25
+		your_odds += randi_range(15, 25) + fish_power_bonus + tick_bonus
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():

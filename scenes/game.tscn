@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://1iqhgrq7dgum" path="res://scenes/sheldon.tscn" id="3_lnu2h"]
 [ext_resource type="PackedScene" uid="uid://bp8nf3muclgrl" path="res://scenes/shelly.tscn" id="5_iywne"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s6527"]
+size = Vector2(6, 12)
+
 [node name="Level" type="Node2D" unique_id=2087867780]
 y_sort_enabled = true
 texture_filter = 1
@@ -50,3 +53,11 @@ position = Vector2(-152, 138)
 
 [node name="Shelly" parent="." unique_id=1178087110 instance=ExtResource("5_iywne")]
 position = Vector2(-73, 140)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=336296058]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=467488585]
+position = Vector2(-382, -100)
+shape = SubResource("RectangleShape2D_s6527")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
