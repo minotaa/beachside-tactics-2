@@ -65,6 +65,7 @@ shop=""
 players=""
 bestiary=""
 trap=""
+npc=""
 
 [input]
 

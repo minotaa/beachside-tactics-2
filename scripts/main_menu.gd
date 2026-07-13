@@ -7,7 +7,19 @@ func _on_play_pressed() -> void:
 	else:
 		Game.start_game()
 
+func _connect_button_sfx(button: Button):
+	button.mouse_entered.connect(func():
+		Game.play_sfx("res://assets/sounds/click.wav", -2, false, false)
+	)
+	button.pressed.connect(func():
+		Game.play_sfx("res://assets/sounds/click1.wav", -2, false, false)
+	)
+
 func _ready() -> void:
+	for button in find_children("", "Button", true):
+		if button is Button:
+			_connect_button_sfx(button)
+	
 	$UI/Main/Settings/Fullscreen/CheckButton.button_pressed = Game.fullscreen
 	$UI/Main/Settings/SFX/Slider.value = Game.sfx_volume
 

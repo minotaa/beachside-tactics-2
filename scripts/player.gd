@@ -26,7 +26,7 @@ var selected_tile: Vector2i
 var interacting: bool = false
 var immersive_interact: NPC
 var step_timer = 0.0
-var step_interval = 0.5
+var step_interval = 0.4
 
 var hook_velocity = 0
 var hook_acceleration = 1.75
@@ -54,7 +54,17 @@ enum FishState {
 func _enter_tree() -> void:
 	set_multiplayer_authority(int(name))
 
+func _node_added(node: Node) -> void:
+	if node is Button:
+		_connect_button_sfx(node)
+
 func _ready() -> void:
+	# Hook up SFX to buttons
+	for button in find_children("", "Button", true):
+		if button is Button:
+			_connect_button_sfx(button)
+	get_tree().node_added.connect(_node_added)
+	
 	# Initialize line physics
 	for i in range(line_segments):
 		line_points.append(Vector2.ZERO)
@@ -881,13 +891,36 @@ func _process_input(delta: float) -> void:
 	if velocity.length() > 0:
 		step_timer -= delta
 		if step_timer <= 0.0:
-			#var footsteps = [
-				#"res://assets/sounds/walk1.wav",
-				#"res://assets/sounds/walk2.wav",
-				#"res://assets/sounds/walk3.wav",
-				#"res://assets/sounds/walk4.wav"
-			#]
-			#Game.play_sfx(footsteps.pick_random(), -5)
+			var footsteps = [
+				"res://assets/sounds/footstep1.ogg",
+				"res://assets/sounds/footstep2.ogg",
+				"res://assets/sounds/footstep3.ogg"
+			]
+			var tilemap = get_parent().get_node("Ground") as TileMapLayer
+			var aboveground = get_parent().get_node("Aboveground") as TileMapLayer
+			var aboveground2 = get_parent().get_node("Aboveground2") as TileMapLayer
+			var local_pos = tilemap.to_local(global_position)
+			var cell = tilemap.local_to_map(local_pos)
+
+			var data = tilemap.get_cell_tile_data(cell)
+			if aboveground.get_cell_source_id(cell) != -1:
+				data = aboveground.get_cell_tile_data(cell)
+			if aboveground2.get_cell_source_id(cell) != -1:
+				data = aboveground2.get_cell_tile_data(cell)
+
+			if data and data.get_custom_data("material") == "grass":
+				footsteps = [
+					"res://assets/sounds/footstep1g.ogg",
+					"res://assets/sounds/footstep2g.ogg",
+					"res://assets/sounds/footstep3g.ogg"
+				]
+			if data and data.get_custom_data("material") == "wood":
+				footsteps = [
+					"res://assets/sounds/footstep1w.ogg",
+					"res://assets/sounds/footstep2w.ogg",
+					"res://assets/sounds/footstep3w.ogg"
+				]
+			Game.play_sfx(footsteps.pick_random(), -5)
 			step_timer = step_interval + randf_range(0.02, 0.08)
 	else:
 		step_timer = 0.0
@@ -1655,3 +1688,11 @@ func _on_inventory_button_pressed() -> void:
 
 func _on_close_inventory_pressed() -> void:
 	Input.action_release("inventory")
+
+func _connect_button_sfx(button: Button):
+	button.mouse_entered.connect(func():
+		Game.play_sfx("res://assets/sounds/click.wav", 2, false, false)
+	)
+	button.pressed.connect(func():
+		Game.play_sfx("res://assets/sounds/click1.wav", 2, false, false)
+	)

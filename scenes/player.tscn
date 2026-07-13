@@ -483,7 +483,7 @@ shadow_size = 2
 shadow_color = Color(0.07058824, 0.07058824, 0.08627451, 0.9607843)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_487ah"]
-texture = ExtResource("27_gl8cc")
+texture = ExtResource("25_wqfne")
 texture_margin_left = 16.0
 texture_margin_top = 16.0
 texture_margin_right = 16.0

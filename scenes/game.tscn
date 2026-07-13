@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://gipenl8rlk71" path="res://scripts/ground.gd" id="3_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://1iqhgrq7dgum" path="res://scenes/sheldon.tscn" id="3_lnu2h"]
 [ext_resource type="PackedScene" uid="uid://bp8nf3muclgrl" path="res://scenes/shelly.tscn" id="5_iywne"]
+[ext_resource type="PackedScene" uid="uid://d18rdlxiuc01" path="res://scenes/warren.tscn" id="6_p57ef"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_s6527"]
 size = Vector2(6, 12)
@@ -59,5 +60,8 @@ position = Vector2(-73, 140)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=467488585]
 position = Vector2(-382, -100)
 shape = SubResource("RectangleShape2D_s6527")
+
+[node name="Warren" parent="." unique_id=1260067264 groups=["npc"] instance=ExtResource("6_p57ef")]
+position = Vector2(182, 434)
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
