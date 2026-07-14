@@ -331,6 +331,26 @@ func preview_item(id: int) -> void:
 	$UI/Bestiary/ItemPreview/Description.text = item.description + "\n\n" + info
 	$UI/Bestiary/ItemPreview.visible = true
 
+func _populate_category(category: Game.Category, target_container: Node) -> void:
+	for item in Catalog.items:
+		if (item as ItemType).category != category:
+			continue
+		if not current_npc.sells(item):
+			continue
+		var cant_buy = false
+		if item.purchase_limit != -1:
+			for i in Game.inventory.list:
+				if i.type == item and i.amount >= item.purchase_limit:
+					cant_buy = true
+		if cant_buy:
+			continue
+		var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
+		shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
+		shop_entry.get_node("TextureRect").texture = item.texture
+		shop_entry.get_node("Label").text = item.name + "\n" + str(roundi(item.price)) + "g"
+		shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
+		target_container.add_child(shop_entry)
+
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
@@ -340,65 +360,17 @@ func update_catalog() -> void:
 		children.queue_free()
 	for children in $UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
+	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
+
+	_populate_category(Game.Category.RODS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer")
+	_populate_category(Game.Category.BAIT, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer")
+	_populate_category(Game.Category.TRAPS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer")
+
+	await get_tree().process_frame
 	if Game.level < 5:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = true
-	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
-	for item in Catalog.items:
-		if (item as ItemType).category == Game.Category.RODS:
-			var cant_buy = false
-			if item.purchase_limit != -1:
-				for i in Game.inventory.list:
-					if i.type == item and i.amount >= item.purchase_limit:
-						cant_buy = true
-			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
-			#if roundi((item as ItemType).price) > Game.balance:
-				#shop_entry.get_node("Panel").disabled = true
-			#else:
-				#shop_entry.get_node("Panel").disabled = false
-			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
-			shop_entry.get_node("TextureRect").texture = item.texture
-			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
-			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
-			if not cant_buy:
-				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".add_child(shop_entry)
-		if (item as ItemType).category == Game.Category.BAIT:
-			var cant_buy = false
-			if item.purchase_limit != -1:
-				for i in Game.inventory.list:
-					if i.type == item and i.amount >= item.purchase_limit:
-						cant_buy = true
-			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
-			#if roundi((item as ItemType).price) > Game.balance:
-				#shop_entry.get_node("Panel").disabled = true
-			#else:
-				#shop_entry.get_node("Panel").disabled = false
-			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
-			shop_entry.get_node("TextureRect").texture = item.texture
-			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
-			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
-			if not cant_buy:
-				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer".add_child(shop_entry)
-		if (item as ItemType).category == Game.Category.TRAPS:
-			var cant_buy = false
-			if item.purchase_limit != -1:
-				for i in Game.inventory.list:
-					if i.type == item and i.amount >= item.purchase_limit:
-						cant_buy = true
-			var shop_entry = preload("res://scenes/ui/shop_entry.tscn").instantiate()
-			#if roundi((item as ItemType).price) > Game.balance:
-				#shop_entry.get_node("Panel").disabled = true
-			#else:
-				#shop_entry.get_node("Panel").disabled = false
-			shop_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
-			shop_entry.get_node("TextureRect").texture = item.texture
-			shop_entry.get_node("Label").text = (item as ItemType).name + "\n" + str(roundi((item as ItemType).price)) + "g"
-			shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
-			if not cant_buy:
-				$"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer".add_child(shop_entry)
-			
-	await get_tree().process_frame
 	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer.get_children().size() == 0:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
 	else:
@@ -442,10 +414,21 @@ func _on_interaction_ended() -> void:
 	immersive_interact = null
 	print("interaction ended")
 
+var current_npc
+
 func _on_dialogue_finished(npc: NPC) -> void:
 	interacting = false
 	immersive_interact = null
+	current_npc = npc
 	if npc.npc_name == "Sheldon":
+		if not $UI/Vendor.visible:
+			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
+			$UI/Vendor.visible = true
+			$UI/Vendor/ItemPreview.visible = false
+			$UI/Inventory.visible = false
+			$UI/Main.visible = false
+			update_catalog()
+	if npc.npc_name == "Warren":
 		if not $UI/Vendor.visible:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
@@ -585,9 +568,9 @@ func _input(event: InputEvent) -> void:
 	# Shop interaction toggle
 	if event.is_action_released("interact") and not interacting:
 		if state == FishState.INACTIVE and not $UI/Inventory.visible:
-			if not $UI/Vendor.visible:
-				for body in $Interaction.get_overlapping_areas():
-					if body.is_in_group("shop"):
+			if not _is_ui_blocking():
+				for body in $Interaction.get_overlapping_areas():	
+					if body.is_in_group("npc"):
 						var npc = body.get_node("..") as NPC
 						if not npc.dialogue_finished.is_connected(_on_dialogue_finished):
 							npc.dialogue_finished.connect(_on_dialogue_finished.bind(npc), CONNECT_ONE_SHOT)
@@ -598,9 +581,22 @@ func _input(event: InputEvent) -> void:
 		
 						npc.start_dialogue()
 						interacting = true
+			if not $UI/Vendor.visible:
+				for body in $Interaction.get_overlapping_areas():
+					if body.is_in_group("shop"):
+						var npc = body.get_node("..") as NPC
+						if not npc.dialogue_finished.is_connected(_on_dialogue_finished):
+							npc.dialogue_finished.connect(_on_dialogue_finished.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_started.is_connected(_on_interaction_started):
+							npc.interaction_started.connect(_on_interaction_started.bind(npc), CONNECT_ONE_SHOT)
+						if not npc.interaction_ended.is_connected(_on_interaction_ended):
+							npc.interaction_ended.connect(_on_interaction_ended, CONNECT_ONE_SHOT)
+						npc.start_dialogue()
+						interacting = true
 			else:
 				$UI/Vendor.visible = false
 				$UI/Main.visible = true
+				current_npc = null
 			if not $UI/Bestiary.visible:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("bestiary"):
@@ -617,6 +613,7 @@ func _input(event: InputEvent) -> void:
 			else:
 				$UI/Bestiary.visible = false
 				$UI/Main.visible = true
+				current_npc = null
 			if not $UI/Trap.visible:
 				var closest_trap = null
 				var closest_distance = INF
@@ -643,6 +640,7 @@ func _input(event: InputEvent) -> void:
 			else:
 				$UI/Trap.visible = false
 				$UI/Main.visible = true
+				current_npc = null
 
 	# Let UI consume input first
 	if _is_ui_blocking():
@@ -1260,15 +1258,24 @@ func _process_ui(delta: float) -> void:
 			$InteractionMark/Coin.visible = true
 			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = false
+			$InteractionMark/Talk.visible = false
 		if body.is_in_group("bestiary"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = false
 			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = true
+			$InteractionMark/Talk.visible = false
 		if body.is_in_group("trap"):
 			$InteractionMark.visible = true
 			$InteractionMark/Coin.visible = false
 			$InteractionMark/Fish.visible = true
+			$InteractionMark/Book.visible = false
+			$InteractionMark/Talk.visible = false
+		if body.is_in_group("npc"):
+			$InteractionMark.visible = true
+			$InteractionMark/Coin.visible = false
+			$InteractionMark/Talk.visible = true
+			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = false
 	if interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
 		$InteractionMark.visible = false

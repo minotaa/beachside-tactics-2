@@ -8,6 +8,7 @@
 [node name="Speech Bubble" type="MarginContainer" unique_id=1523930421]
 z_index = 132
 custom_minimum_size = Vector2(290, 43)
+custom_maximum_size = Vector2(800, -1)
 offset_right = 290.0
 offset_bottom = 43.0
 scale = Vector2(0.25, 0.25)
@@ -30,12 +31,12 @@ theme_override_constants/margin_bottom = 12
 
 [node name="Label" type="RichTextLabel" parent="MarginContainer" unique_id=1179285064]
 layout_mode = 2
+theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("2_ppych")
 bbcode_enabled = true
 text = " uhuh"
 fit_content = true
 scroll_active = false
-autowrap_mode = 0
 horizontal_alignment = 1
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=1687911101]

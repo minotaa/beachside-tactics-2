@@ -20,6 +20,9 @@ var line_display_duration: float = 1.5
 var dialogue_trees: Dictionary = {}
 var default_trees: Array[String] = ["default"]
 
+# -- SHOPKEEPER --
+var selling = []
+
 # --- STATE ---
 var blink_timer: float = 15.0
 var is_in_dialogue: bool = false
@@ -36,6 +39,9 @@ signal choice_made(choice: Dictionary)
 var speech_bubble_scene = preload("res://scenes/ui/speech_bubble.tscn")
 var choice_bubble_scene = preload("res://scenes/ui/choice_bubble.tscn")
 var marker: Vector2
+
+func sells(item: ItemType) -> bool:
+	return selling.has(item)
 
 func _ready() -> void:
 	$AnimatedSprite2D.play("idle")

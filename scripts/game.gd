@@ -18,7 +18,8 @@ enum Category {
 }
 
 enum Location {
-	Crystalwater_Beach
+	Crystalwater_Beach,
+	Crystalwater_Void
 }
 
 enum Difficulty {
@@ -190,6 +191,12 @@ func get_junk_chance() -> float:
 	if equipped_fishing_rod != null:
 		junk_chance += equipped_fishing_rod.junk_chance * 0.01
 	return junk_chance
+
+func get_trophy_fish_chance() -> float:
+	var trophy_chance = 0.0
+	if equipped_bait != null:
+		trophy_chance += equipped_bait.trophy_fish_chance * 0.01
+	return trophy_chance
 
 func get_fishing_speed() -> float:
 	var fishing_speed = 0.0

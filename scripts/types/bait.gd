@@ -4,3 +4,4 @@ class_name Bait
 var extra_quick_bite: float # Added interval boost.
 var extra_fishing_speed: float # Added fishing speed that makes the timer go faster.
 var data: Dictionary = {}
+var trophy_fish_chance: float # Extra trophy fish chance.

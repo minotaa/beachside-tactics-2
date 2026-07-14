@@ -2,6 +2,16 @@ extends NPC
 
 func _ready() -> void:
 	npc_name = "Sheldon"
+	selling = [
+		Catalog.get_item(0), 
+		Catalog.get_item(13),
+		Catalog.get_item(14),
+		Catalog.get_item(15),
+		Catalog.get_item(24),
+		Catalog.get_item(25),
+		Catalog.get_item(26),
+		Catalog.get_item(27)
+	]
 	dialogue_trees = {
 		"intro1": [
 			{

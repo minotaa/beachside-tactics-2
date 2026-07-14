@@ -24,10 +24,14 @@ func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
 func get_fish(location: Game.Location, rod_power: int, trap: bool = false) -> Fish:
 	var catchable_fish = []
 	var current_time := Game.time / Game.TIME_IN_DAY
+	var trophy_active = randf() < Game.get_trophy_fish_chance()
 
 	for item in items:
 		if item is Fish:
-			if item.location == location and rod_power >= item.power_needed and (trap or not item.trap_only):
+			if item.location == location and rod_power >= item.power_needed \
+			and (trap or not item.trap_only) \
+			and (not item.trophy_fish or trophy_active) \
+			and item.can_catch.call():
 				catchable_fish.append(item)
 
 	if catchable_fish.is_empty():
@@ -45,7 +49,6 @@ func get_fish(location: Game.Location, rod_power: int, trap: bool = false) -> Fi
 		current_weight += _get_weighted_rarity(fish, current_time)
 		if random_value < current_weight:
 			return fish
-
 	return null
 
 func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
@@ -602,3 +605,117 @@ func _enter_tree() -> void:
 	shrimp.power_needed = 0.0
 	shrimp.threshold = 0.0
 	items.append(shrimp)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(80.0, 16.0, 16.0, 16.0)
+	var turtle = Fish.new(29, "Turtle", atlas)
+	turtle.description = "A mercurial, elusive reptile. Known for its hard shell."
+	turtle.sell_price = 1000.0
+	turtle.rarity = Game.Rarity.LEGENDARY
+	turtle.difficulty = Game.Difficulty.HARD
+	turtle.trap_only = false
+	turtle.location = Game.Location.Crystalwater_Beach
+	turtle.hour_start = 0.0
+	turtle.hour_end = 0.0
+	turtle.category = Game.Category.FISH
+	turtle.power_needed = 12.0
+	turtle.threshold = 100.0
+	turtle.trophy_fish = true
+	items.append(turtle)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(96.0, 16.0, 16.0, 16.0)
+	var sun_turtle = Fish.new(30, "Sun Turtle", atlas)
+	sun_turtle.description = "A mercurial, elusive reptile. Known for its hard unique, sun colored shell."
+	sun_turtle.sell_price = 1000.0
+	sun_turtle.rarity = Game.Rarity.LEGENDARY
+	sun_turtle.difficulty = Game.Difficulty.HARD
+	sun_turtle.trap_only = false
+	sun_turtle.location = Game.Location.Crystalwater_Beach
+	sun_turtle.hour_start = 0.0
+	sun_turtle.hour_end = 0.0
+	sun_turtle.category = Game.Category.FISH
+	sun_turtle.power_needed = 12.0
+	sun_turtle.threshold = 100.0
+	sun_turtle.trophy_fish = true
+	sun_turtle.can_catch = func():
+		return Game.get_day_time() == Game.TimeOfDay.MORNING or Game.get_day_time() == Game.TimeOfDay.MIDDAY
+	items.append(sun_turtle)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(112.0, 16.0, 16.0, 16.0)
+	var moon_turtle = Fish.new(31, "Moon Turtle", atlas)
+	moon_turtle.description = "A mercurial, elusive reptile. Known for its hard unique, moon colored shell."
+	moon_turtle.sell_price = 1000.0
+	moon_turtle.rarity = Game.Rarity.LEGENDARY
+	moon_turtle.difficulty = Game.Difficulty.HARD
+	moon_turtle.trap_only = false
+	moon_turtle.location = Game.Location.Crystalwater_Beach
+	moon_turtle.hour_start = 0.0
+	moon_turtle.hour_end = 0.0
+	moon_turtle.category = Game.Category.FISH
+	moon_turtle.power_needed = 12.0
+	moon_turtle.threshold = 100.0
+	moon_turtle.trophy_fish = true
+	moon_turtle.can_catch = func():
+		return Game.get_day_time() == Game.TimeOfDay.NIGHT or Game.get_day_time() == Game.TimeOfDay.EVENING
+	items.append(moon_turtle)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(128.0, 16.0, 16.0, 16.0)
+	var trapped_turtle = Fish.new(32, "Trapped Turtle", atlas)
+	trapped_turtle.description = "Actually, it's just a regular turtle trapped in a plastic soda can holder, won't you please help it out?"
+	trapped_turtle.sell_price = 1000.0
+	trapped_turtle.rarity = Game.Rarity.LEGENDARY
+	trapped_turtle.difficulty = Game.Difficulty.HARD
+	trapped_turtle.trap_only = true
+	trapped_turtle.location = Game.Location.Crystalwater_Beach
+	trapped_turtle.hour_start = 0.0
+	trapped_turtle.hour_end = 0.0
+	trapped_turtle.category = Game.Category.FISH
+	trapped_turtle.power_needed = 12.0
+	trapped_turtle.threshold = 100.0
+	trapped_turtle.trophy_fish = true
+	items.append(trapped_turtle)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(144.0, 16.0, 16.0, 16.0)
+	var glitch_turtle = Fish.new(33, "Glitched Turtle", atlas)
+	glitch_turtle.description = "Won't you please help it out?"
+	glitch_turtle.sell_price = 1000.0
+	glitch_turtle.rarity = Game.Rarity.LEGENDARY
+	glitch_turtle.difficulty = Game.Difficulty.HARD
+	glitch_turtle.trap_only = false
+	glitch_turtle.location = Game.Location.Crystalwater_Void
+	glitch_turtle.hour_start = 0.0
+	glitch_turtle.hour_end = 0.0
+	glitch_turtle.category = Game.Category.FISH
+	glitch_turtle.power_needed = 12.0
+	glitch_turtle.threshold = 100.0
+	glitch_turtle.trophy_fish = true
+	items.append(glitch_turtle)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/bait.png")
+	atlas.region = Rect2(80.0, 0.0, 16.0, 16.0)
+	var turtle_bait = Bait.new(34, "Turtle Bait", atlas)
+	turtle_bait.category = Game.Category.BAIT
+	turtle_bait.rarity = Game.Rarity.COMMON
+	turtle_bait.purchasable = true
+	turtle_bait.extra_fishing_speed = 50.0
+	turtle_bait.extra_quick_bite = 5.0
+	turtle_bait.description = "A specialized bait specifically meant to catch Trophy Turtles."
+	turtle_bait.price = 300.0
+	turtle_bait.data = { 
+		"extra_stats": {
+			"Fishing Speed": "+50",
+			"Quick Bite": "+5",
+			"Trophy Fish Chance": "+5"
+		}
+	}
+	items.append(turtle_bait)

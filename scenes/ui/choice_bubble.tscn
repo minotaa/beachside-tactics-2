@@ -66,7 +66,7 @@ layout_mode = 2
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1273803281]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
@@ -78,6 +78,8 @@ horizontal_alignment = 1
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer" unique_id=1544494715]
 layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
 [node name="Choices" type="HBoxContainer" parent="VBoxContainer/MarginContainer2" unique_id=1076847760]
@@ -87,6 +89,7 @@ alignment = 1
 
 [node name="Panel" parent="VBoxContainer/MarginContainer2/Choices" unique_id=2006541894 instance=ExtResource("4_qokcm")]
 layout_mode = 2
+theme_override_constants/align_to_largest_stylebox = 0
 
 [node name="Panel2" type="Button" parent="VBoxContainer/MarginContainer2/Choices" unique_id=2099901004]
 layout_mode = 2

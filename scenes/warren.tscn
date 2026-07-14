@@ -72,11 +72,11 @@ animation = &"idle"
 position = Vector2(0, 6.5)
 shape = SubResource("RectangleShape2D_rw3ai")
 
-[node name="Bestiary" type="Area2D" parent="." unique_id=145546351 groups=["bestiary"]]
+[node name="NPC" type="Area2D" parent="." unique_id=145546351 groups=["npc"]]
 position = Vector2(0, 9)
 collision_layer = 2
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Bestiary" unique_id=309900125]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NPC" unique_id=309900125]
 position = Vector2(0, -5.5)
 shape = SubResource("RectangleShape2D_popqq")

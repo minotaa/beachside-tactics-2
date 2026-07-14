@@ -37,6 +37,10 @@ func show_choices(text: String, choices: Array, marker: Vector2, chars_per_secon
 	_waiting = true
 	_chosen = {}
 	while _waiting:
+		global_position = Vector2(
+			marker.x - (size.x * 0.1166),
+			marker.y - (size.y * 0.30)
+		)
 		await get_tree().process_frame
 		for i in range(choices.size()):
 			if Input.is_action_just_pressed("ui_choice_%d" % [i + 1]):

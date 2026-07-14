@@ -41,6 +41,7 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 				i = close + 1
 				visible = true
 				continue
+		print(size.x)
 		$MarginContainer/Label.text = line.substr(0, i + 1)
 		await get_tree().process_frame
 		global_position = Vector2(

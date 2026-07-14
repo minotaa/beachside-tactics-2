@@ -49,6 +49,7 @@
 [ext_resource type="Texture2D" uid="uid://5ts8q1nqtsew" path="res://assets/sprites/trap.png" id="45_mx1m4"]
 [ext_resource type="Texture2D" uid="uid://cpf0vvnvdfa4n" path="res://assets/sprites/minigame-fish-icon.png" id="45_u2ulf"]
 [ext_resource type="Texture2D" uid="uid://byw5u2jj6d2l7" path="res://assets/sprites/traps.png" id="46_4gjji"]
+[ext_resource type="Texture2D" uid="uid://c1nihe7kc35hh" path="res://assets/sprites/talk.png" id="47_sc3ue"]
 [ext_resource type="Script" uid="uid://c0j4bdlrvc4l8" path="res://scripts/ambience_sound.gd" id="50_6e8lb"]
 [ext_resource type="AudioStream" uid="uid://2xqgqc6kcia2" path="res://assets/sounds/chargingup.ogg" id="51_2gdjj"]
 
@@ -2217,6 +2218,21 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("43_g5jhy")
+
+[node name="Talk" type="TextureRect" parent="InteractionMark" unique_id=2069130380]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.437
+anchor_right = 0.5
+anchor_bottom = 0.437
+offset_left = -4.5
+offset_top = -5.492
+offset_right = 4.5
+offset_bottom = 3.508
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("47_sc3ue")
 
 [node name="Trap" type="Sprite2D" parent="." unique_id=382535271]
 visible = false
