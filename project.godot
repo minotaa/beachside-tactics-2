@@ -32,16 +32,6 @@ Catalog="*res://scripts/types/catalog.gd"
 Network="*uid://c2vy2jytykhf6"
 Game="*res://scripts/game.gd"
 LimboConsole="*uid://dyxornv8vwibg"
-EOSGRuntime="*uid://7saywdx0ipep"
-HPlatform="*uid://yl2muvqrdiud"
-HAuth="*uid://786t1jiowvvg"
-HAchievements="*uid://bis404dty5u5c"
-HFriends="*uid://uumqbey8ji5t"
-HStats="*uid://dbckdip83oone"
-HLeaderboards="*uid://b06khhf20mplm"
-HLobbies="*uid://6iqvm33q0tb1"
-HP2P="*uid://u6ae5fpm6l8q"
-HSessions="*uid://bieh2rxxahuu2"
 Fade="*uid://b7c4rwest4m8y"
 
 [display]
@@ -57,7 +47,7 @@ run/main_run_args="--dev"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/epic-online-services-godot/plugin.cfg", "res://addons/limbo_console/plugin.cfg")
+enabled=PackedStringArray("res://addons/limbo_console/plugin.cfg")
 
 [global_group]
 

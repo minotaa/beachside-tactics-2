@@ -17,6 +17,10 @@ enum Category {
 	TRAPS
 }
 
+enum Island {
+	Crystalwater_Beach # Supposed to be different from the Locations, there can be multiple Locations in a single island.
+}
+
 enum Location {
 	Crystalwater_Beach,
 	Crystalwater_Void
@@ -37,6 +41,9 @@ enum TimeOfDay {
 	NIGHT
 }
 
+const SPAWN_POINTS = {
+	Island.Crystalwater_Beach: Vector2(-216, -125)
+}
 const DAY_COLOR := Color.WHITE
 const NIGHT_COLOR := Color(0.192, 0.149, 0.502, 1.0)
 const TIME_IN_DAY = 1200 
@@ -63,8 +70,9 @@ var highest_star = {}
 var flags = {}
 var traps = []
 var inventory_upgrade_bestiary_bonus = 0
+var last_island: Island = Island.Crystalwater_Beach
 
-var game_scene = preload("res://scenes/game.tscn")
+var game_scene = preload("res://scenes/levels/beach.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
 func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
@@ -276,20 +284,6 @@ func set_time(value: Variant) -> void:
 			_:          LimboConsole.error("Unknown time of day: " + value)
 		LimboConsole.info("Time set to: " + get_time_string() + " (" + TimeOfDay.keys()[get_day_time()] + ")")
 
-func host() -> void:
-	var server_res = await Network.host_server(6466)
-	if not server_res:
-		LimboConsole.error("Couldn't create the server, something probably happened.")
-	else:
-		LimboConsole.info("Successfully created a server.")
-
-func connect_to_server(address: String, username: String = "Player") -> void:
-	var join_res = await Network.join_server(address, username)
-	if not join_res:
-		LimboConsole.error("Couldn't connect to the address.")
-	else:
-		LimboConsole.info("Successfully joined through the connection.")
-
 func _ready() -> void:	
 	var arguments = OS.get_cmdline_args()
 	for arg in arguments:
@@ -297,7 +291,8 @@ func _ready() -> void:
 			dev_mode = true
 			print("Dev mode detected.")
 	multiplayer.multiplayer_peer = null # TODO: REMOVE ME
-	load_game()
+	if DisplayServer.get_name() != "headless": 
+		load_game()
 	LimboConsole.register_command(set_fishing_rod, "set_fishing_rod", "Set your currently equipped fishing rod.")
 	LimboConsole.add_argument_autocomplete_source("set_fishing_rod", 0,
 		func(): 
@@ -317,10 +312,8 @@ func _ready() -> void:
 		func():
 			return [true, false]
 	)
-	LimboConsole.register_command(host, "host", "Hosts a multiplayer server.")
 	LimboConsole.register_command(set_xp, "set_xp", "Sets your XP.")
 	LimboConsole.register_command(set_balance, "set_balance", "Sets your balance.")
-	LimboConsole.register_command(connect_to_server, "connect", "Connect to the server using the connection address.")
 	
 func set_balance(balance: float) -> void:
 	self.balance = balance
@@ -369,7 +362,6 @@ func load_game() -> void:
 				trap_object["bait_inventory"] = bait_inventory
 				trap_object["x"] = trap["x"]
 				trap_object["y"] = trap["y"]
-				print(trap["location"])
 				trap_object["location"] = trap["location"]
 				trap_object["trap"] = Catalog.get_item(trap["trap"])
 				traps.append(trap_object)
@@ -389,6 +381,8 @@ func load_game() -> void:
 				AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), false)
 				var db_value = lerp(-55.0, 0.0, sfx_volume / 100.0)
 				AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), db_value)
+		if data.has("last_island"):
+			last_island = data["last_island"]
 		if data.has("equipped_bait"):
 			var bait_id = data["equipped_bait"]
 			if bait_id != null:  # null means no bait equipped
@@ -452,7 +446,8 @@ func get_save_data() -> Dictionary:
 		"flags": flags,
 		"inventory_upgrade_bestiary_bonus": inventory_upgrade_bestiary_bonus,
 		"highest_star": highest_star,
-		"traps": traps_data
+		"traps": traps_data,
+		"last_island": last_island
 	}
 	return save_data
 

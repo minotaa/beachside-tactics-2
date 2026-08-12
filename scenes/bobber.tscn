@@ -48,11 +48,6 @@ gravity = Vector3(0, 0, 0)
 scale_curve = SubResource("CurveTexture_5btnv")
 alpha_curve = SubResource("CurveTexture_4o5is")
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_rn3pg"]
-properties/0/path = NodePath("Line2D:points")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-
 [sub_resource type="Curve" id="Curve_5btnv"]
 _data = [Vector2(0, 0.5041608), 0.0, 1.7109706, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
@@ -112,9 +107,6 @@ lifetime = 1.5
 one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_4f4en")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=2067705923]
-replication_config = SubResource("SceneReplicationConfig_rn3pg")
 
 [node name="Exclaim" type="GPUParticles2D" parent="." unique_id=521202112]
 z_index = 9

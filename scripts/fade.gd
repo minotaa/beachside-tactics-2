@@ -60,6 +60,7 @@ func fade_to_scene(scene_path: String, fade_duration: float = 1.0):
 
 # Circle closes in (iris closes to black)
 func fade_out(fade_duration: float = 1.0):
+	print("fade_out called, is_fading = ", is_fading)
 	if is_fading:
 		return
 	is_fading = true
@@ -73,6 +74,9 @@ func fade_out(fade_duration: float = 1.0):
 
 # Circle opens out (iris expands to reveal scene)
 func fade_in(fade_duration: float = 1.0):
+	print("fade_in called, is_fading = ", is_fading)
+	if not is_fading:
+		return
 	_update_aspect_ratio()
 	
 	var tween = create_tween()

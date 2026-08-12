@@ -641,23 +641,6 @@ font_color = Color(0.6194887, 0.61948866, 0.6194887, 1)
 [sub_resource type="CircleShape2D" id="CircleShape2D_4r5pv"]
 radius = 23.0
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_a38lo"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-properties/1/path = NodePath("Base:animation")
-properties/1/spawn = true
-properties/1/replication_mode = 2
-properties/2/path = NodePath("Base:frame")
-properties/2/spawn = true
-properties/2/replication_mode = 2
-properties/3/path = NodePath("Base:speed_scale")
-properties/3/spawn = true
-properties/3/replication_mode = 2
-properties/4/path = NodePath("Base:position")
-properties/4/spawn = true
-properties/4/replication_mode = 2
-
 [sub_resource type="LabelSettings" id="LabelSettings_ujl30"]
 font = ExtResource("23_4ni07")
 shadow_size = 0
@@ -2238,9 +2221,6 @@ texture = ExtResource("47_sc3ue")
 visible = false
 modulate = Color(0.51916724, 0.99437696, 0.9999998, 0.7764706)
 texture = ExtResource("46_4gjji")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1472449290]
-replication_config = SubResource("SceneReplicationConfig_a38lo")
 
 [node name="Username" type="Label" parent="." unique_id=1303432497]
 visible = false

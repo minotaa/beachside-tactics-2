@@ -43,6 +43,14 @@ var line_gravity = 80.0  # Sag amount (reduced from 150 for less droop)
 var line_damping = 0.92  # How quickly line settles
 var line_stiffness = 0.5  # How much line resists bending (increased from 0.3 for less sag)
 
+# NETWORKING VARIABLES
+var network_target_position: Vector2
+var network_direction: String = "down"
+var network_moving: bool = false
+var _network_send_timer: float = 0.0
+const NETWORK_SEND_RATE := 0.05   # 20 times/sec
+const NETWORK_INTERP_SPEED := 16.0
+
 enum FishState {
 	FISHING, # When your bobber is out in the water, haven't found a fish.
 	FOUND_FISH, # When your bobber is out in the water, you found a fish, the brief moment when the exclamation mark is on screen.
@@ -59,6 +67,8 @@ func _node_added(node: Node) -> void:
 		_connect_button_sfx(node)
 
 func _ready() -> void:
+	network_target_position = global_position
+	
 	# Hook up SFX to buttons
 	for button in find_children("", "Button", true):
 		if button is Button:
@@ -1512,11 +1522,39 @@ func _fishing_timer(location: Game.Location) -> void:
 		var fish_power_bonus = $FishPowerBar.value * 0.3 if nailed_it else $FishPowerBar.value * 0.25
 		your_odds += randi_range(15, 25) + fish_power_bonus + tick_bonus
 
+func _process_network_send(delta: float) -> void:
+	_network_send_timer -= delta
+	if _network_send_timer > 0.0:
+		return
+	_network_send_timer = NETWORK_SEND_RATE
+	var moving := velocity.length_squared() > 0
+	Network.relay_player_state.rpc_id(1, global_position, last_direction, moving)
+
+func apply_network_state(pos: Vector2, direction: String, moving: bool) -> void:
+	network_target_position = pos
+	network_direction = direction
+	network_moving = moving
+
+func _process_remote(delta: float) -> void:
+	global_position = global_position.lerp(network_target_position, clampf(NETWORK_INTERP_SPEED * delta, 0.0, 1.0))
+
+	if network_moving:
+		last_direction = network_direction
+		if $Base.animation != body_type + "_walk_" + network_direction:
+			play_animation(body_type + "_walk_" + network_direction)
+	else:
+		if $Base.animation.begins_with(body_type + "_walk"):
+			last_direction = network_direction
+			play_idle_animation()
+
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		_process_remote(delta)
 		return
 	_process_ui(delta)
 	_process_input(delta)
+	if multiplayer.has_multiplayer_peer():
+		_process_network_send(delta)
 	
 func get_fishing_direction() -> String:
 	var prefix := body_type + "_fish_"

@@ -1,6 +1,9 @@
 extends Node2D
 
 func _ready():
+	if DisplayServer.get_name() == "headless":
+		get_tree().call_deferred("change_scene_to_file", "res://scenes/main.tscn")
+		return
 	if Game.dev_mode:
 		$UI/Control/Label.visible = false
 		await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
