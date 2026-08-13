@@ -45,6 +45,7 @@ var line_stiffness = 0.5  # How much line resists bending (increased from 0.3 fo
 
 # NETWORKING VARIABLES
 var network_target_position: Vector2
+var network_animation: String = "idle"
 var network_direction: String = "down"
 var network_moving: bool = false
 var _network_send_timer: float = 0.0
@@ -104,8 +105,10 @@ func _ready() -> void:
 			$Trap.hide()
 			$Minigame.hide()
 			$FishPowerBar.hide()
+			$PointLight2D.hide()
+			$PointLight2D2.hide()
 	else:
-		#$Username.hide()
+		#Username.hide()
 		pass
 	
 	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
@@ -563,6 +566,8 @@ func pickup_trap() -> void:
 	$UI/Main.show()
 	
 func _input(event: InputEvent) -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
 	# Zoom
 	if event.is_action_pressed("zoom_in"):
 		intended_zoom = Vector2(
@@ -631,7 +636,6 @@ func _input(event: InputEvent) -> void:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("trap"):
 						var distance = global_position.distance_squared_to(body.global_position)
-
 						if distance < closest_distance:
 							closest_distance = distance
 							closest_trap = body
@@ -700,7 +704,6 @@ func _input(event: InputEvent) -> void:
 		var fish_dir := last_direction
 		bobber_safe = true
 		play_animation(body_type + "_fish_" + fish_dir)
-		print($FishPowerBar.value)
 		if $FishPowerBar.value >= 97:
 			nailed_it = true
 			print("Nailed it")
@@ -711,7 +714,6 @@ func _input(event: InputEvent) -> void:
 	# Allow fishing again after any fish button release (prevents accidental re-cast)
 	if event.is_action_released("fish"):
 		fish_control_safe = true
-
 
 ## Continuous per-frame logic: movement, physics, hold-to-reel, power bar charge.
 func _process_input(delta: float) -> void:
@@ -1528,28 +1530,39 @@ func _process_network_send(delta: float) -> void:
 		return
 	_network_send_timer = NETWORK_SEND_RATE
 	var moving := velocity.length_squared() > 0
-	Network.relay_player_state.rpc_id(1, global_position, last_direction, moving)
+	Network.relay_player_state.rpc_id(1, global_position, last_direction, $Base.animation, moving)
 
-func apply_network_state(pos: Vector2, direction: String, moving: bool) -> void:
+func apply_network_state(pos: Vector2, direction: String, animation: String, moving: bool) -> void:
 	network_target_position = pos
 	network_direction = direction
+	network_animation = animation
 	network_moving = moving
 
-func _process_remote(delta: float) -> void:
+func _process_multiplayer(delta: float) -> void:
 	global_position = global_position.lerp(network_target_position, clampf(NETWORK_INTERP_SPEED * delta, 0.0, 1.0))
+	
+	var distance_to_authority = Game.get_player().global_position.distance_to(global_position)
+	var opacity_factor = clampf(inverse_lerp(100.0, 250.0, distance_to_authority), 0.0, 1.0)
+
+	modulate.a = lerp(1.0, 0.4, opacity_factor)
+	$Shadow.modulate.a = 0.9 * lerp(1.0, 0.4, opacity_factor)
 
 	if network_moving:
 		last_direction = network_direction
 		if $Base.animation != body_type + "_walk_" + network_direction:
 			play_animation(body_type + "_walk_" + network_direction)
 	else:
-		if $Base.animation.begins_with(body_type + "_walk"):
+		if $Base.animation.begins_with(body_type + "_walk") and not network_animation.begins_with(body_type + "_fish") :
 			last_direction = network_direction
 			play_idle_animation()
+		else:
+			last_direction = network_direction
+			if network_animation.begins_with(body_type + "_fish") and not $Base.animation.begins_with(body_type + "_fish"):
+				play_animation(network_animation)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
-		_process_remote(delta)
+		_process_multiplayer(delta)
 		return
 	_process_ui(delta)
 	_process_input(delta)
@@ -1568,6 +1581,8 @@ func _on_base_animation_finished() -> void:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
+		if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+			return
 		Game.play_sfx("res://assets/sounds/whoosh.ogg", 1.0)
 		bobber = preload("res://scenes/bobber.tscn").instantiate()
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
@@ -1575,7 +1590,7 @@ func _on_base_animation_finished() -> void:
 		add_child(bobber)
 		var dir = DIRECTIONS[get_fishing_direction()]
 		last_direction = get_fishing_direction()
-		
+
 		# Reset line physics for new cast
 		line_points.clear()
 		line_velocities.clear()
@@ -1583,46 +1598,46 @@ func _on_base_animation_finished() -> void:
 		for i in range(line_segments):
 			line_points.append(rod_tip)  # Start all points at rod tip
 			line_velocities.append(Vector2.ZERO)
-		
+
 		# NATURAL ARC CAST
 		var power_normalized = $FishPowerBar.value / 100.0
 		var baser_distance = 20
 		if not Game.equipped_fishing_rod.shoddy:
 			baser_distance += 40
 		var base_distance = baser_distance + (power_normalized * 100)  # How far it goes
-		
+
 		bobber.rotation = 0
 		bobber.gravity_scale = 0  # We'll handle gravity manually for better control
-		
+
 		# Determine cast type based on direction
 		var fishing_dir = get_fishing_direction()
 		var is_sideways = (fishing_dir == "left" or fishing_dir == "right")
-		
+
 		# Calculate target position
 		var target_pos = get_rod_tip(fishing_dir) + (dir * base_distance)
-		
+
 		# Initialize line to be taut during cast
 		line_gravity = 20.0
 		line_stiffness = 0.85
-		
+
 		# Natural tumble rotation
 		var rotation_impulse = (15 + power_normalized * 25) * (-1 if dir.x > 0 else 1)
 		bobber.angular_velocity = rotation_impulse
-		
+
 		# Decay rotation naturally
 		var rotation_tween = create_tween()
 		rotation_tween.tween_property(bobber, "angular_velocity", 0.0, 0.6).set_ease(Tween.EASE_OUT)
-		
+
 		if is_sideways:
 			# SIDEWAYS: Arc trajectory
 			var cast_duration = 0.7 + (power_normalized * 0.4)  # Slower, more visible
 			var arc_height = 15 + (power_normalized * 20)  # Much gentler arc
-			
+
 			# Animate position with arc using a custom tween
 			var cast_tween = create_tween()
 			cast_tween.set_trans(Tween.TRANS_QUAD)
 			cast_tween.set_ease(Tween.EASE_OUT)
-			
+
 			# Track progress for arc calculation 
 			var start_pos = bobber.global_position
 			cast_tween.tween_method(

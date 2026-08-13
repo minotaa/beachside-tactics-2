@@ -119,16 +119,16 @@ func load_scene(scene: String) -> void:
 		client_scene_ready.rpc_id(1)
 
 @rpc("any_peer", "unreliable_ordered", "call_remote")
-func relay_player_state(pos: Vector2, direction: String, moving: bool) -> void:
+func relay_player_state(pos: Vector2, direction: String, animation: String, moving: bool) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	for player in players:
 		if player["id"] != id:
-			_forward_player_state.rpc_id(player["id"], id, pos, direction, moving)
+			_forward_player_state.rpc_id(player["id"], id, pos, direction, animation, moving)
 
 @rpc("authority", "unreliable_ordered", "call_remote")
-func _forward_player_state(id: int, pos: Vector2, direction: String, moving: bool) -> void:
+func _forward_player_state(id: int, pos: Vector2, direction: String, animation: String, moving: bool) -> void:
 	if spawned_players.has(id):
-		spawned_players[id].apply_network_state(pos, direction, moving)
+		spawned_players[id].apply_network_state(pos, direction, animation, moving)
 
 # spawn funcs
 @rpc("any_peer", "call_remote", "reliable")
