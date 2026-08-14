@@ -125,6 +125,12 @@ func update_player_save_data(id: int, mutator: Callable) -> void:
 			sync_save_data.rpc_id(id, player["save_data"])
 			return
 
+func get_player_save_data(id: int) -> Dictionary:
+	for player in players:
+		if player["id"] == id:
+			return player["save_data"]
+	return {}
+
 @rpc("any_peer", "call_remote", "reliable")
 func request_buy_item(item_id: int) -> void:
 	var id := multiplayer.get_remote_sender_id()
@@ -198,12 +204,146 @@ func _forward_player_state(id: int, pos: Vector2, direction: String, animation: 
 	if spawned_players.has(id):
 		spawned_players[id].apply_network_state(pos, direction, animation, moving)
 
+func _tick_trap(id: int, save_data: Dictionary, trap_data: Dictionary, delta: float) -> void:
+	var trap := Catalog.get_item(trap_data["trap"]) as Trap
+	var trap_inventory := Inventory.new()
+	trap_inventory.set_list_from_save(trap_data["inventory"])
+	var bait_inventory := Inventory.new()
+	bait_inventory.set_list_from_save(trap_data["bait_inventory"])
+
+	var speed_bonus = trap.fishing_speed
+	if bait_inventory.total_size() > 0:
+		speed_bonus += (bait_inventory.get_item(0).type as Bait).extra_fishing_speed * 0.5
+
+	trap_data["timer"] = trap_data.get("timer", Game.BASE_CATCH_TIME) - (delta + (sqrt(speed_bonus) * 3.5) * 0.001)
+
+	if trap_data["timer"] < 0.0:
+		trap_data["timer"] = Game.BASE_CATCH_TIME
+		if trap_inventory.total_size() < trap.space:
+			var fish = Catalog.get_fish(trap_data["location"], trap.fishing_power, true)
+			trap_inventory.add_item(ItemStack.new(fish, 1))
+			if bait_inventory.total_size() > 0:
+				bait_inventory.take_item(bait_inventory.get_item(0).type, 1)
+			trap_data["inventory"] = trap_inventory.to_list()
+			trap_data["bait_inventory"] = bait_inventory.to_list()
+			sync_save_data.rpc_id(id, save_data)
+			var is_full := trap_inventory.total_size() >= trap.space
+			relay_trap_data.rpc_id(id, trap_data["id"], is_full)
+			trap_data_updated.rpc_id(id, trap_data)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_trap_data(trap_id: int) -> void:
+	var id = multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] == id:
+			for trap_data in player["save_data"].get("traps", []):
+				if trap_data["id"] == trap_id:
+					received_trap_data.rpc_id(id, trap_data)
+					return
+	Toast.add.rpc_id(id, "Couldn't find this specific trap.")
+
+@rpc("authority", "call_remote", "reliable")
+func received_trap_data(trap_data: Dictionary) -> void:
+	var p = Game.get_player()
+	p.get_node("UI/Main").visible = false
+	p.get_node("UI/Trap").visible = true
+	p.last_trap = trap_data
+	p.open_trap_id = trap_data["id"]
+	p.update_trap()
+
+@rpc("authority", "call_remote", "reliable")
+func trap_data_updated(trap_data: Dictionary) -> void:
+	var p = Game.get_player()
+	if p == null:
+		return
+	if p.open_trap_id == trap_data["id"] and p.get_node("UI/Trap").visible:
+		p.last_trap = trap_data
+		p.update_trap()
+
+@rpc("authority", "call_remote", "reliable")
+func relay_trap_data(id: int, is_full: bool) -> void:
+	var trap_node = get_tree().current_scene.get_node_or_null(str(id))
+	if trap_node == null:
+		return
+	trap_node.emit_signal("trap_updated")
+	trap_node.get_node("InteractionMark").visible = is_full
+	trap_node.get_node("InteractionMark/Fish").visible = is_full
+
 # spawn funcs
+@rpc("any_peer", "call_remote", "reliable")
+func place_trap(x: float, y: float, location: Game.Location) -> void:
+	var id = multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] == id:
+			var save_data = player["save_data"]
+			if save_data.get("traps", null) != null and save_data["traps"].size() >= Game.get_max_traps():
+				Toast.add.rpc_id(id, "You have too many traps down!")
+				return
+			var equipped_trap = save_data.get("equipped_trap", null)
+			if equipped_trap == null or Catalog.get_item(equipped_trap) == null or not Catalog.get_item(equipped_trap) is Trap:
+				Toast.add.rpc_id(id, "You're not holding a trap!")
+				return
+			for existing_trap in save_data.get("traps", []):
+				if existing_trap["x"] == x and existing_trap["y"] == y:
+					Toast.add.rpc_id(id, "There's already a trap there!")
+					return
+			var inventory = Inventory.new()
+			var equipped_trap_item = Catalog.get_item(equipped_trap)
+			inventory.set_list_from_save(save_data.get("inventory", []))
+			inventory.take_item(Catalog.get_item(equipped_trap_item.id), 1)
+			save_data["inventory"] = inventory.to_list()
+			save_data["equipped_trap"] = null
+			
+			var trap_data = {
+				"id": randi(),
+				"x": x,
+				"y": y,
+				"location": location,
+				"inventory": Inventory.new().to_list(),
+				"bait_inventory": Inventory.new().to_list(),
+				"trap": equipped_trap_item.id,
+				"timer": Game.BASE_CATCH_TIME
+			}
+			save_data["traps"].append(trap_data)
+			Toast.add.rpc_id(id, "You placed down a: " + equipped_trap_item.name + "!")
+			spawn_trap.rpc_id(id, trap_data)
+			sync_save_data.rpc_id(id, save_data)
+
+@rpc("authority", "call_remote", "reliable")
+func spawn_trap(trap: Dictionary) -> void:
+	print("spawning trap at x:" + str(trap["x"]) + ", y:" + str(trap["y"]))
+	var placed_trap = preload("res://scenes/trap.tscn").instantiate()
+	placed_trap.global_position = Vector2(trap["x"], trap["y"])
+	placed_trap.name = str(trap["id"])
+	placed_trap.trap = trap["trap"]
+	get_tree().current_scene.add_child(placed_trap)
+
 @rpc("any_peer", "call_remote", "reliable")
 func client_scene_ready() -> void:
 	var id = multiplayer.get_remote_sender_id()
 	var new_player_pos = _get_spawn_position(id)
 	spawn_player.rpc(id, new_player_pos)
+	
+	var save_data = get_player_save_data(id)
+	var traps = []
+	for trap in save_data["traps"]:
+		var trap_object = {}
+		var trap_inventory = Inventory.new()
+		var bait_inventory = Inventory.new()
+		trap_inventory.set_list_from_save(trap["inventory"])
+		bait_inventory.set_list_from_save(trap["bait_inventory"])
+		trap_object["inventory"] = trap_inventory
+		trap_object["bait_inventory"] = bait_inventory
+		trap_object["x"] = trap["x"]
+		trap_object["y"] = trap["y"]
+		trap_object["location"] = trap["location"]
+		trap_object["trap"] = trap["trap"]
+		trap_object["timer"] = trap["timer"]
+		trap_object["id"] = trap["id"]
+		traps.append(trap_object)
+	for trap in traps:
+		spawn_trap.rpc_id(id, trap)
+	
 	for player in players:
 		if player["id"] != id:
 			var pos = _get_spawn_position(player["id"])
@@ -287,3 +427,12 @@ func connection_failed() -> void:
 	if multiplayer.connection_failed.is_connected(connection_failed):
 		multiplayer.connection_failed.disconnect(connection_failed)
 	multiplayer.connection_failed.connect(connection_failed)
+
+# process
+func _process(delta: float) -> void:
+	for player in players:
+		var save_data = player["save_data"]
+		if not save_data.has("traps"):
+			continue
+		for trap_data in save_data["traps"]:
+			_tick_trap(player["id"], save_data, trap_data, delta)

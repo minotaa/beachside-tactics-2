@@ -81,15 +81,15 @@ func _ready() -> void:
 		line_points.append(Vector2.ZERO)
 		line_velocities.append(Vector2.ZERO)
 	
-	# Initialize traps
-	for trap in Game.traps:
-		var placed_trap = preload("res://scenes/trap.tscn").instantiate()
-		placed_trap.trap = trap["trap"]
-		placed_trap.location = trap["location"]
-		placed_trap.global_position = Vector2(trap["x"], trap["y"])
-		placed_trap.inventory = trap["inventory"]
-		placed_trap.bait_inventory = trap["bait_inventory"]
-		get_parent().add_child(placed_trap, true)
+	## Initialize traps
+	#for trap in Game.traps:
+		#var placed_trap = preload("res://scenes/trap.tscn").instantiate()
+		#placed_trap.trap = trap["trap"]
+		#placed_trap.location = trap["location"]
+		#placed_trap.global_position = Vector2(trap["x"], trap["y"])
+		#placed_trap.inventory = trap["inventory"]
+		#placed_trap.bait_inventory = trap["bait_inventory"]
+		#get_parent().add_child(placed_trap, true)
 	
 	play_idle_animation()
 	if multiplayer.has_multiplayer_peer():
@@ -240,7 +240,6 @@ func select_item(id: int, ignore: bool = false) -> void:
 			if index < item.data["extra_stats"].keys().size():
 				$UI/Vendor/ItemPreview/Description.text += "\n"
 
-	
 	$UI/Vendor/ItemPreview/Name.text = item.name
 	$UI/Vendor/ItemPreview/Item/TextureRect.texture = item.texture
 	$UI/Vendor/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
@@ -440,7 +439,8 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			update_bestiary()
 
-var last_trap: Node2D
+var last_trap: Dictionary
+var open_trap_id: int = -1
 
 func update_trap() -> void:
 	for child in $UI/Trap/Container/Inventory/ScrollContainer/GridContainer.get_children():
@@ -449,9 +449,14 @@ func update_trap() -> void:
 		child.queue_free()
 	for child in $UI/Trap/Container/Bait/ScrollContainer2/GridContainer.get_children():
 		child.queue_free()
-	$UI/Trap/Container/Inventory/Title.text = "Trap (" + str(roundi(last_trap.inventory.total_size())) + "/" + str(roundi(last_trap.trap.space)) + ")"
-	$UI/Trap/Container/Bait/Title.text = "Bait (" + str(roundi(last_trap.bait_inventory.total_size())) + "/" + str(roundi(last_trap.trap.bait_storage)) + ")"
-	for item in last_trap.inventory.list:
+	var bait_inventory = Inventory.new()
+	var inventory = Inventory.new()
+	bait_inventory.set_list_from_save(last_trap.bait_inventory)
+	inventory.set_list_from_save(last_trap.inventory)
+	var trap = Catalog.get_item(last_trap.trap)
+	$UI/Trap/Container/Inventory/Title.text = "Trap (" + str(roundi(inventory.total_size())) + "/" + str(roundi(trap.space)) + ")"
+	$UI/Trap/Container/Bait/Title.text = "Bait (" + str(roundi(bait_inventory.total_size())) + "/" + str(roundi(trap.bait_storage)) + ")"
+	for item in inventory.list:
 		var fish = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 		
 		fish.get_node("TextureRect").texture = item.type.texture
@@ -462,7 +467,7 @@ func update_trap() -> void:
 		fish.get_node("Label").text = "x" + str(roundi(item.amount))
 		$UI/Trap/Container/Inventory/ScrollContainer/GridContainer.add_child(fish)
 	
-	for item in last_trap.bait_inventory.list:
+	for item in bait_inventory.list:
 		var btn = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 		btn.get_node("TextureRect").texture = item.type.texture
 		btn.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
@@ -543,7 +548,9 @@ func pickup_trap() -> void:
 	Toast.add("You picked up a: " + last_trap.trap.name)
 	Game.play_sfx("res://assets/sounds/clang.ogg", 2.0)
 	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
-	last_trap.queue_free()
+	var last_trap_node = get_tree().current_scene.get_node_or_null(str(last_trap.id))
+	if last_trap_node != null:
+		last_trap_node.queue_free()
 	$UI/Trap.hide()
 	$UI/Main.show()
 	
@@ -624,16 +631,10 @@ func _input(event: InputEvent) -> void:
 
 				if closest_trap:
 					Game.play_sfx("res://assets/sounds/cageopen.ogg", 2.0)
-					last_trap = closest_trap.get_node("..")
-					if not last_trap.is_connected("trap_updated", update_trap):
-						last_trap.connect("trap_updated", update_trap)
-					else:
-						last_trap.disconnect("trap_updated", update_trap)
-						last_trap.connect("trap_updated", update_trap)
-					update_trap()
-					$UI/Main.visible = false
-					$UI/Trap.visible = true
+					var last_trap_node = closest_trap.get_node("..")
+					Network.request_trap_data.rpc_id(1, int(last_trap_node.name))
 			else:
+				open_trap_id = -1
 				$UI/Trap.visible = false
 				$UI/Main.visible = true
 				current_npc = null
@@ -856,28 +857,14 @@ func _process_input(delta: float) -> void:
 
 	# Trap placement
 	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish"):
-		if Game.traps.size() >= Game.get_max_traps():
-			Toast.add("You have too many traps down!")
-			return
-		var placed_trap = preload("res://scenes/trap.tscn").instantiate()
-		placed_trap.trap = Game.equipped_trap
 		var tilemap := get_parent().get_node("Ground") as TileMapLayer
 		var data := tilemap.get_cell_tile_data(selected_tile)
-		placed_trap.location = Game.Location.get(data.get_custom_data("location"))
-		placed_trap.global_position = tilemap.map_to_local(selected_tile)
-		get_parent().add_child(placed_trap, true)
-		Game.inventory.take_item(Game.equipped_trap, 1)
-		Game.traps.append({
-			"x": placed_trap.global_position.x,
-			"y": placed_trap.global_position.y,
-			"location": placed_trap.location,
-			"inventory": placed_trap.inventory,
-			"bait_inventory": placed_trap.bait_inventory,
-			"trap": placed_trap.trap
-		})
+		var location = Game.Location.get(data.get_custom_data("location"))
+		var trap_position = tilemap.map_to_local(selected_tile)
+		Network.place_trap.rpc_id(1, trap_position.x, trap_position.y, location)
+		
 		Game.play_sfx("res://assets/sounds/dunk.ogg", 8)
 		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
-		Game.equipped_trap = null
 		fish_control_safe = false
 
 	if velocity.length() > 0:
