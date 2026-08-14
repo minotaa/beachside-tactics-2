@@ -650,6 +650,7 @@ shadow_offset = Vector2(0.4, 0.4)
 [node name="Player" type="CharacterBody2D" unique_id=855136150 groups=["players"]]
 y_sort_enabled = true
 texture_filter = 1
+collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_qlg0r")
 

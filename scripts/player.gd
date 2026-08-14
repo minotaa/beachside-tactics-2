@@ -253,26 +253,9 @@ func select_item(id: int, ignore: bool = false) -> void:
 	$UI/Vendor/ItemPreview.visible = true
 
 func buy_item() -> void:
-	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
-	print("buying " + str(selected_item))
-	var item = selected_item
-	if item.price > Game.balance:
-		Toast.add("You don't have enough money for this!")
+	if selected_item == null:
 		return
-	if item.purchase_limit != -1:
-		for i in Game.inventory.list:
-			if i.type == item and i.amount >= item.purchase_limit:
-				Toast.add("You already have too many of this item!")
-				return
-	var added_amount = 1
-	if item.category == Game.Category.BAIT:
-		added_amount = 8
-	Game.inventory.add_item(ItemStack.new(item, added_amount))
-	Game.balance -= item.price
-	Toast.add("You bought: " + str(added_amount) + "x " + str(item.name) + "!")
-	update_catalog()
-	select_item(selected_item.id, true)
-	pass
+	Network.request_buy_item.rpc_id(1, selected_item.id)
 
 func update_bestiary() -> void:
 	for children in $UI/Bestiary/List/ScrollContainer/GridContainer.get_children():
@@ -313,7 +296,6 @@ func preview_item(id: int) -> void:
 		return
 	if item == previewed_item:
 		$UI/Bestiary/ItemPreview.visible = not $UI/Bestiary/ItemPreview.visible
-		return
 	previewed_item = item
 	$UI/Bestiary/ItemPreview/Item/Rarity.texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.rarity).to_lower() + ".png")
 	$UI/Bestiary/ItemPreview/Item/TextureRect.texture = item.texture

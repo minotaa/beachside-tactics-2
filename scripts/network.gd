@@ -118,6 +118,74 @@ func load_scene(scene: String) -> void:
 		local_player_spawned.connect(_on_local_player_spawned, CONNECT_ONE_SHOT)
 		client_scene_ready.rpc_id(1)
 
+func update_player_save_data(id: int, mutator: Callable) -> void:
+	for player in players:
+		if player["id"] == id:
+			mutator.call(player["save_data"])
+			sync_save_data.rpc_id(id, player["save_data"])
+			return
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_buy_item(item_id: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var item = Catalog.get_item(item_id)
+
+	if item == null:
+		purchase_rejected.rpc_id(id, "That item doesn't exist.")
+		return
+
+	for player in players:
+		if player["id"] != id:
+			continue
+
+		var save_data = player["save_data"]
+
+		if item.price > save_data.get("balance", 0.0):
+			purchase_rejected.rpc_id(id, "You don't have enough money for this!")
+			return
+
+		if item.purchase_limit != -1:
+			var owned_amount := 0
+			for entry in save_data.get("inventory", []):
+				if entry.get("id") == item_id:
+					owned_amount = entry.get("amount", 0)
+					break
+			if owned_amount >= item.purchase_limit:
+				purchase_rejected.rpc_id(id, "You already have too many of this item!")
+				return
+
+		var added_amount = 8 if item.category == Game.Category.BAIT else 1
+
+		update_player_save_data(id, func(sd):
+			var inv := Inventory.new()
+
+			inv.set_list_from_save(sd.get("inventory", []))
+			inv.add_item(ItemStack.new(item, added_amount))
+			sd["inventory"] = inv.to_list()
+			sd["balance"] = sd.get("balance", 0.0) - item.price
+		)
+		purchase_confirmed.rpc_id(id, item_id, added_amount)
+		return
+
+@rpc("authority", "call_remote", "reliable")
+func purchase_rejected(reason: String) -> void:
+	Toast.add(reason)
+
+@rpc("authority", "call_remote", "reliable")
+func purchase_confirmed(item_id: int, amount: int) -> void:
+	var item = Catalog.get_item(item_id)
+	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
+	Toast.add("You bought: " + str(amount) + "x " + str(item.name) + "!")
+	var local_player = Game.get_player()
+	if local_player:
+		local_player.update_catalog()
+		local_player.select_item(item_id, true)
+
+@rpc("authority", "call_remote", "reliable")
+func sync_save_data(save_data: Dictionary) -> void:
+	Game.apply_save(save_data)
+	Game.save_game("saved")
+
 @rpc("any_peer", "unreliable_ordered", "call_remote")
 func relay_player_state(pos: Vector2, direction: String, animation: String, moving: bool) -> void:
 	var id := multiplayer.get_remote_sender_id()

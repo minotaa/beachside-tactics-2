@@ -330,43 +330,65 @@ func set_holding_trap(holding_trap: bool) -> void:
 	else:
 		LimboConsole.error("Can't find a player.")
 		
-func load_game() -> void:
-	game_loaded = true
-	if not FileAccess.file_exists("user://save.april"):
-		return
-	var save_file: FileAccess = FileAccess.open("user://save.april", FileAccess.READ)
-	while save_file.get_position() < save_file.get_length():
-		var json_string = save_file.get_line()
-		var json = JSON.new()
-		var parse_result = json.parse(json_string)
-		if not parse_result == OK:
-			print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
-			continue
-		var data = json.get_data()
-		if data.has("bag"):
-			bag.set_list_from_save(data["bag"])
-		if data.has("bestiary"):
-			bestiary = data["bestiary"]
-		if data.has("acknowledged_bestiary"):
-			acknowledged_bestiary = data["acknowledged_bestiary"]
-		if data.has("flags"):
-			flags = data["flags"]
-		if data.has("traps"):
-			for trap in data["traps"]:
-				var trap_object = {}
-				var inventory = Inventory.new()
-				var bait_inventory = Inventory.new()
-				inventory.set_list_from_save(trap["inventory"])
-				bait_inventory.set_list_from_save(trap["bait_inventory"])
-				trap_object["inventory"] = inventory
-				trap_object["bait_inventory"] = bait_inventory
-				trap_object["x"] = trap["x"]
-				trap_object["y"] = trap["y"]
-				trap_object["location"] = trap["location"]
-				trap_object["trap"] = Catalog.get_item(trap["trap"])
-				traps.append(trap_object)
-		if data.has("inventory_upgrade_bestiary_bonus"):
-			inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
+func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
+	if data.has("bag"):
+		bag.list.clear()
+		bag.set_list_from_save(data["bag"])
+	if data.has("bestiary"):
+		bestiary = data["bestiary"]
+	if data.has("acknowledged_bestiary"):
+		acknowledged_bestiary = data["acknowledged_bestiary"]
+	if data.has("flags"):
+		flags = data["flags"]
+	if data.has("traps"):
+		traps.clear()
+		for trap in data["traps"]:
+			var trap_object = {}
+			var inventory_ = Inventory.new()
+			var bait_inventory = Inventory.new()
+			inventory_.set_list_from_save(trap["inventory"])
+			bait_inventory.set_list_from_save(trap["bait_inventory"])
+			trap_object["inventory"] = inventory_
+			trap_object["bait_inventory"] = bait_inventory
+			trap_object["x"] = trap["x"]
+			trap_object["y"] = trap["y"]
+			trap_object["location"] = trap["location"]
+			trap_object["trap"] = Catalog.get_item(trap["trap"])
+			traps.append(trap_object)
+	if data.has("inventory_upgrade_bestiary_bonus"):
+		inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
+	if data.has("last_island"):
+		last_island = data["last_island"]
+	if data.has("equipped_bait"):
+		var bait_id = data["equipped_bait"]
+		equipped_bait = Catalog.get_item(bait_id) if bait_id != null else null
+	if data.has("equipped_trap"):
+		var trap_id = data["equipped_trap"]
+		equipped_trap = Catalog.get_item(trap_id) if trap_id != null else null
+	if data.has("equipped_fishing_rod"):
+		var rod_id = data["equipped_fishing_rod"]
+		equipped_fishing_rod = Catalog.get_item(rod_id) if rod_id != null else null
+	if data.has("inventory"):
+		inventory.list.clear()
+		inventory.set_list_from_save(data["inventory"])
+	if data.has("balance"):
+		balance = data["balance"]
+	if data.has("whiffs"):
+		whiffs = data["whiffs"]
+	if data.has("catches"):
+		catches = data["catches"]
+	if data.has("days"):
+		days = data["days"]
+	if data.has("time"):
+		time = data["time"]
+	if data.has("level"):
+		level = data["level"]
+	if data.has("xp"):
+		xp = data["xp"]
+	if data.has("highest_star"):
+		highest_star = data["highest_star"]
+
+	if is_initial_load:
 		if data.has("fullscreen"):
 			fullscreen = data["fullscreen"]
 			if fullscreen:
@@ -381,38 +403,21 @@ func load_game() -> void:
 				AudioServer.set_bus_mute(AudioServer.get_bus_index("SFX"), false)
 				var db_value = lerp(-55.0, 0.0, sfx_volume / 100.0)
 				AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), db_value)
-		if data.has("last_island"):
-			last_island = data["last_island"]
-		if data.has("equipped_bait"):
-			var bait_id = data["equipped_bait"]
-			if bait_id != null:  # null means no bait equipped
-				equipped_bait = Catalog.get_item(bait_id)
-		if data.has("equipped_trap"):
-			var trap_id = data["equipped_trap"]
-			if trap_id != null:  # null means no trap equipped
-				equipped_trap = Catalog.get_item(trap_id)
-		if data.has("equipped_fishing_rod"):
-			var rod_id = data["equipped_fishing_rod"]
-			if rod_id != null:  # null means no rod equipped
-				equipped_fishing_rod = Catalog.get_item(rod_id)
-		if data.has("inventory"):
-			inventory.set_list_from_save(data["inventory"])
-		if data.has("balance"):
-			balance = data["balance"]
-		if data.has("whiffs"):
-			whiffs = data["whiffs"]
-		if data.has("catches"):
-			catches = data["catches"]
-		if data.has("days"):
-			days = data["days"]
-		if data.has("time"):
-			time = data["time"]
-		if data.has("level"):
-			level = data["level"]
-		if data.has("xp"):
-			xp = data["xp"]
-		if data.has("highest_star"):
-			highest_star = data["highest_star"]
+
+func load_game() -> void:
+	game_loaded = true
+	if not FileAccess.file_exists("user://save.april"):
+		return
+	var save_file: FileAccess = FileAccess.open("user://save.april", FileAccess.READ)
+	while save_file.get_position() < save_file.get_length():
+		var json_string = save_file.get_line()
+		var json = JSON.new()
+		var parse_result = json.parse(json_string)
+		if not parse_result == OK:
+			print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
+			continue
+		var data = json.get_data()
+		apply_save(data, true)
 	print("Loaded save data.")
 		
 func get_save_data() -> Dictionary:
