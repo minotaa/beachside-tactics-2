@@ -318,6 +318,213 @@ func spawn_trap(trap: Dictionary) -> void:
 	placed_trap.trap = trap["trap"]
 	get_tree().current_scene.add_child(placed_trap)
 
+func _find_trap(save_data: Dictionary, trap_id: int) -> Dictionary:
+	for trap_data in save_data.get("traps", []):
+		if trap_data["id"] == trap_id:
+			return trap_data
+	return {}
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_insert_bait(trap_id: int, item_id: int, amount: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			continue
+		var save_data = player["save_data"]
+		var trap_data = _find_trap(save_data, trap_id)
+		if trap_data.is_empty():
+			Toast.add.rpc_id(id, "Couldn't find this trap.")
+			return
+		var item = Catalog.get_item(item_id)
+		if item == null or not item is Bait:
+			Toast.add.rpc_id(id, "That's not bait.")
+			return
+		var trap := Catalog.get_item(trap_data["trap"]) as Trap
+		var bait_inventory := Inventory.new()
+		bait_inventory.set_list_from_save(trap_data["bait_inventory"])
+		if bait_inventory.total_size() + amount > trap.bait_storage:
+			Toast.add.rpc_id(id, "The trap's bait storage is full!")
+			return
+		var player_inventory := Inventory.new()
+		player_inventory.set_list_from_save(save_data.get("inventory", []))
+		var owned = player_inventory.get_item_stack(item)
+		if owned == null or owned.amount < amount:
+			Toast.add.rpc_id(id, "You don't have enough of that bait.")
+			return
+		player_inventory.take_item(item, amount)
+		bait_inventory.add_item(ItemStack.new(item, amount))
+		save_data["inventory"] = player_inventory.to_list()
+		trap_data["bait_inventory"] = bait_inventory.to_list()
+		sync_save_data.rpc_id(id, save_data)
+		trap_ui_confirmed.rpc_id(id, trap_data, "res://assets/sounds/squelch.ogg")
+		return
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_remove_bait(trap_id: int, item_id: int, amount: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			continue
+		var save_data = player["save_data"]
+		var trap_data = _find_trap(save_data, trap_id)
+		if trap_data.is_empty():
+			Toast.add.rpc_id(id, "Couldn't find this trap.")
+			return
+		var item = Catalog.get_item(item_id)
+		if item == null:
+			return
+		var bait_inventory := Inventory.new()
+		bait_inventory.set_list_from_save(trap_data["bait_inventory"])
+		var owned = bait_inventory.get_item_stack(item)
+		if owned == null or owned.amount < amount:
+			Toast.add.rpc_id(id, "The trap doesn't have that much bait.")
+			return
+		bait_inventory.take_item(item, amount)
+		var player_inventory := Inventory.new()
+		player_inventory.set_list_from_save(save_data.get("inventory", []))
+		player_inventory.add_item(ItemStack.new(item, amount))
+		save_data["inventory"] = player_inventory.to_list()
+		trap_data["bait_inventory"] = bait_inventory.to_list()
+		sync_save_data.rpc_id(id, save_data)
+		trap_ui_confirmed.rpc_id(id, trap_data, "")
+		return
+
+var xp_table := {
+	Game.Rarity.COMMON:    50.0,
+	Game.Rarity.UNCOMMON:  100.0,
+	Game.Rarity.RARE:      750.0,
+	Game.Rarity.EPIC:      2000.0,
+	Game.Rarity.LEGENDARY: 7500.0
+}
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_collect_from_trap(trap_id: int, item_id: int, amount: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			continue
+		var save_data = player["save_data"]
+		var trap_data = _find_trap(save_data, trap_id)
+		if trap_data.is_empty():
+			Toast.add.rpc_id(id, "Couldn't find this trap.")
+			return
+		var item = Catalog.get_item(item_id)
+		if item == null:
+			return
+		var trap_inventory := Inventory.new()
+		trap_inventory.set_list_from_save(trap_data["inventory"])
+		var owned = trap_inventory.get_item_stack(item)
+		if owned == null or owned.amount < amount:
+			Toast.add.rpc_id(id, "The trap doesn't have that much.")
+			return
+		var bag := Inventory.new()
+		bag.set_list_from_save(save_data.get("bag", []))
+		if not bag.would_fit(ItemStack.new(item, amount), Game.get_max_inventory_size()):
+			Toast.add.rpc_id(id, "Your tackle box doesn't have enough space!")
+			return
+		trap_inventory.take_item(item, amount)
+		bag.add_item(ItemStack.new(item, amount))
+		trap_data["inventory"] = trap_inventory.to_list()
+		save_data["bag"] = bag.to_list()
+		save_data["catches"] = save_data.get("catches", 0) + amount
+		save_data["xp"] = save_data.get("xp", 0.0) + (xp_table.get(item.rarity, 0.0) * amount)
+		sync_save_data.rpc_id(id, save_data)
+		trap_ui_confirmed.rpc_id(id, trap_data, "")
+		return
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_collect_all_from_trap(trap_id: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			continue
+		var save_data = player["save_data"]
+		var trap_data = _find_trap(save_data, trap_id)
+		if trap_data.is_empty():
+			Toast.add.rpc_id(id, "Couldn't find this trap.")
+			return
+		var trap_inventory := Inventory.new()
+		trap_inventory.set_list_from_save(trap_data["inventory"])
+		var bag := Inventory.new()
+		bag.set_list_from_save(save_data.get("bag", []))
+		var xp_gain := 0.0
+		var full := false
+		for item_stack in trap_inventory.list.duplicate():
+			if bag.would_fit(ItemStack.new(item_stack.type, item_stack.amount), Game.get_max_inventory_size()):
+				trap_inventory.take_item(item_stack.type, item_stack.amount)
+				bag.add_item(ItemStack.new(item_stack.type, item_stack.amount))
+				save_data["catches"] = save_data.get("catches", 0) + item_stack.amount
+				xp_gain += xp_table.get(item_stack.type.rarity, 0.0) * item_stack.amount
+			else:
+				full = true
+		trap_data["inventory"] = trap_inventory.to_list()
+		save_data["bag"] = bag.to_list()
+		save_data["xp"] = save_data.get("xp", 0.0) + xp_gain
+		sync_save_data.rpc_id(id, save_data)
+		if full:
+			Toast.add.rpc_id(id, "Your tackle box is full, some fish were left behind!")
+		trap_ui_confirmed.rpc_id(id, trap_data, "")
+		return
+		
+@rpc("any_peer", "call_remote", "reliable")
+func request_pickup_trap(trap_id: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			continue
+		var save_data = player["save_data"]
+		var trap_data = _find_trap(save_data, trap_id)
+		if trap_data.is_empty():
+			Toast.add.rpc_id(id, "Couldn't find this trap.")
+			return
+		var trap_inventory := Inventory.new()
+		trap_inventory.set_list_from_save(trap_data["inventory"])
+		var bag := Inventory.new()
+		bag.set_list_from_save(save_data.get("bag", []))
+		if not bag.would_fit_all(trap_inventory, Game.get_max_inventory_size()):
+			Toast.add.rpc_id(id, "Your tackle box doesn't have enough space to pick up this trap!")
+			return
+		trap_inventory.transfer_limited_to(bag, Game.get_max_inventory_size())
+		var player_inventory := Inventory.new()
+		player_inventory.set_list_from_save(save_data.get("inventory", []))
+		var bait_inventory := Inventory.new()
+		bait_inventory.set_list_from_save(trap_data["bait_inventory"])
+		bait_inventory.transfer_all_to(player_inventory)
+		var trap_item := Catalog.get_item(trap_data["trap"])
+		player_inventory.add_item(ItemStack.new(trap_item, 1))
+		save_data["bag"] = bag.to_list()
+		save_data["inventory"] = player_inventory.to_list()
+		save_data["traps"] = save_data["traps"].filter(func(t): return t["id"] != trap_id)
+		sync_save_data.rpc_id(id, save_data)
+		Toast.add.rpc_id(id, "You picked up a: " + trap_item.name)
+		trap_picked_up.rpc_id(id, trap_id)
+		return
+		
+@rpc("authority", "call_remote", "reliable")
+func trap_ui_confirmed(trap_data: Dictionary, sfx: String) -> void:
+	if sfx != "":
+		Game.play_sfx(sfx, 1.0)
+	var p = Game.get_player()
+	if p == null:
+		return
+	if p.open_trap_id == trap_data["id"]:
+		p.last_trap = trap_data
+		p.update_trap()
+
+@rpc("authority", "call_remote", "reliable")
+func trap_picked_up(trap_id: int) -> void:
+	Game.play_sfx("res://assets/sounds/clang.ogg", 2.0)
+	var trap_node = get_tree().current_scene.get_node_or_null(str(trap_id))
+	if trap_node != null:
+		trap_node.queue_free()
+	var p = Game.get_player()
+	if p == null:
+		return
+	if p.open_trap_id == trap_id:
+		p.open_trap_id = -1
+		p.get_node("UI/Trap").visible = false
+		p.get_node("UI/Main").visible = true
+
 @rpc("any_peer", "call_remote", "reliable")
 func client_scene_ready() -> void:
 	var id = multiplayer.get_remote_sender_id()

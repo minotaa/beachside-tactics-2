@@ -491,68 +491,21 @@ func update_trap() -> void:
 	
 func insert_bait_into_trap(item: ItemType, amount: int) -> void:
 	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
-	if last_trap.bait_inventory.total_size() + take_amount > last_trap.trap.bait_storage:
-		Toast.add("The trap's bait storage is full!")
-		return
-	Game.play_sfx("res://assets/sounds/squelch.ogg", 1.0)
-	Game.inventory.take_item(item, take_amount)
-	last_trap.bait_inventory.add_item(ItemStack.new(item, take_amount))
-	update_trap()
+	Network.request_insert_bait.rpc_id(1, open_trap_id, item.id, take_amount)
 
 func remove_bait_from_trap(item: ItemType, amount: int) -> void:
 	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
-	last_trap.bait_inventory.take_item(item, take_amount)
-	Game.inventory.add_item(ItemStack.new(item, take_amount))
-	update_trap()
-	
-var xp_table := {
-	Game.Rarity.COMMON:    50.0,
-	Game.Rarity.UNCOMMON:  100.0,
-	Game.Rarity.RARE:      750.0,
-	Game.Rarity.EPIC:      2000.0,
-	Game.Rarity.LEGENDARY: 7500.0
-}
-	
+	Network.request_remove_bait.rpc_id(1, open_trap_id, item.id, take_amount)
+
 func collect_all_from_trap() -> void:
-	var full = false
-	for item in last_trap.inventory.list.duplicate():
-		if Game.bag.would_fit(ItemStack.new(item.type, item.amount), Game.get_max_inventory_size()):
-			last_trap.inventory.take_item(item.type, item.amount)
-			Game.catches += item.amount
-			Game.add_xp(xp_table.get(item.type.rarity, 0.0) * item.amount)
-			Game.bag.add_item(ItemStack.new(item.type, item.amount))
-		else:
-			full = true
-	if full:
-		Toast.add("Your tackle box is full, some fish were left behind!")
-	update_trap()
-	
+	Network.request_collect_all_from_trap.rpc_id(1, open_trap_id)
+
 func collect_from_trap(item: ItemType, amount: int) -> void:
 	var take_amount = amount if Input.is_key_pressed(KEY_SHIFT) else 1
-	if not Game.bag.would_fit(ItemStack.new(item, take_amount), Game.get_max_inventory_size()):
-		Toast.add("Your tackle box doesn't have enough space!")
-		return
-	last_trap.inventory.take_item(item, take_amount)
-	Game.catches += take_amount
-	Game.bag.add_item(ItemStack.new(item, take_amount))
-	Game.add_xp(xp_table.get(item.rarity, 0.0) * take_amount)
-	update_trap()
-	
+	Network.request_collect_from_trap.rpc_id(1, open_trap_id, item.id, take_amount)
+
 func pickup_trap() -> void:
-	if not Game.bag.would_fit_all(last_trap.inventory, Game.get_max_inventory_size()):
-		Toast.add("Your tackle box doesn't have enough space to pick up this trap!")
-		return
-	last_trap.inventory.transfer_limited_to(Game.bag, Game.get_max_inventory_size())
-	last_trap.bait_inventory.transfer_all_to(Game.inventory)
-	Game.inventory.add_item(ItemStack.new(last_trap.trap, 1))
-	Toast.add("You picked up a: " + last_trap.trap.name)
-	Game.play_sfx("res://assets/sounds/clang.ogg", 2.0)
-	Game.traps = Game.traps.filter(func(t): return t["x"] != last_trap.global_position.x or t["y"] != last_trap.global_position.y)
-	var last_trap_node = get_tree().current_scene.get_node_or_null(str(last_trap.id))
-	if last_trap_node != null:
-		last_trap_node.queue_free()
-	$UI/Trap.hide()
-	$UI/Main.show()
+	Network.request_pickup_trap.rpc_id(1, open_trap_id)
 	
 func _input(event: InputEvent) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
