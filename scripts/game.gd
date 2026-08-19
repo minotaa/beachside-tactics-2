@@ -195,34 +195,42 @@ func roll_stars() -> int:
 			return 1
 	return 0
 
-func get_junk_chance() -> float:
+func get_junk_chance(save_data: Dictionary) -> float:
 	var junk_chance = 0.0
-	if equipped_fishing_rod != null:
-		junk_chance += equipped_fishing_rod.junk_chance * 0.01
+	if save_data["equipped_fishing_rod"] != null and Catalog.get_item(save_data["equipped_fishing_rod"]) != null:
+		junk_chance += Catalog.get_item(save_data["equipped_fishing_rod"]).junk_chance * 0.01
 	return junk_chance
 
-func get_trophy_fish_chance() -> float:
+func get_trophy_fish_chance(save_data: Dictionary) -> float:
 	var trophy_chance = 0.0
-	if equipped_bait != null:
-		trophy_chance += equipped_bait.trophy_fish_chance * 0.01
+	if save_data["equipped_bait"] != null and Catalog.get_item(save_data["equipped_bait"]) != null:
+		trophy_chance += Catalog.get_item(save_data["equipped_bait"]).trophy_fish_chance * 0.01
 	return trophy_chance
 
-func get_fishing_speed() -> float:
+func get_fishing_speed(save_data: Dictionary) -> float:
 	var fishing_speed = 0.0
-	if equipped_bait != null and equipped_fishing_rod != null and equipped_fishing_rod.baitable:
-		fishing_speed += equipped_bait.extra_fishing_speed
+	if save_data["equipped_bait"] != null and \
+	Catalog.get_item(save_data["equipped_bait"]) != null and \
+	save_data["equipped_fishing_rod"] != null and \
+	Catalog.get_item(save_data["equipped_fishing_rod"]) != null and \
+	(Catalog.get_item(save_data["equipped_fishing_rod"]) as FishingRod).baitable:
+		fishing_speed += Catalog.get_item(save_data["equipped_bait"]).extra_fishing_speed
 	return fishing_speed
 
-func get_quick_bite() -> float:
+func get_quick_bite(save_data: Dictionary) -> float:
 	var quick_bite = 0.0
-	if equipped_bait != null and equipped_fishing_rod != null and equipped_fishing_rod.baitable:
-		quick_bite += equipped_bait.extra_quick_bite
+	if save_data["equipped_bait"] != null and \
+	Catalog.get_item(save_data["equipped_bait"]) != null and \
+	save_data["equipped_fishing_rod"] != null and \
+	Catalog.get_item(save_data["equipped_fishing_rod"]) != null and \
+	(Catalog.get_item(save_data["equipped_fishing_rod"]) as FishingRod).baitable:
+		quick_bite += Catalog.get_item(save_data["equipped_bait"]).extra_quick_bite
 	return quick_bite
 
-func get_fishing_power() -> float:
+func get_fishing_power(save_data: Dictionary) -> float:
 	var fishing_power = 0.0
-	if equipped_fishing_rod != null:
-		fishing_power += equipped_fishing_rod.fishing_power
+	if save_data["equipped_fishing_rod"] != null and Catalog.get_item(save_data["equipped_fishing_rod"]) != null:
+		fishing_power += Catalog.get_item(save_data["equipped_fishing_rod"]).fishing_power
 	return fishing_power
 
 func calculate_xp_for_level(_level: int) -> float:

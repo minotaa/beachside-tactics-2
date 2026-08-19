@@ -1262,7 +1262,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\n"
 		debug_text += "Num until catch: " + str(odds) + "\n"
 		debug_text += "Your num: " + str(your_odds) + "\n"
-		debug_text += "Rod power: " + str(Game.get_fishing_power()) + "\n"
+		debug_text += "Rod power: " + str(Game.get_fishing_power(Game.get_save_data())) + "\n"
 	if state == FishState.REELING:
 		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
@@ -1362,7 +1362,7 @@ func _fishing_timer(location: Game.Location) -> void:
 	if Game.bag.total_size() > Game.get_max_inventory_size():
 		Toast.add("Your tackle box is full, you will release anything you catch.")
 	
-	var rod_power = Game.get_fishing_power()
+	var rod_power = Game.get_fishing_power(Game.get_save_data())
 
 	while (state == FishState.FISHING):
 		if bobber != null:
@@ -1389,7 +1389,7 @@ func _fishing_timer(location: Game.Location) -> void:
 						Game.inventory.take_item(Game.equipped_bait, 1)
 						if not Game.inventory.has_item(Game.equipped_bait):
 							Game.equipped_bait = null
-							Toast.add("You ran out of bait!")		
+							Toast.add("You ran out of bait!")
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					stack.data["stars"] = Game.roll_stars()
@@ -1440,9 +1440,9 @@ func _fishing_timer(location: Game.Location) -> void:
 						Toast.add("You ran out of bait!")
 				print("Player decided to catch fish, ending loop.")
 				return
-		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite()) * 0.025))
+		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(Game.get_save_data())) * 0.025))
 		await get_tree().create_timer(tick_interval).timeout
-		var tick_bonus = sqrt(Game.get_fishing_speed()) * 3.5
+		var tick_bonus = sqrt(Game.get_fishing_speed(Game.get_save_data())) * 3.5
 		var fish_power_bonus = $FishPowerBar.value * 0.3 if nailed_it else $FishPowerBar.value * 0.25
 		your_odds += randi_range(15, 25) + fish_power_bonus + tick_bonus
 
@@ -1624,7 +1624,10 @@ func _on_base_animation_finished() -> void:
 				data = aboveground2.get_cell_tile_data(tile_map.local_to_map(bobber_position))
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
-				_fishing_timer(Game.Location.get(data.get_custom_data("location")))
+				Network.start_fishing_timer.rpc_id(1, Game.Location.get(data.get_custom_data("location")), $FishPowerBar.value, true)
+				state = FishState.FISHING
+				if Game.bag.total_size() > Game.get_max_inventory_size(): # TODO: Should be accurate to player's actual inventory, who cares though.
+					Toast.add("Your tackle box is full, you will release anything you catch.")
 				Game.play_sfx("res://assets/sounds/bobberland.ogg", 1)
 			else:
 				print("Invalid tile to fish on, stopping fishing")

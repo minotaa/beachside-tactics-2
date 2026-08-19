@@ -5,6 +5,7 @@ const DEFAULT_SERVER_IP: String = "127.0.0.1"
 const MAX_PLAYERS: int = 9
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
 
+var fishing_players = []
 var players = []
 var player_name: String
 var spawned_players: Dictionary = {} # peer_id -> Node
@@ -526,6 +527,29 @@ func trap_picked_up(trap_id: int) -> void:
 		p.get_node("UI/Main").visible = true
 
 @rpc("any_peer", "call_remote", "reliable")
+func start_fishing_timer(location: Game.Location, fish_power_bonus: float, nailed_it: bool) -> void:
+	if multiplayer.get_unique_id() != 1:
+		return
+	var odds = randi_range(250, 1100)
+	var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(get_player_save_data(multiplayer.get_remote_sender_id()))) * 0.025)) # TODO: THIS SHOULD BE REPLACED WITH ACTUAL PLAYER SPECIFIC QUICK BITE
+	fishing_players.append({
+		"id": multiplayer.get_remote_sender_id(),
+		"location": location,
+		"them": 0,
+		"us": odds, 
+		"fish_power_bonus": fish_power_bonus,
+		"nailed_it": nailed_it,
+		"next_tick": tick_interval # TODO: Optional misses feature? Account for how many times a player missed a catch?
+	})
+	print("Started fishing for " + str(multiplayer.get_remote_sender_id()) + ".")
+
+@rpc("authority", "call_remote", "reliable")
+func stop_fishing_for_player() -> void:
+	var player = Game.get_player()
+	player.state = player.FishState.INACTIVE
+	print("Stopped fishing for " + str(multiplayer.get_unique_id()) + ".")
+
+@rpc("any_peer", "call_remote", "reliable")
 func client_scene_ready() -> void:
 	var id = multiplayer.get_remote_sender_id()
 	var new_player_pos = _get_spawn_position(id)
@@ -635,11 +659,61 @@ func connection_failed() -> void:
 		multiplayer.connection_failed.disconnect(connection_failed)
 	multiplayer.connection_failed.connect(connection_failed)
 
+@rpc("authority", "call_remote", "reliable")
+func instantly_catch(stack: ItemStack) -> void:
+	var player = Game.get_player()
+	player.state = player.FishState.REELING_BACK
+	if player.bobber != null:
+		if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
+			Game.inventory.take_item(Game.equipped_bait, 1)
+			if not Game.inventory.has_item(Game.equipped_bait):
+				Game.equipped_bait = null
+				Toast.add("You ran out of bait!")
+		player.bobber.get_node("Splashes").amount = 64
+		if Game.bag.total_size() > Game.get_max_inventory_size():
+			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+		else:
+			Game.bag.add_item(stack)
+			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
+			add_child(speech_bubble)
+			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
+			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
+			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
+			Game.highest_star[str(stack.type.id)] = max(
+				Game.highest_star.get(str(stack.type.id), 0),
+				stack.data.get("stars", 0)
+			)
+			Game.play_sfx("res://assets/sounds/catch.ogg", 2)
+
 # process
 func _process(delta: float) -> void:
+	if multiplayer.get_unique_id() != 1:
+		return
 	for player in players:
 		var save_data = player["save_data"]
 		if not save_data.has("traps"):
 			continue
 		for trap_data in save_data["traps"]:
 			_tick_trap(player["id"], save_data, trap_data, delta)
+	for player in fishing_players:
+		player["next_tick"] = player.get("next_tick", 0.0) - delta
+		if player.get("next_tick", 0.0) <= 0.0:
+			player["next_tick"] = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(get_player_save_data(player["id"]))) * 0.025)) 
+			# Should play a ripple here by the way if not playing.
+			var fish_power_bar = player.get("fish_power_bonus", 0.0)
+			var odds_to_tally = fish_power_bar * 0.3 if player.get("nailed_it", false) else player.get("nailed_it", false) * 0.25
+			odds_to_tally += randi_range(15, 25) 
+			odds_to_tally += sqrt(Game.get_fishing_speed(get_player_save_data(player["id"]))) * 3.5 
+			player["them"] += odds_to_tally
+			if player["them"] >= player["us"]:
+				# They caught it, should send notification now...
+				var fish = Catalog.get_fish(player.get("location", 0), Game.get_fishing_power(get_player_save_data(player["id"]))) 
+				var stars = Game.roll_stars()
+				var stack = ItemStack.new(fish, 1)
+				var rod_power = Game.get_fishing_power(get_player_save_data(player["id"]))
+				stack.data["stars"] = stars
+				if fish is Junk or fish.threshold <= rod_power:
+					Game.add_xp.rpc_id(player["id"], 3)
+					instantly_catch.rpc_id(player["id"], stack)
