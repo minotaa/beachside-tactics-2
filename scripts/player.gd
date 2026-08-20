@@ -711,13 +711,13 @@ func _process_input(delta: float) -> void:
 			Input.vibrate_handheld(10)
 			Game.play_sfx_briefly("res://assets/sounds/squeak.ogg", 0.2, 1, -1, true, true)
 			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
-				_on_fish_caught()
+				Network.minigame_result.rpc_id(1, true)
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
 			$Minigame/Progress.value -= 85 * delta
 			Game.play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, 1.5, -1, true, true)
 			if $Minigame/Progress.value <= 0:
-				_on_fish_lost()
+				Network.minigame_result.rpc_id(1, false)
 	else:
 		$Minigame.visible = false
 		for child in $Minigame/Column.get_children():
@@ -891,7 +891,7 @@ func _on_fish_caught() -> void:
 	if bobber != null:
 		var stack := ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 		stack.data["stars"] = Game.roll_stars()
-		if Game.bag.total_size() > Game.get_max_inventory_size():
+		if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
 			Game.bag.add_item(stack)
@@ -926,7 +926,7 @@ func _on_fish_lost() -> void:
 	bobber_safe = true
 	play_idle_animation()
 	print("Lost the fish.")
-	Game.whiffs += 1
+	#Game.whiffs += 1
 var i_float_timer = 0.0
 
 func set_trap(id: int) -> void:
@@ -1003,7 +1003,7 @@ func update_inventory() -> void:
 				$UI/Inventory/Container.set_tab_hidden(i, true)
 			else:
 				$UI/Inventory/Container.set_tab_hidden(i, false)
-	$UI/Inventory/Title.text = "Tackle Box (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size()) + "):"
+	$UI/Inventory/Title.text = "Tackle Box (" + str(Game.bag.total_size()) + "/" + str(Game.get_max_inventory_size(Game.get_save_data())) + "):"
 	var inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
@@ -1213,7 +1213,7 @@ func _process_ui(delta: float) -> void:
 			$InteractionMark/Book.visible = false
 	if interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
 		$InteractionMark.visible = false
-	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size())) * 100.0
+	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size(Game.get_save_data()))) * 100.0
 	if percentage_filled < 50.0:
 		$UI/Main/InventoryButton/TextureRect.texture = preload("res://assets/sprites/backpack.png")
 	elif percentage_filled > 50.0 and percentage_filled < 90.0:
@@ -1251,7 +1251,7 @@ func _process_ui(delta: float) -> void:
 	$UI/Main/Combination/Balance/Label.text = "$" + str(roundi(Game.balance))
 	var debug_text = "Fishing rod: " + str(Game.equipped_fishing_rod) + "\n"
 	debug_text += "Balance: " + str(Game.balance) + "\n"
-	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + "\n"
+	debug_text += "Inventory: " + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size(Game.get_save_data())) + "\n"
 	debug_text += "Level: " + str(Game.level) + "\n"
 	debug_text += "XP: " + str(roundi(Game.xp)) + "/" + str(roundi(Game.calculate_xp_for_level(Game.level))) + "\n" 
 	debug_text += "Time: " + str(Game.get_time_string()) + " " + Game.TimeOfDay.keys()[Game.get_day_time()] + " R: " + str(roundi(Game.time)) + "\n"
@@ -1359,7 +1359,7 @@ func _fishing_timer(location: Game.Location) -> void:
 	odds = randi_range(250, 1100)
 	your_odds = 0
 	state = FishState.FISHING
-	if Game.bag.total_size() > Game.get_max_inventory_size():
+	if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
 		Toast.add("Your tackle box is full, you will release anything you catch.")
 	
 	var rod_power = Game.get_fishing_power(Game.get_save_data())
@@ -1393,7 +1393,7 @@ func _fishing_timer(location: Game.Location) -> void:
 					bobber.get_node("Splashes").amount = 64
 					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
 					stack.data["stars"] = Game.roll_stars()
-					if Game.bag.total_size() > Game.get_max_inventory_size():
+					if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
 						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 					else:
 						Game.bag.add_item(stack)
@@ -1624,9 +1624,9 @@ func _on_base_animation_finished() -> void:
 				data = aboveground2.get_cell_tile_data(tile_map.local_to_map(bobber_position))
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
-				Network.start_fishing_timer.rpc_id(1, Game.Location.get(data.get_custom_data("location")), $FishPowerBar.value, true)
+				Network.start_fishing_timer.rpc_id(1, Game.Location.get(data.get_custom_data("location")), $FishPowerBar.value, nailed_it)
 				state = FishState.FISHING
-				if Game.bag.total_size() > Game.get_max_inventory_size(): # TODO: Should be accurate to player's actual inventory, who cares though.
+				if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()): # TODO: Should be accurate to player's actual inventory, who cares though.
 					Toast.add("Your tackle box is full, you will release anything you catch.")
 				Game.play_sfx("res://assets/sounds/bobberland.ogg", 1)
 			else:

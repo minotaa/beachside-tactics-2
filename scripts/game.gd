@@ -235,31 +235,25 @@ func get_fishing_power(save_data: Dictionary) -> float:
 
 func calculate_xp_for_level(_level: int) -> float:
 	var xp_scaling: float = 1.5
-	# Formula: base_xp * (scaling ^ (level - 1))
-	# Level 1->2: 100 XP
-	# Level 2->3: 150 XP
-	# Level 3->4: 225 XP, etc.
+	# Level 1->2: 100 XP, 2->3: 150 XP, 3->4: 225 XP, etc.
 	return 100.0 * pow(xp_scaling, _level - 1)
 
-func level_up():
-	xp -= calculate_xp_for_level(level)
-	level += 1
-	Toast.add("You leveled up! You are now Level %d!" % [roundi(level)])
-	print("Level up! Now level ", level)
-	play_sfx("res://assets/sounds/levelup.ogg", -8.0)
-
-@rpc("authority", "call_local")
-func add_xp(amount: float) -> void:
-	xp += amount
-	while xp >= calculate_xp_for_level(level):
-		level_up()
+func apply_xp(save_data: Dictionary, amount: float) -> int:
+	save_data["xp"] = save_data.get("xp", 0.0) + amount
+	save_data["level"] = save_data.get("level", 1)
+	var levels_gained := 0
+	while save_data["xp"] >= calculate_xp_for_level(save_data["level"]):
+		save_data["xp"] -= calculate_xp_for_level(save_data["level"])
+		save_data["level"] += 1
+		levels_gained += 1
+	return levels_gained
 
 func get_max_traps() -> int:
 	return 5
 
-func get_max_inventory_size() -> int:
+func get_max_inventory_size(save_data: Dictionary) -> int:
 	var size = 25
-	size += inventory_upgrade_bestiary_bonus
+	size += save_data["inventory_upgrade_bestiary_bonus"]
 	return size
 
 func is_mobile() -> bool:
