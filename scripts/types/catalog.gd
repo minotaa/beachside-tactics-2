@@ -14,17 +14,17 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 			return 5.0
 	return 100.0  # fallback
 
-func get_fish_drop(location: Game.Location, rod_power: int) -> ItemType:
+func get_fish_drop(location: Game.Location, rod_power: int, save_data: Dictionary) -> ItemType:
 	# 10% chance to get junk instead of fish
-	if randf() > 0.9 - Game.get_junk_chance():
+	if randf() > 0.9 - Game.get_junk_chance(save_data):
 		return get_junk(location, rod_power)
 	else:
-		return get_fish(location, rod_power)
+		return get_fish(location, rod_power, save_data)
 
-func get_fish(location: Game.Location, rod_power: int, trap: bool = false) -> Fish:
+func get_fish(location: Game.Location, rod_power: int, save_data: Dictionary, trap: bool = false) -> Fish:
 	var catchable_fish = []
 	var current_time := Game.time / Game.TIME_IN_DAY
-	var trophy_active = randf() < Game.get_trophy_fish_chance()
+	var trophy_active = randf() < Game.get_trophy_fish_chance(save_data)
 
 	for item in items:
 		if item is Fish:

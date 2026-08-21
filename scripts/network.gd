@@ -221,7 +221,7 @@ func _tick_trap(id: int, save_data: Dictionary, trap_data: Dictionary, delta: fl
 	if trap_data["timer"] < 0.0:
 		trap_data["timer"] = Game.BASE_CATCH_TIME
 		if trap_inventory.total_size() < trap.space:
-			var fish = Catalog.get_fish(trap_data["location"], trap.fishing_power, true)
+			var fish = Catalog.get_fish(trap_data["location"], trap.fishing_power, save_data, true)
 			trap_inventory.add_item(ItemStack.new(fish, 1))
 			if bait_inventory.total_size() > 0:
 				bait_inventory.take_item(bait_inventory.get_item(0).type, 1)
@@ -539,30 +539,26 @@ func trap_picked_up(trap_id: int) -> void:
 func start_fishing_timer(location: Game.Location, fish_power_bonus: float, nailed_it: bool) -> void:
 	if multiplayer.get_unique_id() != 1:
 		return
+	var id := multiplayer.get_remote_sender_id()
 	var odds = randi_range(250, 1100)
-	var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(get_player_save_data(multiplayer.get_remote_sender_id()))) * 0.025)) # TODO: THIS SHOULD BE REPLACED WITH ACTUAL PLAYER SPECIFIC QUICK BITE
-	for fishing_player in fishing_players:
-		if fishing_player["id"] == multiplayer.get_remote_sender_id():
-			fishing_player = {
-				"id": multiplayer.get_remote_sender_id(),
-				"location": location,
-				"them": 0,
-				"us": odds, 
-				"fish_power_bonus": fish_power_bonus,
-				"nailed_it": nailed_it,
-				"next_tick": tick_interval # TODO: Optional misses feature? Account for how many times a player missed a catch?
-			}
-		return # This just updates us and them in practice.
-	fishing_players.append({
-		"id": multiplayer.get_remote_sender_id(),
+	var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(get_player_save_data(id))) * 0.025))
+
+	var entry = {
+		"id": id,
 		"location": location,
 		"them": 0,
-		"us": odds, 
+		"us": odds,
 		"fish_power_bonus": fish_power_bonus,
 		"nailed_it": nailed_it,
-		"next_tick": tick_interval # TODO: Optional misses feature? Account for how many times a player missed a catch?
-	})
-	print("Started fishing for " + str(multiplayer.get_remote_sender_id()) + ".")
+		"next_tick": tick_interval
+	}
+
+	for i in range(fishing_players.size()):
+		if fishing_players[i]["id"] == id:
+			fishing_players[i] = entry
+			return
+	fishing_players.append(entry)
+	print("Started fishing for " + str(id) + ".")
 
 @rpc("authority", "call_remote", "reliable")
 func stop_fishing_for_player() -> void:
@@ -703,7 +699,17 @@ func instantly_catch(stack: ItemStack, caught_it: bool) -> void:
 @rpc("authority", "call_remote", "reliable")
 func fish_on_line(stack: ItemStack, fishing_player: Dictionary) -> void:
 	var player = Game.get_player()
+	if player == null or player.bobber == null:
+		return
 	Game.play_sfx("res://assets/sounds/oh.ogg", 2.0)
+	var bobber_fish = preload("res://scenes/ui/bobber_fish.tscn").instantiate()
+	bobber_fish.name = "Bobber Fish"
+	bobber_fish.set_meta("fish_id", stack.type.id)
+	bobber_fish.get_node("Sprite2D").texture = stack.type.texture
+	bobber_fish.get_node("Sprite2D").visible = false
+	player.bobber.add_child(bobber_fish)
+
+	player.bobber.get_node("Exclaim").emitting = true
 	player.bobber.get_node("Exclaim").emitting = true
 	if stack.type.rarity == Game.Rarity.COMMON:
 		player.bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-common.png")
@@ -722,7 +728,7 @@ func fish_on_line(stack: ItemStack, fishing_player: Dictionary) -> void:
 			player.bobber_fish.queue_free()
 		player.state = player.FishState.FISHING
 		print("Player decided not to catch fish, continuing loop.")
-		start_fishing_timer.rpc_id(1, fishing_player["id"], fishing_player["fish_power_bonus"], fishing_player["nailed_it"])
+		start_fishing_timer.rpc_id(1, fishing_player["location"], fishing_player["fish_power_bonus"], fishing_player["nailed_it"])
 	else:
 		print("Player decided to catch fish, ending loop.")
 		return
@@ -733,9 +739,11 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 	var bag = Inventory.new()
 	bag.set_list_from_save(save_data["bag"])
 
-	if save_data["equipped_bait"] != null and save_data["equipped_fishing_rod"] != null and Catalog.get_item(save_data["equipped_fishing_rod"]).baitable:
-		inventory.take_item(save_data["equipped_bait"], 1)
-		if not inventory.has_item(Catalog.get_item(save_data["equipped_bait"])):
+	var equipped_bait = save_data.get("equipped_bait", null)
+	var equipped_rod = save_data.get("equipped_fishing_rod", null)
+	if equipped_bait != null and equipped_rod != null and Catalog.get_item(equipped_rod).baitable:
+		inventory.take_item(equipped_bait, 1)
+		if not inventory.has_item(Catalog.get_item(equipped_bait)):
 			save_data["equipped_bait"] = null
 			Toast.add.rpc_id(id, "You ran out of bait!")
 
@@ -747,7 +755,7 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 			stack.data.get("stars", 0)
 		)
 		bag.add_item(stack)
-		save_data["catches"] += 1
+		save_data["catches"] = save_data.get("catches", 0) + 1
 
 	save_data["inventory"] = inventory.get_list()
 	save_data["bag"] = bag.get_list()
@@ -770,10 +778,10 @@ func minigame_result(success: bool) -> void:
 			else:
 				bite_missed.rpc_id(id)
 				var save_data = get_player_save_data(id)
-				save_data["whiffs"] += 1
+				save_data["whiffs"] = save_data.get("whiffs", 0) + 1
 				sync_save_data.rpc_id(id, save_data)
-			stop_fishing_for_player.rpc_id(id)
-			fishing_players.remove_at(i)
+				stop_fishing_for_player.rpc_id(id)
+				fishing_players.remove_at(i)
 			return
 
 @rpc("authority", "call_remote", "reliable")
@@ -796,7 +804,7 @@ func ripple_water() -> void:
 
 # process
 func _process(delta: float) -> void:
-	if multiplayer.get_unique_id() != 1:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_unique_id() != 1:
 		return
 	for player in players:
 		var save_data = player["save_data"]
@@ -805,6 +813,8 @@ func _process(delta: float) -> void:
 		for trap_data in save_data["traps"]:
 			_tick_trap(player["id"], save_data, trap_data, delta)
 	for player in fishing_players:
+		if player.get("reeling", false):
+			continue
 		player["next_tick"] = player.get("next_tick", 0.0) - delta
 		if player.get("next_tick", 0.0) <= 0.0:
 			player["next_tick"] = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(get_player_save_data(player["id"]))) * 0.025)) 
@@ -816,7 +826,7 @@ func _process(delta: float) -> void:
 			player["them"] += odds_to_tally
 			if player["them"] >= player["us"]:
 				# They caught it, should send notification now...
-				var fish = Catalog.get_fish(player.get("location", 0), Game.get_fishing_power(get_player_save_data(player["id"]))) 
+				var fish = Catalog.get_fish_drop(player.get("location", 0), Game.get_fishing_power(get_player_save_data(player["id"])), get_player_save_data(player["id"]))
 				var stars = Game.roll_stars()
 				var stack = ItemStack.new(fish, 1)
 				var rod_power = Game.get_fishing_power(get_player_save_data(player["id"]))
@@ -827,7 +837,9 @@ func _process(delta: float) -> void:
 					if levels_gained > 0:
 						notify_level_up.rpc_id(player["id"], save_data["level"])
 					_resolve_catch(player["id"], save_data, stack)
-					sync_save_data.rpc_id(player["id"], player["save_data"])
+					sync_save_data.rpc_id(player["id"], save_data)
 				else:
+					player["reeling"] = true
+					player["stack"] = stack
 					fish_on_line.rpc_id(player["id"], stack, player)
 				#fishing_players = fishing_players.filter(func(p): return p["id"] != player["id"])

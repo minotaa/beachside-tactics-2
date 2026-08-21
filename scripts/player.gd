@@ -1373,7 +1373,7 @@ func _fishing_timer(location: Game.Location) -> void:
 		
 		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
 		if your_odds >= odds:	
-			var fish = Catalog.get_fish_drop(location, rod_power)
+			var fish = Catalog.get_fish_drop(location, rod_power, Game.get_save_data())
 			print(fish)
 			var bobber_fish = preload("res://scenes/ui/bobber_fish.tscn").instantiate()
 			bobber_fish.set_meta("fish_id", fish.id)
