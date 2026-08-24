@@ -177,11 +177,11 @@ func _on_quest_triggered(quest_id: String) -> void:
 		"open_shop":
 			dialogue_finished.connect(_open_shop, CONNECT_ONE_SHOT)
 		"told_about_shelly":
-			Game.flags["heard_about_shelly"] = true
+			Network.request_set_flag.rpc_id(1, "heard_about_shelly", true)
 		"finish_bait":
-			Game.flags["heard_about_bait"] = true
+			Network.request_set_flag.rpc_id(1, "heard_about_bait", true)
 		"finish_traps":
-			Game.flags["heard_about_traps"] = true
+			Network.request_set_flag.rpc_id(1, "heard_about_traps", true)
 			
 func _open_shop() -> void:
 	pass

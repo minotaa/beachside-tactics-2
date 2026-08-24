@@ -92,16 +92,4 @@ func _evaluate_condition(condition: String) -> bool:
 func _on_quest_triggered(quest_id: String) -> void:
 	match quest_id:
 		"give_bestiary_reward":
-			var money = calculate_money_earned()
-			var xp = calculate_xp_earned()
-			Game.balance += money
-			Game.add_xp(xp)
-			Game.play_sfx("res://assets/sounds/reward2.ogg", -10)
-			Toast.add("You received $%s and %s XP!" % [roundi(money), roundi(xp)])
-
-			var before = Game.inventory_upgrade_bestiary_bonus
-			for id in Game.bestiary:
-				Game.acknowledged_bestiary[id] = true
-			Game.inventory_upgrade_bestiary_bonus = (Game.acknowledged_bestiary.size() / 5) * 5
-			if Game.inventory_upgrade_bestiary_bonus > before:
-				Toast.add("Your tackle box grew! +%d slots." % (Game.inventory_upgrade_bestiary_bonus - before))
+			Network.request_bestiary_reward.rpc_id(1)

@@ -188,6 +188,57 @@ func purchase_confirmed(item_id: int, amount: int) -> void:
 		local_player.update_catalog()
 		local_player.select_item(item_id, true)
 
+const TROPHY_TURTLE_IDS = {
+	"regular": 29,
+	"day": 30,
+	"night": 31,
+	"trap": 32,
+	"glitch": 33,
+}
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_turn_in_trophy_turtle() -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	if save_data.is_empty():
+		return
+
+	var flags = save_data.get("flags", {})
+	var bag := Inventory.new()
+	bag.set_list_from_save(save_data.get("bag", []))
+
+	var turtle_key := ""
+	var turtle_item = null
+	for key in TROPHY_TURTLE_IDS.keys():
+		if flags.get("trophy_%s_caught" % key, false):
+			continue
+		var item = Catalog.get_item(TROPHY_TURTLE_IDS[key])
+		if bag.has_item(item):
+			turtle_key = key
+			turtle_item = item
+			break
+
+	if turtle_key == "":
+		return
+
+	bag.take_item(turtle_item, 1)
+	save_data["bag"] = bag.to_list()
+
+	flags["trophy_%s_caught" % turtle_key] = true
+	save_data["flags"] = flags
+
+	save_data["balance"] = save_data.get("balance", 0.0) + 500.0
+	var levels_gained = Game.apply_xp(save_data, 50)
+
+	sync_save_data.rpc_id(id, save_data)
+	if levels_gained > 0:
+		notify_level_up.rpc_id(id, save_data["level"])
+	trophy_turtle_turned_in.rpc_id(id)
+
+@rpc("authority", "call_remote", "reliable")
+func trophy_turtle_turned_in() -> void:
+	Toast.add("You received $500 and 50 XP!")
+
 @rpc("authority", "call_remote", "reliable")
 func sync_save_data(save_data: Dictionary) -> void:
 	Game.apply_save(save_data)
@@ -598,6 +649,103 @@ func client_scene_ready() -> void:
 		if player["id"] != id:
 			var pos = _get_spawn_position(player["id"])
 			spawn_player.rpc_id(id, player["id"], pos)
+
+var bestiary_money_table := {
+	Game.Rarity.COMMON:    50.0,
+	Game.Rarity.UNCOMMON:  100.0,
+	Game.Rarity.RARE:      250.0,
+	Game.Rarity.EPIC:      500.0,
+	Game.Rarity.LEGENDARY: 1000.0
+}
+
+var bestiary_xp_table := {
+	Game.Rarity.COMMON:    100.0,
+	Game.Rarity.UNCOMMON:  500.0,
+	Game.Rarity.RARE:      1500.0,
+	Game.Rarity.EPIC:      5000.0,
+	Game.Rarity.LEGENDARY: 12500.0
+}
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_bestiary_reward() -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	if save_data.is_empty():
+		return
+
+	var bestiary = save_data.get("bestiary", {})
+	var acknowledged = save_data.get("acknowledged_bestiary", {})
+
+	var to_ack := []
+	var money_gain := 0.0
+	var xp_gain := 0.0
+	for item_id in bestiary:
+		var catchable = Catalog.get_item(int(item_id))
+		if catchable is Fish and catchable.location == Game.Location.Crystalwater_Beach:
+			if acknowledged.get(item_id, null) == null:
+				to_ack.append(item_id)
+				money_gain += bestiary_money_table.get(catchable.rarity, 0.0)
+				xp_gain += bestiary_xp_table.get(catchable.rarity, 0.0)
+
+	if to_ack.size() < 5:
+		return # server re-validates the threshold, doesn't trust the client's claim
+
+	save_data["balance"] = save_data.get("balance", 0.0) + money_gain
+	var levels_gained = Game.apply_xp(save_data, xp_gain)
+
+	for item_id in to_ack:
+		acknowledged[item_id] = true
+	save_data["acknowledged_bestiary"] = acknowledged
+
+	var before_bonus = save_data.get("inventory_upgrade_bestiary_bonus", 0)
+	var new_bonus = int(acknowledged.size() / 5) * 5
+	save_data["inventory_upgrade_bestiary_bonus"] = new_bonus
+
+	sync_save_data.rpc_id(id, save_data)
+	if levels_gained > 0:
+		notify_level_up.rpc_id(id, save_data["level"])
+	bestiary_reward_given.rpc_id(id, money_gain, xp_gain, new_bonus - before_bonus)
+
+@rpc("authority", "call_remote", "reliable")
+func bestiary_reward_given(money: float, xp: float, bonus_gained: int) -> void:
+	Game.play_sfx("res://assets/sounds/reward2.ogg", -10)
+	Toast.add("You received $%s and %s XP!" % [roundi(money), roundi(xp)])
+	if bonus_gained > 0:
+		Toast.add("Your tackle box grew! +%d slots." % bonus_gained)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_set_flag(flag_name: String, value: Variant) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	if save_data.is_empty():
+		return
+	var flags = save_data.get("flags", {})
+	if flags.get(flag_name, null) == value:
+		return
+	flags[flag_name] = value
+	save_data["flags"] = flags
+	sync_save_data.rpc_id(id, save_data)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_starter_money() -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	if save_data.is_empty():
+		return
+	var flags = save_data.get("flags", {})
+	if flags.get("got_starter_money", false):
+		return
+
+	save_data["balance"] = save_data.get("balance", 0.0) + 100.0
+	flags["got_starter_money"] = true
+	save_data["flags"] = flags
+
+	sync_save_data.rpc_id(id, save_data)
+	starter_money_given.rpc_id(id)
+
+@rpc("authority", "call_remote", "reliable")
+func starter_money_given() -> void:
+	Toast.add("You received $100!")
 
 func _on_local_player_spawned() -> void:
 	await Fade.fade_in()

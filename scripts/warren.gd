@@ -154,13 +154,9 @@ func _evaluate_condition(condition: String) -> bool:
 func _on_quest_triggered(quest_id: String) -> void:
 	match quest_id:
 		"heard_spiel":
-			Game.flags["heard_warren_spiel"] = true
+			Network.request_set_flag.rpc_id(1, "heard_warren_spiel", true)
 		"give_trophy_turtle_reward":
-			var turtle_key = _next_uncaught_trophy_turtle_in_bag()
-			if turtle_key != "":
-				Game.flags["trophy_%s_caught" % turtle_key] = true
-				Game.add_xp(50)
-				Game.balance += 500
+			Network.request_turn_in_trophy_turtle.rpc_id(1)
 	pass
 
 func _next_uncaught_trophy_turtle_in_bag() -> String:
