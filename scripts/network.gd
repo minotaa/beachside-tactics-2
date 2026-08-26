@@ -133,6 +133,48 @@ func get_player_save_data(id: int) -> Dictionary:
 	return {}
 
 @rpc("any_peer", "call_remote", "reliable")
+func request_sell_all(id: int = -1) -> void:
+	id = multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	if save_data.is_empty():
+		return
+
+	var bag := Inventory.new()
+	bag.set_list_from_save(save_data.get("bag", []))
+
+	var amount_earned := 0.0
+	var to_remove := []
+	for item in bag.list:
+		if item.type.category == Game.Category.FISH or item.type.category == Game.Category.JUNK:
+			var mult = 1.0
+			match int(item.data.get("stars", 0)):
+				1: mult = 1.25
+				2: mult = 1.5
+				3: mult = 2.0
+			amount_earned += item.amount * item.type.sell_price * mult
+			to_remove.append(item)
+
+	if to_remove.is_empty():
+		return
+
+	for item in to_remove:
+		bag.remove_item(item)
+
+	save_data["bag"] = bag.to_list()
+	save_data["balance"] = save_data.get("balance", 0.0) + amount_earned
+
+	sync_save_data.rpc_id(id, save_data)
+	sell_all_confirmed.rpc_id(id, amount_earned)
+
+@rpc("authority", "call_remote", "reliable")
+func sell_all_confirmed(amount_earned: float) -> void:
+	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
+	Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
+	var player = Game.get_player()
+	if player != null and player.get_node("UI/Vendor").visible:
+		player.update_catalog()
+		
+@rpc("any_peer", "call_remote", "reliable")
 func request_buy_item(item_id: int) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	var item = Catalog.get_item(item_id)

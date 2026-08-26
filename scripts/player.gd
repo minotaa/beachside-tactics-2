@@ -326,6 +326,8 @@ func preview_item(id: int) -> void:
 	$UI/Bestiary/ItemPreview.visible = true
 
 func _populate_category(category: Game.Category, target_container: Node) -> void:
+	if current_npc == null:
+		return
 	for item in Catalog.items:
 		if (item as ItemType).category != category:
 			continue
@@ -423,7 +425,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			update_catalog()
 	if npc.npc_name == "Warren":
-		if not $UI/Vendor.visible:
+		if not $UI/Vendor.visible and Game.level >= 10:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
 			$UI/Vendor/ItemPreview.visible = false
@@ -1645,28 +1647,8 @@ func _on_base_animation_finished() -> void:
 				play_idle_animation()
 
 func _on_sell_pressed() -> void:
-	var amount_earned = 0.0
-	var to_remove = []
-	for item in Game.bag.list:
-		if item.type.category == Game.Category.FISH or item.type.category == Game.Category.JUNK:
-			var mult = 1.0
-			match item.data.get("stars", 0):
-				1: mult = 1.25
-				2: mult = 1.5
-				3: mult = 2.0
-			var earned = item.amount * item.type.sell_price * mult
-			Game.balance += earned
-			amount_earned += earned
-			to_remove.append(item)
-	if not to_remove.is_empty():
-		for item in to_remove:
-			Game.bag.remove_item(item)
-	
-	if amount_earned > 0.0:
-		Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
-		Toast.add("Sold all your fish and earned $" + str(roundi(amount_earned)) + "!")
+	Network.request_sell_all.rpc_id(1)
 	_on_close_shop_pressed()
-	update_catalog()
 
 func _on_close_shop_pressed() -> void:
 	var release_interact = InputEventAction.new()

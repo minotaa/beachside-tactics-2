@@ -22,30 +22,40 @@ func get_fish_drop(location: Game.Location, rod_power: int, save_data: Dictionar
 		return get_fish(location, rod_power, save_data)
 
 func get_fish(location: Game.Location, rod_power: int, save_data: Dictionary, trap: bool = false) -> Fish:
-	var catchable_fish = []
 	var current_time := Game.time / Game.TIME_IN_DAY
-	var trophy_active = randf() < Game.get_trophy_fish_chance(save_data)
+	var trophy_chance = Game.get_trophy_fish_chance(save_data)
 
+	if randf() < trophy_chance:
+		var trophy_pool = _get_catchable_fish(location, rod_power, trap, current_time, true)
+		if not trophy_pool.is_empty():
+			return _pick_weighted_fish(trophy_pool, current_time)
+
+	var normal_pool = _get_catchable_fish(location, rod_power, trap, current_time, false)
+	if normal_pool.is_empty():
+		return null
+	return _pick_weighted_fish(normal_pool, current_time)
+
+func _get_catchable_fish(location: Game.Location, rod_power: int, trap: bool, current_time: float, trophy_only: bool) -> Array:
+	var result = []
 	for item in items:
 		if item is Fish:
 			if item.location == location and rod_power >= item.power_needed \
 			and (trap or not item.trap_only) \
-			and (not item.trophy_fish or trophy_active) \
+			and item.trophy_fish == trophy_only \
 			and item.can_catch.call():
-				catchable_fish.append(item)
+				result.append(item)
+	return result
 
-	if catchable_fish.is_empty():
-		return null
-
+func _pick_weighted_fish(pool: Array, current_time: float) -> Fish:
 	var total_weight = 0.0
-	for fish in catchable_fish:
+	for fish in pool:
 		total_weight += _get_weighted_rarity(fish, current_time)
 
 	var random_value = randf() * total_weight
 	var current_weight = 0.0
-	catchable_fish.shuffle()
+	pool.shuffle()
 
-	for fish in catchable_fish:
+	for fish in pool:
 		current_weight += _get_weighted_rarity(fish, current_time)
 		if random_value < current_weight:
 			return fish
@@ -60,7 +70,7 @@ func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
 		in_peak = current_time >= fish.hour_start and current_time < fish.hour_end
 	else:
 		in_peak = current_time >= fish.hour_start or current_time < fish.hour_end
-	return base * (2.0 if in_peak else 0.25)
+	return base * (2.0 if in_peak else 1.0)
 
 func get_junk(location: Game.Location, rod_power: int) -> ItemType:
 	var catchable_junk = []

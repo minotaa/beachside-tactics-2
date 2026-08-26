@@ -72,9 +72,39 @@ var flags = {}
 var traps = []
 var inventory_upgrade_bestiary_bonus = 0
 var last_island: Island = Island.Crystalwater_Beach
+var _sfx_in_progress: Dictionary = {}
 
 var game_scene = preload("res://scenes/levels/beach.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
+
+func stop_sfx(path: String) -> void:
+	for child in get_children():
+		if child is AudioStreamPlayer and child.get_meta("sfx_path", "") == path:
+			child.stop()
+			child.queue_free()
+	if _sfx_in_progress.has(path):
+		_sfx_in_progress[path] = false
+
+func play_sfx(path: String, volume: float = -20.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
+	if no_overlap and _sfx_in_progress.get(path, false):
+		return
+	if no_overlap:
+		_sfx_in_progress[path] = true
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.bus = "SFX"
+	player.set_meta("sfx_path", path)
+	player.stream = load(path)
+	player.volume_db = volume
+	if pitch_rand:
+		player.pitch_scale = randf_range(pitch_lower, pitch_higher)
+	player.play()
+	var wait_time = player.stream.get_length() / player.pitch_scale
+	await get_tree().create_timer(wait_time).timeout
+	if no_overlap:
+		_sfx_in_progress[path] = false
+	if is_instance_valid(player):
+		player.queue_free()
 
 func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0, from_position: float = -1.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
 	if no_overlap and _sfx_in_progress.get(path, false):
@@ -84,6 +114,7 @@ func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0
 	var player := AudioStreamPlayer.new()
 	add_child(player)
 	player.bus = "SFX"
+	player.set_meta("sfx_path", path)
 	player.stream = load(path)
 	if pitch_rand:
 		player.pitch_scale = randf_range(pitch_lower, pitch_higher)
@@ -94,30 +125,13 @@ func play_sfx_briefly(path: String, duration: float = 4.0, volume: float = -20.0
 	await get_tree().create_timer(duration).timeout
 	if no_overlap:
 		_sfx_in_progress[path] = false
+	if not is_instance_valid(player):
+		return
 	var tween := create_tween()
 	tween.tween_property(player, "volume_db", -80.0, 1.5)
 	await tween.finished
-	player.queue_free()
-
-var _sfx_in_progress: Dictionary = {}
-
-func play_sfx(path: String, volume: float = -20.0, pitch_rand: bool = true, no_overlap: bool = false, pitch_lower: float = 0.92, pitch_higher: float = 1.08) -> void:
-	if no_overlap and _sfx_in_progress.get(path, false):
-		return
-	if no_overlap:
-		_sfx_in_progress[path] = true
-	var player := AudioStreamPlayer.new()
-	add_child(player)
-	player.bus = "SFX"
-	player.stream = load(path)
-	player.volume_db = volume
-	if pitch_rand:
-		player.pitch_scale = randf_range(pitch_lower, pitch_higher)
-	player.play()
-	await player.finished
-	if no_overlap:
-		_sfx_in_progress[path] = false
-	player.queue_free()
+	if is_instance_valid(player):
+		player.queue_free()
 
 func get_rarity_color(rarity: Rarity) -> String:
 	match rarity:
