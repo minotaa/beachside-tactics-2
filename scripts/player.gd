@@ -939,11 +939,13 @@ func set_trap(id: int) -> void:
 				Game.equipped_trap = Catalog.get_item(id)
 				Toast.add("Equipped " + str(Catalog.get_item(id).name) + ".")
 			Game.play_sfx("res://assets/sounds/cageopen.ogg", 12)
+			Network.request_equip.rpc_id(1, "equipped_trap", id)
 		else:
 			LimboConsole.error("This doesn't seem to be a trap.")
 	else:
 		Toast.add("Unequipped your trap.")
 		Game.equipped_trap = null
+		Network.request_equip.rpc_id(1, "equipped_trap", null)
 	update_inventory()
 
 func set_bait(id: int) -> void:
@@ -958,11 +960,13 @@ func set_bait(id: int) -> void:
 				if not Game.equipped_fishing_rod.baitable:
 					Toast.add("The bait won't work unless you have a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod that can be baited.")
 			Game.play_sfx("res://assets/sounds/squelch.ogg", 3.0)
+			Network.request_equip.rpc_id(1, "equipped_bait", id)
 		else:
 			LimboConsole.error("This doesn't seem to be bait.")
 	else:
 		Toast.add("Removed currently equipped bait.")
 		Game.equipped_bait = null
+		Network.request_equip.rpc_id(1, "equipped_bait", null)
 	update_inventory()
 
 func set_fishing_rod(id: int) -> void:
@@ -975,12 +979,14 @@ func set_fishing_rod(id: int) -> void:
 			if Game.equipped_fishing_rod != Catalog.get_item(id):
 				Game.equipped_fishing_rod = Catalog.get_item(id)
 				Toast.add("Equipped: [img center region=" + str(Game.equipped_fishing_rod.texture.region.position.x) + "," + str(Game.equipped_fishing_rod.texture.region.position.y) + "," + str(16) + "," + str(16) + "width=16 height=16]res://assets/sprites/items.png[/img] " + str(Catalog.get_item(id).name))
+			Network.request_equip.rpc_id(1, "equipped_fishing_rod", id)
 		else:
 			LimboConsole.error("This doesn't seem to be a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 	else:
 		if Game.equipped_fishing_rod != null:
 			Toast.add("Removed currently equipped [img center region=" + str(Game.equipped_fishing_rod.texture.region.position.x) + "," + str(Game.equipped_fishing_rod.texture.region.position.y) + "," + str(16) + "," + str(16) + "width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
 		Game.equipped_fishing_rod = null
+		Network.request_equip.rpc_id(1, "equipped_fishing_rod", null)
 	update_inventory()
 
 func update_inventory() -> void:
@@ -1263,8 +1269,8 @@ func _process_ui(delta: float) -> void:
 		debug_text += "Num until catch: " + str(odds) + "\n"
 		debug_text += "Your num: " + str(your_odds) + "\n"
 		debug_text += "Rod power: " + str(Game.get_fishing_power(Game.get_save_data())) + "\n"
-	if state == FishState.REELING:
-		debug_text += "\nFish: " +  str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
+	if state == FishState.REELING and bobber != null and bobber.has_node("Bobber Fish"):
+		debug_text += "\nFish: " + str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
 	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible):
