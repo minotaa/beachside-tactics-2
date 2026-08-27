@@ -1,0 +1,6 @@
+.godot/
+.git/
+.github/
+*.import
+export_presets.cfg
+docker-compose.yml

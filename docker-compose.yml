@@ -1,0 +1,7 @@
+services:
+  server:
+    image: ghcr.io/OWNER/beachside-tactics-2/server:latest # replace OWNER with your GitHub username/org
+    ports:
+      - "${PORT:-6466}:${PORT:-6466}/udp"
+    command: ["--port=${PORT:-6466}"]
+    restart: unless-stopped
