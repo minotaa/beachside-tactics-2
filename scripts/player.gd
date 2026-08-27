@@ -799,11 +799,13 @@ func _process_input(delta: float) -> void:
 				if $FishPowerBar.value >= 100:
 					hantenjutsushiki = true
 					$ChargeBuildup.stop()
-					$ChargeBuildup.stream = load("res://assets/sounds/chargingup.ogg")
+					$ChargeBuildup.stream = load("res://assets/sounds/chargingupbutinreverse.ogg")
 					$ChargeBuildup.play()
 		elif charging_cast:
 			charging_cast = false
 			$ChargeBuildup.stop()
+	else:
+		$ChargeBuildup.stop()
 
 	# Hide power bar if inventory opens mid-charge
 	if $FishPowerBar.visible and (near_npc() or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):

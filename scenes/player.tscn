@@ -2255,6 +2255,7 @@ script = ExtResource("50_6e8lb")
 
 [node name="ChargeBuildup" type="AudioStreamPlayer" parent="." unique_id=66281793]
 stream = ExtResource("51_2gdjj")
+bus = &"SFX"
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]
 [connection signal="pressed" from="UI/Main/InventoryButton" to="." method="_on_inventory_button_pressed"]
