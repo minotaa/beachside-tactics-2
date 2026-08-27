@@ -204,16 +204,19 @@ func request_buy_item(item_id: int) -> void:
 				return
 
 		var added_amount = 8 if item.category == Game.Category.BAIT else 1
-
+		var equipped_the_item = false
 		update_player_save_data(id, func(sd):
 			var inv := Inventory.new()
 
 			inv.set_list_from_save(sd.get("inventory", []))
 			inv.add_item(ItemStack.new(item, added_amount))
+			if sd["equipped_bait"] == null and item is Bait:
+				sd["equipped_bait"] = item.id
+				equipped_the_item = true
 			sd["inventory"] = inv.to_list()
 			sd["balance"] = sd.get("balance", 0.0) - item.price
 		)
-		purchase_confirmed.rpc_id(id, item_id, added_amount)
+		purchase_confirmed.rpc_id(id, item_id, added_amount, equipped_the_item)
 		return
 
 @rpc("authority", "call_remote", "reliable")
@@ -221,10 +224,13 @@ func purchase_rejected(reason: String) -> void:
 	Toast.add(reason)
 
 @rpc("authority", "call_remote", "reliable")
-func purchase_confirmed(item_id: int, amount: int) -> void:
+func purchase_confirmed(item_id: int, amount: int, equipped: bool = false) -> void:
 	var item = Catalog.get_item(item_id)
 	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
-	Toast.add("You bought: " + str(amount) + "x " + str(item.name) + "!")
+	if not equipped:
+		Toast.add("You bought: " + str(amount) + "x " + str(item.name) + "!")
+	else:
+		Toast.add("You bought and equipped: " + str(amount) + "x " + str(item.name) + "!")
 	var local_player = Game.get_player()
 	if local_player:
 		local_player.update_catalog()
@@ -677,6 +683,12 @@ func start_fishing_timer(location: Game.Location, fish_power_bonus: float, naile
 	fishing_players.append(entry)
 	print("Started fishing for " + str(id) + ".")
 
+@rpc("any_peer", "call_remote", "reliable")
+func stop_fishing_timer() -> void:
+	var id = multiplayer.get_remote_sender_id()
+	fishing_players = fishing_players.filter(func(p): return p["id"] != id)
+	print("Stopped fishing for " + str(id) + ".")
+
 @rpc("authority", "call_remote", "reliable")
 func stop_fishing_for_player() -> void:
 	var player = Game.get_player()
@@ -978,7 +990,7 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 	var equipped_bait = save_data.get("equipped_bait", null)
 	var equipped_rod = save_data.get("equipped_fishing_rod", null)
 	if equipped_bait != null and equipped_rod != null and Catalog.get_item(equipped_rod).baitable:
-		inventory.take_item(equipped_bait, 1)
+		inventory.take_item(Catalog.get_item(equipped_bait), 1)
 		if not inventory.has_item(Catalog.get_item(equipped_bait)):
 			save_data["equipped_bait"] = null
 			Toast.add.rpc_id(id, "You ran out of bait!")

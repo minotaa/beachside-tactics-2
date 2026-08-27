@@ -751,6 +751,7 @@ func _process_input(delta: float) -> void:
 		bobber_safe = true
 		state = FishState.INACTIVE
 		if bobber != null:
+			Network.stop_fishing_timer.rpc_id(1)
 			bobber.queue_free()
 			bobber = null
 		velocity_length = min(1, 0.5 + velocity_length)
@@ -885,6 +886,7 @@ func _cancel_bobber(message: String = "") -> void:
 	bobber_safe = true
 	fish_control_safe = false
 	play_idle_animation()
+	Network.stop_fishing_timer.rpc_id(1)
 	if bobber != null:
 		bobber.queue_free()
 
@@ -1163,7 +1165,12 @@ func _process_ui(delta: float) -> void:
 	var light_energy = lerp(0.2, 0.0, day_factor)
 	$PointLight2D.energy = light_energy
 	$PointLight2D2.energy = light_energy
-	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable and not _is_ui_blocking():
+	if Game.equipped_bait != null and Game.equipped_fishing_rod != null and Game.equipped_fishing_rod.baitable and not (
+		$UI/Vendor.visible \
+		or $UI/Bestiary.visible \
+		or $UI/Inventory.visible \
+		or $UI/Trap.visible \
+	):
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
 		$UI/Main/Bait/HBoxContainer/Label.text = "x" + str(Game.inventory.get_item_stack(Game.equipped_bait).amount)
@@ -1326,6 +1333,7 @@ func _process_ui(delta: float) -> void:
 				Game.play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, 0.25)
 			if round(bobber.global_position.distance_to(get_rod_tip(get_fishing_direction()))) <= 10:
 				state = FishState.INACTIVE
+				Network.stop_fishing_timer.rpc_id(1)
 				bobber_safe = true
 				print("Player reeled in bobber.")
 				if bobber != null:
@@ -1641,6 +1649,7 @@ func _on_base_animation_finished() -> void:
 				print("Invalid tile to fish on, stopping fishing")
 				state = FishState.INACTIVE
 				bobber_safe = true
+				Network.stop_fishing_timer.rpc_id(1)
 				if bobber != null:
 					bobber.queue_free()
 					bobber = null

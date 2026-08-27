@@ -796,6 +796,7 @@ alignment = 1
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 texture = ExtResource("36_fdfoy")
+expand_mode = 2
 
 [node name="Label" type="Label" parent="UI/Main/Bait/HBoxContainer" unique_id=1759848330]
 layout_mode = 2
@@ -2149,7 +2150,7 @@ position = Vector2(0, 8)
 shape = SubResource("CircleShape2D_4r5pv")
 
 [node name="InteractionMark" type="TextureRect" parent="." unique_id=1540127431]
-z_index = 129
+z_index = 1289
 offset_left = -8.0
 offset_top = -23.0
 offset_right = 8.0

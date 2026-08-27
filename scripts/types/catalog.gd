@@ -720,7 +720,7 @@ func _enter_tree() -> void:
 	turtle_bait.extra_fishing_speed = 50.0
 	turtle_bait.extra_quick_bite = 5.0
 	turtle_bait.description = "A specialized bait specifically meant to catch Trophy Turtles."
-	turtle_bait.price = 300.0
+	turtle_bait.price = 125.0
 	turtle_bait.data = { 
 		"extra_stats": {
 			"Fishing Speed": "+50",
