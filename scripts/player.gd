@@ -1630,6 +1630,9 @@ func _on_base_animation_finished() -> void:
 
 		bobber_safe = false
 		if bobber != null:
+			if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
+				bobber.get_node("Bait").texture = Game.equipped_bait.texture
+				bobber.get_node("Bait").emitting = true
 			bobber.sleeping = true
 			var tile_map = get_parent().get_node("Ground") as TileMapLayer
 			var bobber_position = tile_map.to_local(bobber.global_position)
