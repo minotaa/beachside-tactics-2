@@ -230,13 +230,13 @@ func select_item(id: int, ignore: bool = false) -> void:
 	selected_item = item
 	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
-	if randf() > 0.2:
+	if randf() < 0.2:
 		$UI/Vendor/ItemPreview/Description.text = $UI/Vendor/ItemPreview/Description.text.replace("Flimsy Fishing Rod", "Flismy Fshing Bod")
 	var index = 0
 	if item.data.has("extra_stats"):
 		for key in item.data["extra_stats"].keys():
 			index += 1
-			$UI/Vendor/ItemPreview/Description.text += str("[color=#828282]" + key) + "[/color][color=white]:[/color] " + str(item.data["extra_stats"][key])
+			$UI/Vendor/ItemPreview/Description.text += str("[color=#b3b3b3]" + key) + "[/color][color=white]:[/color] " + str(item.data["extra_stats"][key])
 			if index < item.data["extra_stats"].keys().size():
 				$UI/Vendor/ItemPreview/Description.text += "\n"
 
@@ -1044,56 +1044,56 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Bait/Equipped/Name".text = "Nothing"
 		$"UI/Inventory/Container/Bait/Equipped/Description".text = "You have no bait equipped, buy some in the shop."
-		$"UI/Inventory/Container/Bait/Equipped/Stats".text = "Nothing: +0"
+		$"UI/Inventory/Container/Bait/Equipped/Description".text += "\n\nNothing: +0"
 	else:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = Game.equipped_bait.texture
 		$"UI/Inventory/Container/Bait/Equipped/Name".text = Game.equipped_bait.name
 		$"UI/Inventory/Container/Bait/Equipped/Description".text = Game.equipped_bait.description
-		$"UI/Inventory/Container/Bait/Equipped/Stats".text = ""
+		$"UI/Inventory/Container/Bait/Equipped/Description".text += "\n\n"
 		var index = 0
 		for key in Game.equipped_bait.data["extra_stats"].keys():
 			index += 1
-			$"UI/Inventory/Container/Bait/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_bait.data["extra_stats"][key])
+			$"UI/Inventory/Container/Bait/Equipped/Description".text += str("[color=#b3b3b3]" + key) + "[/color][color=white]:[/color] " + str(Game.equipped_bait.data["extra_stats"][key])
 			if index < Game.equipped_bait.data["extra_stats"].keys().size():
-				$"UI/Inventory/Container/Bait/Equipped/Stats".text += "\n"
+				$"UI/Inventory/Container/Bait/Equipped/Description".text += "\n"
 
 	if Game.equipped_trap == null:
 		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Traps/Equipped/Name".text = "Nothing"
 		$"UI/Inventory/Container/Traps/Equipped/Description".text = "You have no trap equipped, they're probably all being cast, but if you don't have any, buy one in the shop."
-		$"UI/Inventory/Container/Traps/Equipped/Stats".text = "Nothing: +0"
+		$"UI/Inventory/Container/Traps/Equipped/Description".text = "\n\nNothing: +0"
 	else:
 		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = Game.equipped_trap.texture
 		$"UI/Inventory/Container/Traps/Equipped/Name".text = Game.equipped_trap.name
 		$"UI/Inventory/Container/Traps/Equipped/Description".text = Game.equipped_trap.description
 		if randf() < 0.2:
 			$"UI/Inventory/Container/Traps/Equipped/Description".text = $"UI/Inventory/Container/Traps/Equipped/Description".text.replace("flimsy", "flismy")
-		$"UI/Inventory/Container/Traps/Equipped/Stats".text = ""
+		$"UI/Inventory/Container/Traps/Equipped/Description".text += "\n\n"
 		var index = 0
 		for key in Game.equipped_trap.data["extra_stats"].keys():
 			index += 1
-			$"UI/Inventory/Container/Traps/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_trap.data["extra_stats"][key])
+			$"UI/Inventory/Container/Traps/Equipped/Description".text += str("[color=#b3b3b3]" + key) + "[/color][color=white]:[/color] " + str(Game.equipped_trap.data["extra_stats"][key])
 			if index < Game.equipped_trap.data["extra_stats"].keys().size():
-				$"UI/Inventory/Container/Traps/Equipped/Stats".text += "\n"
+				$"UI/Inventory/Container/Traps/Equipped/Description".text += "\n"
 				
 	if Game.equipped_fishing_rod == null:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = "Nothing"
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no Fishing Rod equipped, buy one in the shop."
-		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = "Nothing: +0"
+		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "\n\nNothing: +0"
 	else:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = Game.equipped_fishing_rod.texture
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = Game.equipped_fishing_rod.name
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = Game.equipped_fishing_rod.description
 		if randf() < 0.2:
 			$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = $"UI/Inventory/Container/Fishing Rods/Equipped/Description".text.replace("Flimsy Fishing Rod", "Flismy Fshing Bod")
-		$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text = ""
+		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text += "\n\n"
 		var index = 0
 		for key in Game.equipped_fishing_rod.data["extra_stats"].keys():
 			index += 1
-			$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += str(key) + ": " + str(Game.equipped_fishing_rod.data["extra_stats"][key])
+			$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text += str("[color=#b3b3b3]" + key) + "[/color][color=white]:[/color] " + str(Game.equipped_fishing_rod.data["extra_stats"][key])
 			if index < Game.equipped_fishing_rod.data["extra_stats"].keys().size():
-				$"UI/Inventory/Container/Fishing Rods/Equipped/Stats".text += "\n"
+				$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text += "\n"
 
 	var bag = Game.bag.list.duplicate()
 	bag.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
@@ -1528,6 +1528,9 @@ func _on_base_animation_finished() -> void:
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
 		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
 		add_child(bobber)
+		
+		if nailed_it:
+			$Exclaim.emitting = true
 		var dir = DIRECTIONS[get_fishing_direction()]
 		last_direction = get_fishing_direction()
 
@@ -1645,6 +1648,7 @@ func _on_base_animation_finished() -> void:
 				data = aboveground2.get_cell_tile_data(tile_map.local_to_map(bobber_position))
 			if data and data.get_custom_data("water"):
 				print("Valid tile to fish on, starting timer")
+					
 				Network.start_fishing_timer.rpc_id(1, Game.Location.get(data.get_custom_data("location")), $FishPowerBar.value, nailed_it)
 				state = FishState.FISHING
 				if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()): # TODO: Should be accurate to player's actual inventory, who cares though.

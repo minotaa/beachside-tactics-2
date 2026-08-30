@@ -123,9 +123,9 @@ func _enter_tree() -> void:
 	basic_fishing_rod.baitable = false
 	basic_fishing_rod.data = { 
 		"extra_stats": {
-			"Baitable": "No",
-			"Rod Power": "+1",
-			"Extra Junk Chance": "+0"
+			"Baitable": "[color=#f03535]No",
+			"Rod Power": "[color=#36f53c]+1",
+			"Extra Junk Chance": "[color=#36f53c]+0"
 		}
 	}
 	items.append(basic_fishing_rod)
@@ -328,9 +328,9 @@ func _enter_tree() -> void:
 	bamboo_fishing_rod.shoddy = true
 	bamboo_fishing_rod.data = { 
 		"extra_stats": {
-			"Baitable": "No",
-			"Rod Power": "+5",
-			"Extra Junk Chance": "+10"
+			"Baitable": "[color=#f03535]No",
+			"Rod Power": "[color=#36f53c]+5",
+			"Extra Junk Chance": "[color=#36f53c]+10"
 		}
 	}
 	items.append(bamboo_fishing_rod)
@@ -352,9 +352,9 @@ func _enter_tree() -> void:
 	decent_fishing_rod.shoddy = false
 	decent_fishing_rod.data = { 
 		"extra_stats": {
-			"Baitable": "Yes",
-			"Rod Power": "+12.5",
-			"Extra Junk Chance": "+20"
+			"Baitable": "[color=#36f53c]Yes",
+			"Rod Power": "[color=#36f53c]+12.5",
+			"Extra Junk Chance": "[color=#36f53c]+20"
 		}
 	}
 	items.append(decent_fishing_rod)
@@ -372,8 +372,8 @@ func _enter_tree() -> void:
 	worms.price = 10.0
 	worms.data = { 
 		"extra_stats": {
-			"Fishing Speed": "+25",
-			"Quick Bite": "+0"
+			"Fishing Speed": "[color=#36f53c]+25",
+			"Quick Bite": "[color=#36f53c]+0"
 		}
 	}
 	items.append(worms)
@@ -527,10 +527,10 @@ func _enter_tree() -> void:
 	common_trap.submerged_texture = atlas
 	common_trap.data = { 
 		"extra_stats": {
-			"Space": "3",
-			"Rod Power": "12.5",
-			"Bait Storage": "+12",
-			"Fishing Speed": "2"
+			"Space": "[color=#32d8fc]3",
+			"Rod Power": "[color=#32d8fc]12.5",
+			"Bait Storage": "[color=#32d8fc]12",
+			"Fishing Speed": "[color=#32d8fc]2"
 		}
 	}
 	items.append(common_trap)
@@ -548,8 +548,8 @@ func _enter_tree() -> void:
 	snails.price = 100.0
 	snails.data = { 
 		"extra_stats": {
-			"Fishing Speed": "+100",
-			"Quick Bite": "+5"
+			"Fishing Speed": "[color=#36f53c]+100",
+			"Quick Bite": "[color=#36f53c]+5"
 		}
 	}
 	items.append(snails)
@@ -567,8 +567,8 @@ func _enter_tree() -> void:
 	peanuts.price = 300.0
 	peanuts.data = { 
 		"extra_stats": {
-			"Fishing Speed": "+200",
-			"Quick Bite": "+15"
+			"Fishing Speed": "[color=#36f53c]+200",
+			"Quick Bite": "[color=#36f53c]+15"
 		}
 	}
 	items.append(peanuts)
@@ -590,11 +590,11 @@ func _enter_tree() -> void:
 	turtle_fishing_rod.shoddy = false
 	turtle_fishing_rod.data = { 
 		"extra_stats": {
-			"Baitable": "Yes",
-			"Rod Power": "+100",
-			"Extra Junk Chance": "+25",
-			"Turtle": "Yes",
-			"How Turtle?": "Very"
+			"Baitable": "[color=#36f53c]Yes",
+			"Rod Power": "[color=#36f53c]+100",
+			"Extra Junk Chance": "[color=#36f53c]+25",
+			"Turtle": "[color=#36f53c]Yes",
+			"How Turtle?": "[color=#36f53c]Very"
 		}
 	}
 	items.append(turtle_fishing_rod)
@@ -715,7 +715,7 @@ func _enter_tree() -> void:
 	atlas.region = Rect2(80.0, 0.0, 16.0, 16.0)
 	var turtle_bait = Bait.new(34, "Turtle Bait", atlas)
 	turtle_bait.category = Game.Category.BAIT
-	turtle_bait.rarity = Game.Rarity.COMMON
+	turtle_bait.rarity = Game.Rarity.UNCOMMON
 	turtle_bait.purchasable = true
 	turtle_bait.extra_fishing_speed = 50.0
 	turtle_bait.extra_quick_bite = 5.0
@@ -723,9 +723,9 @@ func _enter_tree() -> void:
 	turtle_bait.price = 125.0
 	turtle_bait.data = { 
 		"extra_stats": {
-			"Fishing Speed": "+50",
-			"Quick Bite": "+5",
-			"Trophy Fish Chance": "+5"
+			"Fishing Speed": "[color=#36f53c]+50",
+			"Quick Bite": "[color=#36f53c]+5",
+			"Trophy Fish Chance": "[color=#36f53c]+5"
 		}
 	}
 	items.append(turtle_bait)

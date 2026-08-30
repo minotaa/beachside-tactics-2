@@ -68,7 +68,6 @@ damping_max = 30.000002
 scale_min = 0.29999998
 scale_max = 0.79999995
 scale_curve = SubResource("CurveTexture_4f4en")
-color = Color(0.8901961, 1, 1, 1)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1y8pg"]
 particle_flag_disable_z = true
