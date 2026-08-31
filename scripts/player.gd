@@ -413,9 +413,10 @@ func _on_interaction_ended() -> void:
 var current_npc
 
 func _on_dialogue_finished(npc: NPC) -> void:
+	current_npc = npc
+	await get_tree().create_timer(0.5).timeout
 	interacting = false
 	immersive_interact = null
-	current_npc = npc
 	if npc.npc_name == "Sheldon":
 		if not $UI/Vendor.visible:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)

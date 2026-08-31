@@ -172,8 +172,7 @@ func _on_quest_triggered(quest_id: String) -> void:
 	match quest_id:
 		"give_starter_money":
 			if not Game.flags.get("got_starter_money", false):
-				Game.balance += 100
-				Game.flags["got_starter_money"] = true
+				Network.request_starter_money.rpc_id(1)
 		"open_shop":
 			dialogue_finished.connect(_open_shop, CONNECT_ONE_SHOT)
 		"told_about_shelly":
