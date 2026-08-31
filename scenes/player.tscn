@@ -658,7 +658,7 @@ script = ExtResource("1_qlg0r")
 [node name="Exclaim" type="GPUParticles2D" parent="." unique_id=333409775]
 position = Vector2(0, 8)
 emitting = false
-amount = 16
+amount = 4
 texture = ExtResource("2_sc3ue")
 lifetime = 1.5
 one_shot = true

@@ -42,7 +42,7 @@ enum TimeOfDay {
 }
 
 const SPAWN_POINTS = {
-	Island.Crystalwater_Beach: Vector2(-216, -125)
+	Island.Crystalwater_Beach: Vector2(-248, 0)
 }
 const BASE_CATCH_TIME = 1200.0
 const DAY_COLOR := Color.WHITE

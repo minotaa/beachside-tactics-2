@@ -715,7 +715,7 @@ func _enter_tree() -> void:
 	atlas.region = Rect2(80.0, 0.0, 16.0, 16.0)
 	var turtle_bait = Bait.new(34, "Turtle Bait", atlas)
 	turtle_bait.category = Game.Category.BAIT
-	turtle_bait.rarity = Game.Rarity.UNCOMMON
+	turtle_bait.rarity = Game.Rarity.RARE
 	turtle_bait.purchasable = true
 	turtle_bait.extra_fishing_speed = 50.0
 	turtle_bait.extra_quick_bite = 5.0

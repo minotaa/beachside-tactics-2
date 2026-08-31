@@ -873,14 +873,14 @@ func _player_joined(id: int) -> void:
 
 func _player_quit(id: int) -> void:
 	print("[server] Player quit with ID " + str(id))
-	for player in players:
-		if str(player["id"]) == str(id):
-			Toast.add.rpc(player["username"] + " left the server!")
 	players = players.filter(func(p): return p["id"] != id)
 	fishing_players = fishing_players.filter(func(p): return p["id"] != id)
 	despawn_player.rpc(id)
 	player_quit.emit(id)
 	server_player_quit.rpc(id)
+	for player in players:
+		if str(player["id"]) == str(id):
+			Toast.add.rpc(player["username"] + " left the server!")
 
 @rpc("any_peer", "call_remote", "reliable")
 func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(save_data: Dictionary) -> void:
