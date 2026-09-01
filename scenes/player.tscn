@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://it176hjsau23" path="res://assets/sprites/progress.png" id="13_oprun"]
 [ext_resource type="Texture2D" uid="uid://doantlsit6s6j" path="res://assets/sprites/minigame-progress-bar.png" id="14_oprun"]
 [ext_resource type="Texture2D" uid="uid://dpi0maofy08ke" path="res://assets/sprites/minigame-hook-icon.png" id="16_a8ls1"]
+[ext_resource type="Texture2D" uid="uid://cdv6sl0kdiy6g" path="res://assets/sprites/caught-fish-common.png" id="17_4r5pv"]
 [ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="18_i4ail"]
 [ext_resource type="FontFile" uid="uid://be62fukl44n8f" path="res://assets/fonts/DepartureMono-Regular.otf" id="18_ke2ow"]
 [ext_resource type="Texture2D" uid="uid://dm36abwmv6v4n" path="res://assets/sprites/backpack.png" id="19_i4ail"]
@@ -639,6 +640,14 @@ font_size = 32
 font = ExtResource("18_i4ail")
 font_color = Color(0.6194887, 0.61948866, 0.6194887, 1)
 
+[sub_resource type="FontVariation" id="FontVariation_0h5mt"]
+base_font = ExtResource("18_i4ail")
+variation_embolden = 1.0
+
+[sub_resource type="FontVariation" id="FontVariation_lxlsd"]
+base_font = ExtResource("18_i4ail")
+variation_transform = Transform2D(1, 0.1, 0, 1, 0, 0)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_4r5pv"]
 radius = 23.0
 
@@ -890,6 +899,34 @@ offset_right = 0.039993286
 offset_bottom = 0.039993286
 grow_vertical = 2
 texture = ExtResource("19_i4ail")
+
+[node name="LevelingButton" type="Button" parent="UI/Main" unique_id=589070932]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 328.0
+offset_top = 79.0
+offset_right = 376.0
+offset_bottom = 127.0
+theme_override_fonts/font = ExtResource("18_i4ail")
+theme_override_icons/icon = ExtResource("19_i4ail")
+theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_bj30b")
+expand_icon = true
+
+[node name="TextureRect" type="TextureRect" parent="UI/Main/LevelingButton" unique_id=1777464173]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.16700001
+anchor_top = 0.16700001
+anchor_right = 0.83300006
+anchor_bottom = 0.83300006
+offset_left = -0.040000916
+offset_top = -0.040000916
+offset_right = 0.015983582
+offset_bottom = 0.039993286
+grow_vertical = 2
+texture = ExtResource("17_4r5pv")
 
 [node name="LevelBar" type="TextureProgressBar" parent="UI/Main" unique_id=1396506588]
 texture_filter = 1
@@ -2083,6 +2120,104 @@ offset_bottom = 372.0
 [node name="GridContainer" type="HBoxContainer" parent="UI/Trap/Container/Bait/ScrollContainer2" unique_id=579688952]
 layout_mode = 2
 
+[node name="Leveling" type="Control" parent="UI" unique_id=1293169504]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="Panel" parent="UI/Leveling" unique_id=15184504]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -704.0
+offset_top = -224.0
+offset_right = -16.0
+offset_bottom = 224.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Leveling/Container" unique_id=2009978067]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 0
+offset_left = 32.0
+offset_top = 96.0
+offset_right = 664.0
+offset_bottom = 240.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/Leveling/Container/ScrollContainer" unique_id=120717579]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Leveling/Container/ScrollContainer/MarginContainer" unique_id=984700941]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="Label" type="RichTextLabel" parent="UI/Leveling/Container" unique_id=401283430]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 240.0
+offset_right = 664.0
+offset_bottom = 432.0
+theme_override_constants/line_separation = 6
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_fonts/bold_font = SubResource("FontVariation_0h5mt")
+theme_override_fonts/italics_font = SubResource("FontVariation_lxlsd")
+theme_override_font_sizes/normal_font_size = 22
+theme_override_font_sizes/bold_font_size = 22
+theme_override_font_sizes/italics_font_size = 22
+bbcode_enabled = true
+text = "Leveling rewards for Level 10:
+- [b]Loss of family![/b]
+- Loss of balls."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Close" type="Button" parent="UI/Leveling/Container" unique_id=804923389]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.87200004
+anchor_top = 0.063
+anchor_right = 0.95300007
+anchor_bottom = 0.18400002
+offset_left = 16.063965
+offset_top = -1.6640015
+offset_right = 0.3359375
+offset_bottom = -9.12001
+grow_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_bj30b")
+icon = ExtResource("34_giy8y")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Title" type="Label" parent="UI/Leveling/Container" unique_id=248242664]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -312.0
+offset_top = 28.0
+offset_right = 256.0
+offset_bottom = 85.0
+grow_horizontal = 2
+text = "Leveling "
+label_settings = SubResource("LabelSettings_a38lo")
+vertical_alignment = 1
+
 [node name="Interaction" type="Area2D" parent="." unique_id=1380827311]
 collision_mask = 2
 
@@ -2200,6 +2335,7 @@ bus = &"SFX"
 
 [connection signal="animation_finished" from="Base" to="." method="_on_base_animation_finished"]
 [connection signal="pressed" from="UI/Main/InventoryButton" to="." method="_on_inventory_button_pressed"]
+[connection signal="pressed" from="UI/Main/LevelingButton" to="." method="_on_leveling_button_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Fishing Rods/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Bait/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Traps/Equipped/Close" to="." method="_on_close_inventory_pressed"]
@@ -2212,3 +2348,4 @@ bus = &"SFX"
 [connection signal="pressed" from="UI/Trap/Container/Inventory/Pickup" to="." method="pickup_trap"]
 [connection signal="pressed" from="UI/Trap/Container/Inventory/Pickup2" to="." method="collect_all_from_trap"]
 [connection signal="pressed" from="UI/Trap/Container/Bait/Close" to="." method="_on_close_shop_pressed"]
+[connection signal="pressed" from="UI/Leveling/Container/Close" to="." method="_on_close_leveling_pressed"]

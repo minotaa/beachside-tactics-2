@@ -347,6 +347,152 @@ func _populate_category(category: Game.Category, target_container: Node) -> void
 		shop_entry.get_node("Panel").connect("pressed", Callable(self, "select_item").bind(item.id))
 		target_container.add_child(shop_entry)
 
+var selected_level: int = -1
+var manual_selection: bool = false
+
+func format_stat_prefixed(stat_name: String, value: String) -> String:
+	var color := Game.COLOR_INNATE
+	
+	if value.begins_with("+") or value == "Yes":
+		color = Game.COLOR_POSITIVE
+	elif value.begins_with("-") or value == "No":
+		color = Game.COLOR_NEGATIVE
+	
+	return "[color=%s]%s[/color] [color=%s]%s[/color]" % [color, value, Game.COLOR_DULL, stat_name]
+
+func _get_padded_leveling_rewards() -> Dictionary:
+	var raw := Game.LEVELING_REWARDS
+	var levels := raw.keys()
+	levels.sort()
+	if levels.is_empty():
+		return {}
+	
+	var padded := {}
+	var min_level: int = levels[0]
+	var max_level: int = levels[levels.size() - 1]
+	
+	for level in range(min_level, max_level + 1):
+		var lines: Array = []
+		
+		if raw.has(level):
+			for line in raw[level]:
+				lines.append("%s" % line)
+		
+		for stat_name in Game.DEFAULT_LEVEL_REWARD_STAT.keys():
+			lines.append(format_stat_prefixed(stat_name, Game.DEFAULT_LEVEL_REWARD_STAT[stat_name]))
+		
+		padded[level] = lines
+	
+	return padded
+
+
+func _get_closest_milestone(padded: Dictionary, player_level: int) -> int:
+	var levels := padded.keys()
+	levels.sort()
+	
+	for level in levels:
+		if level >= Game.level:
+			return level
+	
+	return -1
+
+
+func select_level(level: int) -> void:
+	manual_selection = true
+	_apply_selection(level)
+
+
+func _apply_selection(level: int) -> void:
+	selected_level = level
+	
+	for child in $UI/Leveling/Container/ScrollContainer/MarginContainer/HBoxContainer.get_children():
+		child.get_node("Equipped").visible = child.get_node("Label").text == str(level)
+	
+	_update_reward_label(level)
+	call_deferred("_center_scroll_on_level", level)
+
+func _center_scroll_on_level(level: int) -> void:
+	var scroll := $UI/Leveling/Container/ScrollContainer
+	var hbox := $UI/Leveling/Container/ScrollContainer/MarginContainer/HBoxContainer
+	
+	var index := -1
+	var children := hbox.get_children()
+	for i in children.size():
+		if children[i].name == str(level):
+			index = i
+			break
+	
+	if index == -1:
+		return
+	
+	var x_offset: float = 12 + index * (96 + 22)
+	var target_center: float = x_offset + 110 / 2.0
+	var scroll_center: float = target_center - scroll.size.x / 2.0
+	
+	scroll.scroll_horizontal = int(scroll_center)
+
+func _update_reward_label(level: int) -> void:
+	var padded := _get_padded_leveling_rewards()
+	if not padded.has(level):
+		$UI/Leveling/Container/Label.text = ""
+		return
+	
+	var lines: Array = padded[level]
+	var text := "Rewards for Level %d:\n" % level
+	for line in lines:
+		text += "- %s\n" % line
+	text += "\n" + get_progress_text()
+	
+	$UI/Leveling/Container/Label.text = text.strip_edges()
+
+func get_progress_text() -> String:
+	var current_xp: float = Game.xp
+	var next_level_xp: float = Game.calculate_xp_for_level(Game.level + 1)
+	var current_level_xp: float = Game.calculate_xp_for_level(Game.level)
+	
+	var progress = 0.0
+	if next_level_xp > current_level_xp:
+		progress = (current_level_xp / next_level_xp)
+	print("xp: ", current_xp, " current_level_xp: ", current_level_xp, " next_level_xp: ", next_level_xp)
+	progress = clamp(progress, 0.0, 1.0)
+	
+	var percent = int(round(progress * 100))
+	print(progress, percent)
+	
+	return "[color=%s]%d%%[/color] [color=%s]to[/color] Level %d" % [Game.COLOR_INNATE, percent, Game.COLOR_DULL, Game.level + 1]
+
+func update_leveling() -> void:
+	for child in $UI/Leveling/Container/ScrollContainer/MarginContainer/HBoxContainer.get_children():
+		child.queue_free()
+		
+	var padded := _get_padded_leveling_rewards()
+	var levels := padded.keys()
+	levels.sort()
+	
+	for level in levels:
+		var reward_entry = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		reward_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-common.png")
+		reward_entry.get_node("TextureRect").texture = load("res://assets/sprites/caught-fish-common.png")
+		reward_entry.get_node("Label").text = str(level)
+		reward_entry.get_node("Label").visible = true
+		reward_entry.get_node("Label").horizontal_alignment = 1
+		reward_entry.get_node("Equipped").visible = false
+		reward_entry.offset_transform_position = Vector2(0, 16.0)
+		reward_entry.name = str(level)
+		
+		reward_entry.connect("pressed", Callable(self, "select_level").bind(level))
+		$UI/Leveling/Container/ScrollContainer/MarginContainer/HBoxContainer.add_child(reward_entry, true)
+	await get_tree().process_frame
+	if manual_selection and padded.has(selected_level):
+		_apply_selection(selected_level)
+	else:
+		var closest := _get_closest_milestone(padded, Game.level)
+		if closest != -1:
+			_apply_selection(closest)
+		else:
+			selected_level = -1
+			$UI/Leveling/Container/Label.text = ""
+			
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
@@ -424,6 +570,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
 			$UI/Main.visible = false
+			$UI/Leveling.visible = false
 			update_catalog()
 	if npc.npc_name == "Warren":
 		if not $UI/Vendor.visible and Game.level >= 10:
@@ -432,6 +579,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Vendor/ItemPreview.visible = false
 			$UI/Inventory.visible = false
 			$UI/Main.visible = false
+			$UI/Leveling.visible = false
 			update_catalog()
 	if npc.npc_name == "Shelly":
 		if not $UI/Bestiary.visible: 
@@ -440,6 +588,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Bestiary/ItemPreview.visible = false
 			$UI/Inventory.visible = false
 			$UI/Main.visible = false
+			$UI/Leveling.visible = false
 			update_bestiary()
 
 var last_trap: Dictionary
@@ -527,7 +676,7 @@ func _input(event: InputEvent) -> void:
 
 	# Shop interaction toggle
 	if event.is_action_released("interact") and not interacting:
-		if state == FishState.INACTIVE and not $UI/Inventory.visible:
+		if state == FishState.INACTIVE and not $UI/Inventory.visible and not $UI/Leveling.visible:
 			if not _is_ui_blocking():
 				for body in $Interaction.get_overlapping_areas():	
 					if body.is_in_group("npc"):
@@ -809,7 +958,7 @@ func _process_input(delta: float) -> void:
 		$ChargeBuildup.stop()
 
 	# Hide power bar if inventory opens mid-charge
-	if $FishPowerBar.visible and (near_npc() or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
+	if $FishPowerBar.visible and (near_npc() or $UI/Leveling.visible or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
 		$FishPowerBar.hide()
 		hantenjutsushiki = false
 		fish_control_safe = false
@@ -878,6 +1027,7 @@ func _is_ui_blocking() -> bool:
 		or $UI/Bestiary.visible
 		or $UI/Inventory.visible
 		or $UI/Trap.visible
+		or $UI/Leveling.visible
 		or immersive_interact != null
 	)
 
@@ -1173,6 +1323,7 @@ func _process_ui(delta: float) -> void:
 		or $UI/Bestiary.visible \
 		or $UI/Inventory.visible \
 		or $UI/Trap.visible \
+		or $UI/Leveling.visible \
 	):
 		$UI/Main/Bait.visible = true
 		$UI/Main/Bait/HBoxContainer/TextureRect.texture = Game.equipped_bait.texture
@@ -1191,6 +1342,11 @@ func _process_ui(delta: float) -> void:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
 	elif $UI/Trap.visible:
 		var panel_width = -$UI/Trap/Container.size.x
+		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
+		var target_pos = global_position + Vector2(offset, 0)
+		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
+	elif $UI/Leveling.visible:
+		var panel_width = $UI/Leveling/Container.size.x
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
 		var target_pos = global_position + Vector2(offset, 0)
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
@@ -1285,7 +1441,8 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " + str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
-	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible):
+	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible and not $UI/Leveling.visible):
+		
 		if not $UI/Inventory.visible:
 			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()
@@ -1298,6 +1455,10 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/LevelBar.show()
 			$UI/Main/InventoryButton.show()
 			$UI/Inventory.hide()
+	
+	if Input.is_action_just_released("inventory") and $UI/Leveling.visible:
+		$UI/Leveling.visible = false
+		$UI/Main.visible = true
 	
 	# Update rope physics for fishing line
 	if bobber != null:
@@ -1518,7 +1679,7 @@ func get_fishing_direction() -> String:
 
 func _on_base_animation_finished() -> void:
 	var prefix := body_type + "_fish_"
-	if $UI/Bestiary.visible or $UI/Vendor.visible or $UI/Inventory.visible:
+	if $UI/Leveling.visible or $UI/Bestiary.visible or $UI/Vendor.visible or $UI/Inventory.visible:
 		play_idle_animation()
 		return
 	if $Base.animation.begins_with(prefix):
@@ -1688,3 +1849,12 @@ func _connect_button_sfx(button: Button):
 	button.pressed.connect(func():
 		Game.play_sfx("res://assets/sounds/click1.wav", 2, false, false)
 	)
+
+func _on_leveling_button_pressed() -> void:
+	$UI/Leveling.visible = true
+	$UI/Main.visible = false
+	update_leveling()
+
+func _on_close_leveling_pressed() -> void:
+	$UI/Leveling.visible = false
+	$UI/Main.visible = true

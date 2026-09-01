@@ -41,6 +41,27 @@ enum TimeOfDay {
 	NIGHT
 }
 
+const LEVELING_REWARDS = {
+	1: [],
+	5: [
+		"Access to Baits."
+	],
+	10: [
+		"Access to Traps.",
+		"Can talk to Warren."
+	]
+}
+
+const DEFAULT_LEVEL_REWARD_STAT := {
+	"Rod Power": "+1"
+}
+
+const COLOR_DULL := "#b3b3b3"
+const COLOR_POSITIVE := "#36f53c"
+const COLOR_NEGATIVE := "#f03535"
+const COLOR_INNATE := "#32d8fc"
+
+
 const SPAWN_POINTS = {
 	Island.Crystalwater_Beach: Vector2(-248, 0)
 }

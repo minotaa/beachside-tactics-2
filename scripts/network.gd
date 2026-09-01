@@ -735,15 +735,15 @@ func client_scene_ready() -> void:
 			spawn_player.rpc_id(id, player["id"], pos)
 
 var bestiary_money_table := {
-	Game.Rarity.COMMON:    50.0,
-	Game.Rarity.UNCOMMON:  100.0,
-	Game.Rarity.RARE:      250.0,
-	Game.Rarity.EPIC:      500.0,
-	Game.Rarity.LEGENDARY: 1000.0
+	Game.Rarity.COMMON:    100.0,
+	Game.Rarity.UNCOMMON:  250.0,
+	Game.Rarity.RARE:      500.0,
+	Game.Rarity.EPIC:      1000.0,
+	Game.Rarity.LEGENDARY: 2500.0
 }
 
 var bestiary_xp_table := {
-	Game.Rarity.COMMON:    100.0,
+	Game.Rarity.COMMON:    250.0,
 	Game.Rarity.UNCOMMON:  500.0,
 	Game.Rarity.RARE:      1500.0,
 	Game.Rarity.EPIC:      5000.0,
