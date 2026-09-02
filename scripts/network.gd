@@ -1067,9 +1067,11 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 func minigame_result(success: bool) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	print("minigame_result from ", id, " success: ", success)
+	var found_player = false
 	for i in range(fishing_players.size()):
 		var player = fishing_players[i]
 		if player["id"] == id and player.get("reeling", false):
+			found_player = true
 			print("  matched reeling player, stack: ", player.get("stack", null))
 			if success:
 				_resolve_catch(id, get_player_save_data(id), player["stack"])
@@ -1080,6 +1082,10 @@ func minigame_result(success: bool) -> void:
 				stop_fishing_for_player.rpc_id(id)
 			fishing_players.remove_at(i)
 			return
+	if not found_player:
+		var save_data = get_player_save_data(id)
+		stop_fishing_for_player.rpc_id(id, save_data)
+	
 
 @rpc("authority", "call_remote", "reliable")
 func bite_missed() -> void:
