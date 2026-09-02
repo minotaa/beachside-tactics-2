@@ -228,7 +228,14 @@ func select_item(id: int, ignore: bool = false) -> void:
 		else:
 			$UI/Vendor/ItemPreview.visible = true
 	selected_item = item
-	$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
+	if Game.inventory.has_item(item):
+		var amount = Game.inventory.get_item_stack(item).amount
+		$UI/Vendor/ItemPreview/Price.text = "Owned: " + str(amount) + "  Price: $" + str(roundi(item.price))
+	elif Game.upgrades.has_item(item):
+		var level = Game.upgrades.get_item_stack(item).data["level"]
+		$UI/Vendor/ItemPreview/Price.text = "Level: " + str(level) + "  Price: $" + str(roundi(item.price))
+	else:
+		$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
 	if randf() < 0.2:
 		$UI/Vendor/ItemPreview/Description.text = $UI/Vendor/ItemPreview/Description.text.replace("Flimsy Fishing Rod", "Flismy Fshing Bod")
@@ -440,7 +447,7 @@ func _update_reward_label(level: int) -> void:
 	var lines: Array = padded[level]
 	var text := "Rewards for Level %d:\n" % level
 	for line in lines:
-		text += "- %s\n" % line
+		text += "[color=%s]-[/color] %s\n" % [Game.COLOR_BULLET, line]
 	text += "\n" + get_progress_text()
 	
 	$UI/Leveling/Container/Label.text = text.strip_edges()
@@ -500,6 +507,9 @@ func update_catalog() -> void:
 		children.queue_free()
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer".get_children():
 		children.queue_free()
+	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer/HBoxContainer".get_children():
+		children.queue_free()
+		
 	for children in $UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.get_children():
 		children.queue_free()
 	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
@@ -507,16 +517,25 @@ func update_catalog() -> void:
 	_populate_category(Game.Category.RODS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.BAIT, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.TRAPS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer")
+	_populate_category(Game.Category.UPGRADES, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer/HBoxContainer")
+
 
 	await get_tree().process_frame
 	if Game.level < 5:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait.visible = true
+	
 	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer.get_children().size() == 0:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = false
 	else:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods.visible = true
+		
+	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer/HBoxContainer.get_children().size() == 0 or Game.level < 12:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades.visible = false
+	else:
+		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades.visible = true
+		
 	if $UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer.get_children().size() == 0 or Game.level < 10:
 		$UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps.visible = false
 	else:
@@ -1155,12 +1174,19 @@ func update_inventory() -> void:
 		child.queue_free()
 	for child in $"UI/Inventory/Container/Traps/GridContainer".get_children():
 		child.queue_free()
+	for child in $"UI/Inventory/Container/Upgrades/GridContainer".get_children():
+		child.queue_free()
 	for i in range($UI/Inventory/Container.get_tab_count()):
 		if $UI/Inventory/Container.get_tab_title(i) == "Bait":
 			if Game.level < 5:
 				$UI/Inventory/Container.set_tab_hidden(i, true)
 			else:
 				$UI/Inventory/Container.set_tab_hidden(i, false)
+		if $UI/Inventory/Container.get_tab_title(i) == "Upgrades":
+			if Game.level < 12:
+				$UI/Inventory/Container.set_tab_hidden(i, true)
+			else:
+				$UI/Inventory/Container.set_tab_hidden(i, false)		
 		if $UI/Inventory/Container.get_tab_title(i) == "Traps":
 			if Game.level < 10:
 				$UI/Inventory/Container.set_tab_hidden(i, true)
@@ -1265,6 +1291,17 @@ func update_inventory() -> void:
 		total += item.type.sell_price * mult * item.amount
 		$UI/Inventory/ScrollContainer/VBoxContainer.add_child(inventory_entry)
 	$UI/Inventory/Amount.text = "Total: $" + str(roundi(total))
+	
+	var upgrades = Game.upgrades.list.duplicate()
+	upgrades.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
+	for upgrade in upgrades:
+		inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
+		inventory_button.get_node("TextureRect").texture = upgrade.type.texture
+		inventory_button.get_node("Equipped").hide()
+		inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(upgrade.type.rarity).to_lower() + ".png")
+		#inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(upgrade.type.id))
+		$"UI/Inventory/Container/Upgrades/GridContainer".add_child(inventory_button)
+
 	var inventory = Game.inventory.list.duplicate()
 	inventory.sort_custom(func(a, b): return a.type.rarity > b.type.rarity)
 	for item in inventory:

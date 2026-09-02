@@ -49,6 +49,9 @@ const LEVELING_REWARDS = {
 	10: [
 		"Access to Traps.",
 		"Can talk to Warren."
+	],
+	12: [
+		"Access to Upgrades."
 	]
 }
 
@@ -56,6 +59,7 @@ const DEFAULT_LEVEL_REWARD_STAT := {
 	"Fishing Power": "+1"
 }
 
+const COLOR_BULLET := "#828282"
 const COLOR_DULL := "#b3b3b3"
 const COLOR_POSITIVE := "#36f53c"
 const COLOR_NEGATIVE := "#f03535"
@@ -83,6 +87,7 @@ var equipped_bait: Bait
 var equipped_trap: Trap
 var time: float = TIME_IN_DAY * 0.55
 var days: int = 0
+var upgrades = Inventory.new()
 var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
 var game_loaded: bool = false
@@ -97,6 +102,17 @@ var _sfx_in_progress: Dictionary = {}
 
 var game_scene = preload("res://scenes/levels/beach.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
+
+func to_roman(n: int) -> String:
+	var result = ""
+	var values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+	var romans = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+
+	for i in range(values.size()):
+		while n >= values[i]:
+			n -= values[i]
+			result += romans[i]
+	return result
 
 func stop_sfx(path: String) -> void:
 	for child in get_children():
@@ -370,6 +386,9 @@ func set_holding_trap(holding_trap: bool) -> void:
 		LimboConsole.error("Can't find a player.")
 		
 func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
+	if data.has("upgrades"):
+		upgrades.list.clear()
+		upgrades.set_list_from_save(data["upgrades"])
 	if data.has("bag"):
 		bag.list.clear()
 		bag.set_list_from_save(data["bag"])
@@ -491,7 +510,8 @@ func get_save_data() -> Dictionary:
 		"inventory_upgrade_bestiary_bonus": inventory_upgrade_bestiary_bonus,
 		"highest_star": highest_star,
 		"traps": traps_data,
-		"last_island": last_island
+		"last_island": last_island,
+		"upgrades": upgrades.to_list()
 	}
 	return save_data
 

@@ -199,29 +199,68 @@ func request_buy_item(item_id: int) -> void:
 				if entry.get("id") == item_id:
 					owned_amount = entry.get("amount", 0)
 					break
+			for entry in save_data.get("upgrades", []):
+				if entry.get("id") == item_id:
+					owned_amount = entry.get("amount", 0)
+					break		
 			if owned_amount >= item.purchase_limit:
 				purchase_rejected.rpc_id(id, "You already have too many of this item!")
 				return
 
-		var added_amount = 8 if item.category == Game.Category.BAIT else 1
-		var equipped_the_item = false
-		update_player_save_data(id, func(sd):
-			var inv := Inventory.new()
+		if item is Upgrade:
+			var upgrades = Inventory.new()
+			upgrades.set_list_from_save(save_data["upgrades"])
+			if upgrades.has_item(item):
+				var stack = upgrades.get_item_stack(item)
+				if stack.data["level"] >= item.max_level:
+					purchase_rejected.rpc_id(id, "You already have this upgrade maxed out!")
+					return
+				stack.data["level"] = stack.data["level"] + 1
+				save_data["upgrades"] = upgrades.to_list()
+				save_data["balance"] -= item.price
+				purchase_confirmed_upgrade.rpc_id(id, item.id, stack.data["level"])
+				sync_save_data.rpc_id(id, save_data)
+			else:
+				if item.max_level <= 0:
+					purchase_rejected.rpc_id(id, "This item cannot be purchased.")
+					return
+				var stack = ItemStack.new(item, 1)
+				stack.data["level"] = 1
+				save_data["balance"] -= item.price
+				upgrades.add_item(stack)
+				save_data["upgrades"] = upgrades.to_list()
+				purchase_confirmed_upgrade.rpc_id(id, item.id, stack.data["level"])
+				sync_save_data.rpc_id(id, save_data)
+		else:
+			var added_amount = 8 if item.category == Game.Category.BAIT else 1
+			var equipped_the_item = false
+			update_player_save_data(id, func(sd):
+				var inv := Inventory.new()
 
-			inv.set_list_from_save(sd.get("inventory", []))
-			inv.add_item(ItemStack.new(item, added_amount))
-			if sd["equipped_bait"] == null and item is Bait:
-				sd["equipped_bait"] = item.id
-				equipped_the_item = true
-			sd["inventory"] = inv.to_list()
-			sd["balance"] = sd.get("balance", 0.0) - item.price
-		)
-		purchase_confirmed.rpc_id(id, item_id, added_amount, equipped_the_item)
+				inv.set_list_from_save(sd.get("inventory", []))
+				inv.add_item(ItemStack.new(item, added_amount))
+				if sd["equipped_bait"] == null and item is Bait:
+					sd["equipped_bait"] = item.id
+					equipped_the_item = true
+				sd["inventory"] = inv.to_list()
+				sd["balance"] = sd.get("balance", 0.0) - item.price
+			)
+			purchase_confirmed.rpc_id(id, item_id, added_amount, equipped_the_item)
 		return
 
 @rpc("authority", "call_remote", "reliable")
 func purchase_rejected(reason: String) -> void:
 	Toast.add(reason)
+
+@rpc("authority", "call_remote", "reliable")
+func purchase_confirmed_upgrade(item_id: int, level: int) -> void:
+	var item = Catalog.get_item(item_id)
+	Game.play_sfx("res://assets/sounds/cashregister.ogg", 1.5)
+	Toast.add("You bought: " + str(item.name) + " " + str(Game.to_roman(level)) + "!")
+	var local_player = Game.get_player()
+	if local_player:
+		local_player.update_catalog()
+		local_player.select_item(item_id, true)
 
 @rpc("authority", "call_remote", "reliable")
 func purchase_confirmed(item_id: int, amount: int, equipped: bool = false) -> void:

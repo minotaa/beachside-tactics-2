@@ -1299,6 +1299,88 @@ icon = ExtResource("34_giy8y")
 icon_alignment = 1
 expand_icon = true
 
+[node name="Upgrades" type="Control" parent="UI/Inventory/Container" unique_id=1543128253]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3
+
+[node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Upgrades" unique_id=2021574264]
+layout_mode = 0
+offset_top = -4.0
+offset_right = 504.0
+offset_bottom = 556.0
+theme_override_constants/h_separation = 16
+columns = 4
+
+[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Upgrades" unique_id=1228494782]
+layout_mode = 0
+offset_left = 528.0
+offset_top = 39.0
+offset_right = 800.0
+offset_bottom = 559.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
+
+[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1930766499]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -68.0
+offset_top = 16.0
+offset_right = 68.0
+offset_bottom = 152.0
+grow_horizontal = 2
+texture = SubResource("AtlasTexture_2a3c5")
+
+[node name="Name" type="Label" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1307879558]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
+offset_top = 168.0
+offset_right = 128.0
+offset_bottom = 219.0
+grow_horizontal = 2
+text = "Basic Fishing Rod"
+label_settings = SubResource("LabelSettings_42b1b")
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1971914632]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
+offset_top = 232.0
+offset_right = 128.0
+offset_bottom = 472.0
+grow_horizontal = 2
+theme_override_constants/line_separation = 3
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+bbcode_enabled = true
+text = "The most basic fishing rod ever. You couldn't get more boring than this."
+
+[node name="Close" type="Button" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1219128021]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.82400006
+anchor_top = -0.108
+anchor_right = 1.0
+anchor_bottom = -0.015000001
+offset_left = 0.37197876
+offset_top = 0.15999985
+offset_right = 0.5
+offset_bottom = -0.19999981
+grow_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_bj30b")
+icon = ExtResource("34_giy8y")
+icon_alignment = 1
+expand_icon = true
+
 [node name="Vendor" type="Control" parent="UI" unique_id=1068774297]
 visible = false
 layout_mode = 3
@@ -1408,14 +1490,14 @@ grow_vertical = 2
 texture = ExtResource("33_t4otl")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods" unique_id=416700450]
-custom_minimum_size = Vector2(520, 104)
+custom_minimum_size = Vector2(504, 104)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 104.0
 offset_top = -52.0
-offset_right = 624.0
+offset_right = 608.0
 offset_bottom = 52.0
 grow_vertical = 2
 
@@ -1441,14 +1523,14 @@ grow_vertical = 2
 texture = ExtResource("36_fdfoy")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait" unique_id=1858847491]
-custom_minimum_size = Vector2(520, 104)
+custom_minimum_size = Vector2(504, 104)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 104.0
 offset_top = -52.0
-offset_right = 624.0
+offset_right = 608.0
 offset_bottom = 52.0
 grow_vertical = 2
 
@@ -1477,14 +1559,14 @@ grow_vertical = 2
 texture = ExtResource("45_mx1m4")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps" unique_id=398510509]
-custom_minimum_size = Vector2(520, 104)
+custom_minimum_size = Vector2(504, 104)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 104.0
 offset_top = -52.0
-offset_right = 624.0
+offset_right = 608.0
 offset_bottom = 52.0
 grow_vertical = 2
 
@@ -1494,6 +1576,42 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer" unique_id=137208026 instance=ExtResource("34_j2b1d")]
+layout_mode = 2
+
+[node name="Upgrades" type="Control" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer" unique_id=1903881696]
+custom_minimum_size = Vector2(600, 110)
+layout_mode = 2
+
+[node name="Title" type="TextureRect" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades" unique_id=1045807174]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 22.0
+offset_top = -36.0
+offset_right = 86.0
+offset_bottom = 28.0
+grow_vertical = 2
+texture = ExtResource("45_mx1m4")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades" unique_id=368670767]
+custom_minimum_size = Vector2(504, 104)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 104.0
+offset_top = -52.0
+offset_right = 608.0
+offset_bottom = 52.0
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer" unique_id=1476149493]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Shop Entry" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer/HBoxContainer" unique_id=514439085 instance=ExtResource("34_j2b1d")]
 layout_mode = 2
 
 [node name="Sell" type="Control" parent="UI/Vendor/TabContainer" unique_id=1504702216]
@@ -2121,6 +2239,7 @@ offset_bottom = 372.0
 layout_mode = 2
 
 [node name="Leveling" type="Control" parent="UI" unique_id=1293169504]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -2338,6 +2457,7 @@ bus = &"SFX"
 [connection signal="pressed" from="UI/Inventory/Container/Fishing Rods/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Bait/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Inventory/Container/Traps/Equipped/Close" to="." method="_on_close_inventory_pressed"]
+[connection signal="pressed" from="UI/Inventory/Container/Upgrades/Equipped/Close" to="." method="_on_close_inventory_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Shop/Close" to="." method="_on_close_shop_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Sell" to="." method="_on_sell_pressed"]
 [connection signal="pressed" from="UI/Vendor/TabContainer/Sell/Close" to="." method="_on_close_shop_pressed"]
