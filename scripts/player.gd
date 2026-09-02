@@ -384,7 +384,7 @@ func _get_padded_leveling_rewards() -> Dictionary:
 				lines.append("%s" % line)
 		
 		for stat_name in Game.DEFAULT_LEVEL_REWARD_STAT.keys():
-			lines.append(Game.format_stat_prefixed(stat_name, " "+Game.DEFAULT_LEVEL_REWARD_STAT[stat_name]))
+			lines.append(Game.format_stat_prefixed(" "+ stat_name, Game.DEFAULT_LEVEL_REWARD_STAT[stat_name]))
 		
 		padded[level] = lines
 	
