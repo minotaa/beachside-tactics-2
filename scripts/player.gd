@@ -311,7 +311,7 @@ func preview_item(id: int) -> void:
 		info += "Best Catch: " + star_icon.repeat(best_stars) + "\n"
 	info += "Sell Price: $" + str(roundi(item.sell_price)) + "\n"
 	info += "Location: " + location_name + "\n"
-	info += "Rod Power Needed: " + str(item.power_needed) + "\n"
+	info += "Fishing Power Needed: " + str(item.power_needed) + "\n"
 
 	if item is Fish:
 		var hour_start = Game.get_time_string(item.hour_start)
@@ -1436,7 +1436,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\n"
 		debug_text += "Num until catch: " + str(odds) + "\n"
 		debug_text += "Your num: " + str(your_odds) + "\n"
-		debug_text += "Rod power: " + str(Game.get_fishing_power(Game.get_save_data())) + "\n"
+		debug_text += "Fishing Power: " + str(Game.get_fishing_power(Game.get_save_data())) + "\n"
 	if state == FishState.REELING and bobber != null and bobber.has_node("Bobber Fish"):
 		debug_text += "\nFish: " + str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text

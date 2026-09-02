@@ -53,7 +53,7 @@ const LEVELING_REWARDS = {
 }
 
 const DEFAULT_LEVEL_REWARD_STAT := {
-	"Rod Power": "+1"
+	"Fishing Power": "+1"
 }
 
 const COLOR_DULL := "#b3b3b3"
@@ -266,6 +266,7 @@ func get_fishing_power(save_data: Dictionary) -> float:
 	var fishing_power = 0.0
 	if save_data["equipped_fishing_rod"] != null and Catalog.get_item(save_data["equipped_fishing_rod"]) != null:
 		fishing_power += Catalog.get_item(save_data["equipped_fishing_rod"]).fishing_power
+	fishing_power += 1 * save_data["level"]
 	return fishing_power
 
 func calculate_xp_for_level(_level: int) -> float:

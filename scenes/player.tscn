@@ -2121,7 +2121,6 @@ offset_bottom = 372.0
 layout_mode = 2
 
 [node name="Leveling" type="Control" parent="UI" unique_id=1293169504]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -2137,9 +2136,9 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = -704.0
-offset_top = -224.0
+offset_top = -240.0
 offset_right = -16.0
-offset_bottom = 224.0
+offset_bottom = 240.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
@@ -2167,9 +2166,9 @@ alignment = 1
 [node name="Label" type="RichTextLabel" parent="UI/Leveling/Container" unique_id=401283430]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 240.0
+offset_top = 264.0
 offset_right = 664.0
-offset_bottom = 432.0
+offset_bottom = 456.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_fonts/bold_font = SubResource("FontVariation_0h5mt")

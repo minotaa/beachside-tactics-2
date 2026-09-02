@@ -124,7 +124,7 @@ func _enter_tree() -> void:
 	basic_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "[color=#f03535]No",
-			"Rod Power": "[color=#36f53c]+1",
+			"Fishing Power": "[color=#36f53c]+1",
 			"Extra Junk Chance": "[color=#36f53c]+0"
 		}
 	}
@@ -329,7 +329,7 @@ func _enter_tree() -> void:
 	bamboo_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "[color=#f03535]No",
-			"Rod Power": "[color=#36f53c]+5",
+			"Fishing Power": "[color=#36f53c]+5",
 			"Extra Junk Chance": "[color=#36f53c]+10"
 		}
 	}
@@ -353,7 +353,7 @@ func _enter_tree() -> void:
 	decent_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "[color=#36f53c]Yes",
-			"Rod Power": "[color=#36f53c]+12.5",
+			"Fishing Power": "[color=#36f53c]+12.5",
 			"Extra Junk Chance": "[color=#36f53c]+20"
 		}
 	}
@@ -528,7 +528,7 @@ func _enter_tree() -> void:
 	common_trap.data = { 
 		"extra_stats": {
 			"Space": "[color=#32d8fc]3",
-			"Rod Power": "[color=#32d8fc]12.5",
+			"Fishing Power": "[color=#32d8fc]12.5",
 			"Bait Storage": "[color=#32d8fc]12",
 			"Fishing Speed": "[color=#32d8fc]2"
 		}
@@ -591,7 +591,7 @@ func _enter_tree() -> void:
 	turtle_fishing_rod.data = { 
 		"extra_stats": {
 			"Baitable": "[color=#36f53c]Yes",
-			"Rod Power": "[color=#36f53c]+100",
+			"Fishing Power": "[color=#36f53c]+100",
 			"Extra Junk Chance": "[color=#36f53c]+25",
 			"Turtle": "[color=#36f53c]Yes",
 			"How Turtle?": "[color=#36f53c]Very"
