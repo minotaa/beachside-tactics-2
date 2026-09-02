@@ -732,6 +732,7 @@ func _enter_tree() -> void:
 	
 	atlas = AtlasTexture.new()
 	atlas.atlas = preload("res://assets/sprites/upgrades.png")
+	atlas.region = Rect2(0.0, 0.0, 16.0, 16.0)
 	var lucky_charm = Upgrade.new(35, "Lucky Rod Charm", atlas)
 	lucky_charm.category = Game.Category.UPGRADES
 	lucky_charm.rarity = Game.Rarity.COMMON
