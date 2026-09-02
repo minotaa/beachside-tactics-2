@@ -233,7 +233,7 @@ func select_item(id: int, ignore: bool = false) -> void:
 		$UI/Vendor/ItemPreview/Price.text = "Owned: " + str(amount) + "  Price: $" + str(roundi(item.price))
 	elif Game.upgrades.has_item(item):
 		var level = Game.upgrades.get_item_stack(item).data["level"]
-		$UI/Vendor/ItemPreview/Price.text = "Level: " + str(level) + "  Price: $" + str(roundi(item.price))
+		$UI/Vendor/ItemPreview/Price.text = "Level: " + str(int(level)) + "  Price: $" + str(roundi(item.price))
 	else:
 		$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
@@ -246,6 +246,14 @@ func select_item(id: int, ignore: bool = false) -> void:
 			$UI/Vendor/ItemPreview/Description.text += str("[color=#b3b3b3]" + key) + "[/color][color=white]:[/color] " + str(item.data["extra_stats"][key])
 			if index < item.data["extra_stats"].keys().size():
 				$UI/Vendor/ItemPreview/Description.text += "\n"
+	if item is Upgrade:
+		if Game.upgrades.has_item(item):
+			var level = Game.upgrades.get_item_stack(item).data["level"]
+			$UI/Vendor/ItemPreview/Description.text += "\n"
+			$UI/Vendor/ItemPreview/Description.text += item.get_benefits.call(level) + " [color=#b3b3b3]->[/color] " + item.get_benefits.call(level + 1)
+		else:
+			$UI/Vendor/ItemPreview/Description.text += "\n"
+			$UI/Vendor/ItemPreview/Description.text += item.get_benefits.call(1) 
 
 	$UI/Vendor/ItemPreview/Name.text = item.name
 	$UI/Vendor/ItemPreview/Item/TextureRect.texture = item.texture
@@ -357,16 +365,6 @@ func _populate_category(category: Game.Category, target_container: Node) -> void
 var selected_level: int = -1
 var manual_selection: bool = false
 
-func format_stat_prefixed(stat_name: String, value: String) -> String:
-	var color := Game.COLOR_INNATE
-	
-	if value.begins_with("+") or value == "Yes":
-		color = Game.COLOR_POSITIVE
-	elif value.begins_with("-") or value == "No":
-		color = Game.COLOR_NEGATIVE
-	
-	return "[color=%s]%s[/color] [color=%s]%s[/color]" % [color, value, Game.COLOR_DULL, stat_name]
-
 func _get_padded_leveling_rewards() -> Dictionary:
 	var raw := Game.LEVELING_REWARDS
 	var levels := raw.keys()
@@ -386,7 +384,7 @@ func _get_padded_leveling_rewards() -> Dictionary:
 				lines.append("%s" % line)
 		
 		for stat_name in Game.DEFAULT_LEVEL_REWARD_STAT.keys():
-			lines.append(format_stat_prefixed(stat_name, Game.DEFAULT_LEVEL_REWARD_STAT[stat_name]))
+			lines.append(Game.format_stat_prefixed(stat_name, " "+Game.DEFAULT_LEVEL_REWARD_STAT[stat_name]))
 		
 		padded[level] = lines
 	
@@ -518,7 +516,6 @@ func update_catalog() -> void:
 	_populate_category(Game.Category.BAIT, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.TRAPS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.UPGRADES, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades/ScrollContainer/HBoxContainer")
-
 
 	await get_tree().process_frame
 	if Game.level < 5:

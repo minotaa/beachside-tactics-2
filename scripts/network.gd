@@ -774,11 +774,11 @@ func client_scene_ready() -> void:
 			spawn_player.rpc_id(id, player["id"], pos)
 
 var bestiary_money_table := {
-	Game.Rarity.COMMON:    100.0,
-	Game.Rarity.UNCOMMON:  250.0,
-	Game.Rarity.RARE:      500.0,
-	Game.Rarity.EPIC:      1000.0,
-	Game.Rarity.LEGENDARY: 2500.0
+	Game.Rarity.COMMON:    50.0,
+	Game.Rarity.UNCOMMON:  100.0,
+	Game.Rarity.RARE:      250.0,
+	Game.Rarity.EPIC:      500.0,
+	Game.Rarity.LEGENDARY: 1000.0
 }
 
 var bestiary_xp_table := {
@@ -1047,7 +1047,15 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 	save_data["inventory"] = inventory.to_list()
 	save_data["bag"] = bag.to_list()
 
-	var levels_gained = Game.apply_xp(save_data, 3)
+	var xp_gained = (xp_table.get(stack.type.rarity, 0.0))
+	var upgrades = Inventory.new()
+	upgrades.set_list_from_save(save_data["upgrades"])
+	if upgrades.has_item(Catalog.get_item(35)):
+		var level = upgrades.get_item_stack(Catalog.get_item(35)).data["level"]
+		var xp_increase = xp_table.get(stack.type.rarity, 0.0) * (0.1 * level)
+		xp_gained += xp_increase
+
+	var levels_gained = Game.apply_xp(save_data, xp_gained)
 	print("  catches: ", catches_before, " -> ", save_data.get("catches", 0), " | xp: ", xp_before, " -> ", save_data.get("xp", 0.0), " | level: ", level_before, " -> ", save_data.get("level", 1))
 	sync_save_data.rpc_id(id, save_data)
 	if levels_gained > 0:

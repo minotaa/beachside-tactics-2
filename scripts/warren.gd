@@ -113,7 +113,7 @@ func _ready() -> void:
 
 		"default": [
 			{
-				"text": "Still working on it? Good. Good. The research doesn't stop just because it's inconvenient.",
+				"text": ["Still working on it? Good. Good. The research doesn't stop just because it's inconvenient.", "Thanks for letting me have all those turtles, I should have something your troubles."],
 				"next": null
 			}
 		]
@@ -130,6 +130,12 @@ func _ready() -> void:
 		"default"
 	]
 	super._ready()
+
+func sells(item: ItemType) -> bool:
+	var catalog = selling.duplicate()
+	if _evaluate_condition("received_all_trophies"):
+		catalog.append(Catalog.get_item(36))
+	return catalog.has(item)
 
 func _evaluate_condition(condition: String) -> bool:
 	match condition:
@@ -149,6 +155,14 @@ func _evaluate_condition(condition: String) -> bool:
 			return not Game.flags.get("trophy_glitch_caught", false)
 		"has_trophy_turtle_to_turn_in":
 			return _next_uncaught_trophy_turtle_in_bag() != ""
+		"received_all_trophies":
+			return (
+				Game.flags.get("trophy_glitch_caught", false) \
+				and Game.flags.get("trophy_trap_caught", false) \
+				and Game.flags.get("trophy_day_caught", false) \
+				and Game.flags.get("trophy_night_caught", false) \
+				and Game.flags.get("trophy_regular_caught", false)
+			) 
 	return true
 
 func _on_quest_triggered(quest_id: String) -> void:

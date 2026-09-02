@@ -10,7 +10,8 @@ func _ready() -> void:
 		Catalog.get_item(24),
 		Catalog.get_item(25),
 		Catalog.get_item(26),
-		Catalog.get_item(27)
+		Catalog.get_item(27),
+		Catalog.get_item(35)
 	]
 	dialogue_trees = {
 		"intro1": [

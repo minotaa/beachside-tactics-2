@@ -103,6 +103,16 @@ var _sfx_in_progress: Dictionary = {}
 var game_scene = preload("res://scenes/levels/beach.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
 
+func format_stat_prefixed(stat_name: String, value: String) -> String:
+	var color := COLOR_INNATE
+	
+	if value.begins_with("+") or value == "Yes":
+		color = COLOR_POSITIVE
+	elif value.begins_with("-") or value == "No":
+		color = COLOR_NEGATIVE
+	
+	return "[color=%s]%s[/color][color=%s]%s[/color]" % [color, value, COLOR_DULL, stat_name]
+
 func to_roman(n: int) -> String:
 	var result = ""
 	var values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
@@ -256,6 +266,10 @@ func get_trophy_fish_chance(save_data: Dictionary) -> float:
 	var trophy_chance = 0.0
 	if save_data["equipped_bait"] != null and Catalog.get_item(save_data["equipped_bait"]) != null:
 		trophy_chance += Catalog.get_item(save_data["equipped_bait"]).trophy_fish_chance * 0.01
+	var upgrades = Inventory.new()
+	upgrades.set_list_from_save(save_data["upgrades"])
+	if upgrades.has_item(Catalog.get_item(36)):
+		trophy_chance += 0.001 * upgrades.get_item_stack(Catalog.get_item(36)).data["level"]
 	return trophy_chance
 
 func get_fishing_speed(save_data: Dictionary) -> float:
@@ -293,6 +307,7 @@ func calculate_xp_for_level(_level: int) -> float:
 func apply_xp(save_data: Dictionary, amount: float) -> int:
 	save_data["xp"] = save_data.get("xp", 0.0) + amount
 	save_data["level"] = save_data.get("level", 1)
+	print("applying "+ str(floor(amount)) + " xp")
 	var levels_gained := 0
 	while save_data["xp"] >= calculate_xp_for_level(save_data["level"]):
 		save_data["xp"] -= calculate_xp_for_level(save_data["level"])

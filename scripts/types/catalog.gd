@@ -729,3 +729,30 @@ func _enter_tree() -> void:
 		}
 	}
 	items.append(turtle_bait)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/upgrades.png")
+	var lucky_charm = Upgrade.new(35, "Lucky Rod Charm", atlas)
+	lucky_charm.category = Game.Category.UPGRADES
+	lucky_charm.rarity = Game.Rarity.COMMON
+	lucky_charm.purchasable = true
+	lucky_charm.max_level = 10
+	lucky_charm.get_benefits = func(level):
+		return Game.format_stat_prefixed("% more XP upon Fishing", "+" + str(10 * int(level)))
+	lucky_charm.description = "A neat charm you attach to your fishing rod, provides more XP upon catching fish."
+	lucky_charm.price = 750
+	items.append(lucky_charm)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/upgrades.png")
+	atlas.region = Rect2(16.0, 0.0, 16.0, 16.0)
+	var turtle_master = Upgrade.new(36, "Turtle Master Rod Charm", atlas)
+	turtle_master.category = Game.Category.UPGRADES
+	turtle_master.rarity = Game.Rarity.RARE
+	turtle_master.purchasable = true
+	turtle_master.max_level = 5
+	turtle_master.get_benefits = func(level):
+		return Game.format_stat_prefixed("Trophy Fish Chance", "+" + str(0.1 * int(level)))
+	turtle_master.description = "It's not that glamorous honestly, it's pretty bland, provides Trophy Fish chance."
+	turtle_master.price = 1250
+	items.append(turtle_master)

@@ -45,6 +45,7 @@
 [ext_resource type="Texture2D" uid="uid://bbhl3tnt2ng1f" path="res://assets/sprites/baits.png" id="36_fdfoy"]
 [ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="38_giy8y"]
 [ext_resource type="Texture2D" uid="uid://b2kt1y66uo04a" path="res://assets/sprites/light.png" id="39_j2b1d"]
+[ext_resource type="Texture2D" uid="uid://s3yi1cl7otdy" path="res://assets/sprites/upgrade.png" id="40_ha2mi"]
 [ext_resource type="PackedScene" uid="uid://c3x0kaqpwgj4q" path="res://scenes/ui/inventory_button.tscn" id="42_holxr"]
 [ext_resource type="Texture2D" uid="uid://dygfbet0gwv33" path="res://assets/sprites/book.png" id="43_g5jhy"]
 [ext_resource type="Texture2D" uid="uid://5ts8q1nqtsew" path="res://assets/sprites/trap.png" id="45_mx1m4"]
@@ -1592,7 +1593,7 @@ offset_top = -36.0
 offset_right = 86.0
 offset_bottom = 28.0
 grow_vertical = 2
-texture = ExtResource("45_mx1m4")
+texture = ExtResource("40_ha2mi")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Upgrades" unique_id=368670767]
 custom_minimum_size = Vector2(504, 104)
