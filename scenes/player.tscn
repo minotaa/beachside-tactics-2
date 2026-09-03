@@ -483,7 +483,7 @@ size = Vector2(8, 17)
 [sub_resource type="LabelSettings" id="LabelSettings_60mlk"]
 line_spacing = 5.0
 font = ExtResource("18_ke2ow")
-font_size = 24
+font_size = 32
 
 [sub_resource type="LabelSettings" id="LabelSettings_g5jhy"]
 font = ExtResource("18_i4ail")
@@ -579,10 +579,6 @@ texture_margin_bottom = 16.0
 [sub_resource type="AtlasTexture" id="AtlasTexture_2a3c5"]
 atlas = ExtResource("20_a38lo")
 region = Rect2(0, 0, 16, 16)
-
-[sub_resource type="LabelSettings" id="LabelSettings_42b1b"]
-font = ExtResource("18_i4ail")
-font_size = 32
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bj30b"]
 
@@ -1044,7 +1040,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -928.0
 offset_top = -436.0
-offset_right = -576.0
+offset_right = -416.0
 offset_bottom = 436.0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
@@ -1102,7 +1098,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 368.0
+offset_left = 528.0
 offset_top = -476.0
 offset_right = 1848.0
 offset_bottom = 436.0
@@ -1124,17 +1120,17 @@ metadata/_tab_index = 0
 
 [node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Fishing Rods" unique_id=1780666739]
 layout_mode = 0
-offset_top = -12.0
-offset_right = 1080.0
-offset_bottom = 818.0
+offset_top = -4.0
+offset_right = 872.0
+offset_bottom = 819.0
 theme_override_constants/h_separation = 16
 columns = 4
 
 [node name="Equipped" type="Panel" parent="UI/Inventory/Container/Fishing Rods" unique_id=1853744269]
 layout_mode = 0
-offset_left = 1112.0
+offset_left = 896.0
 offset_top = 60.0
-offset_right = 1432.0
+offset_right = 1272.0
 offset_bottom = 812.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
 
@@ -1150,48 +1146,52 @@ offset_bottom = 208.0
 grow_horizontal = 2
 texture = SubResource("AtlasTexture_2a3c5")
 
-[node name="Name" type="Label" parent="UI/Inventory/Container/Fishing Rods/Equipped" unique_id=1344267878]
+[node name="Name" type="RichTextLabel" parent="UI/Inventory/Container/Fishing Rods/Equipped" unique_id=1116132764]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -144.0
+offset_left = -148.0
 offset_top = 216.0
-offset_right = 144.0
-offset_bottom = 320.0
+offset_right = 148.0
+offset_bottom = 304.0
 grow_horizontal = 2
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_font_sizes/normal_font_size = 32
 text = "Basic Fishing Rod"
-label_settings = SubResource("LabelSettings_42b1b")
+autowrap_mode = 2
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 2
 
 [node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Fishing Rods/Equipped" unique_id=1177939637]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -144.0
-offset_top = 328.0
-offset_right = 144.0
+offset_left = -148.0
+offset_top = 312.0
+offset_right = 148.0
 offset_bottom = 736.0
 grow_horizontal = 2
-theme_override_constants/line_separation = 4
+theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "The most basic fishing rod ever. You couldn't get more boring than this."
+horizontal_alignment = 1
 
 [node name="Close" type="Button" parent="UI/Inventory/Container/Fishing Rods/Equipped" unique_id=1090723078]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.82400006
+anchor_left = 0.851
 anchor_top = -0.096
 anchor_right = 1.0
 anchor_bottom = -0.021000002
-offset_left = -0.12802124
+offset_left = 0.22399902
 offset_top = 0.19200134
-offset_bottom = 0.6000147
+offset_right = 0.2000122
+offset_bottom = -0.20799923
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -1207,73 +1207,77 @@ metadata/_tab_index = 1
 
 [node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Bait" unique_id=1502213689]
 layout_mode = 0
-offset_top = -11.0
-offset_right = 1080.0
+offset_top = -4.0
+offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
 columns = 4
 
-[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Bait" unique_id=1271656385]
+[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Bait" unique_id=1832919677]
 layout_mode = 0
-offset_left = 1112.0
+offset_left = 896.0
 offset_top = 60.0
-offset_right = 1432.0
+offset_right = 1272.0
 offset_bottom = 812.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
 
-[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Bait/Equipped" unique_id=547617863]
+[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Bait/Equipped" unique_id=957094097]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -68.0
-offset_top = 16.0
-offset_right = 68.0
-offset_bottom = 152.0
+offset_left = -88.0
+offset_top = 24.0
+offset_right = 88.0
+offset_bottom = 208.0
 grow_horizontal = 2
 texture = SubResource("AtlasTexture_2a3c5")
 
-[node name="Name" type="Label" parent="UI/Inventory/Container/Bait/Equipped" unique_id=644264990]
+[node name="Name" type="RichTextLabel" parent="UI/Inventory/Container/Bait/Equipped" unique_id=888387540]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -128.0
-offset_top = 168.0
-offset_right = 128.0
-offset_bottom = 219.0
+offset_left = -148.0
+offset_top = 216.0
+offset_right = 148.0
+offset_bottom = 304.0
 grow_horizontal = 2
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_font_sizes/normal_font_size = 32
 text = "Basic Fishing Rod"
-label_settings = SubResource("LabelSettings_42b1b")
-horizontal_alignment = 1
 autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Bait/Equipped" unique_id=1060321118]
+[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Bait/Equipped" unique_id=1532148481]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -120.0
-offset_top = 232.0
-offset_right = 120.0
-offset_bottom = 472.0
+offset_left = -148.0
+offset_top = 312.0
+offset_right = 148.0
+offset_bottom = 736.0
 grow_horizontal = 2
-theme_override_constants/line_separation = 4
+theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "The most basic fishing rod ever. You couldn't get more boring than this."
+horizontal_alignment = 1
 
-[node name="Close" type="Button" parent="UI/Inventory/Container/Bait/Equipped" unique_id=840461331]
+[node name="Close" type="Button" parent="UI/Inventory/Container/Bait/Equipped" unique_id=1074022853]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.822
-anchor_top = -0.097
-anchor_right = 1.0020001
+anchor_left = 0.85200006
+anchor_top = -0.096
+anchor_right = 1.001
 anchor_bottom = -0.021000002
-offset_left = -0.040008545
-offset_top = 0.94400024
-offset_right = -1.6400146
+offset_left = -0.15200806
+offset_top = 0.19200134
+offset_right = -0.17599487
 offset_bottom = -0.20799923
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
@@ -1290,74 +1294,78 @@ metadata/_tab_index = 2
 
 [node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Traps" unique_id=2018117089]
 layout_mode = 0
-offset_top = -11.0
-offset_right = 1080.0
+offset_top = -4.0
+offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
 columns = 4
 
-[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Traps" unique_id=860908738]
+[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Traps" unique_id=529374664]
 layout_mode = 0
-offset_left = 1112.0
+offset_left = 896.0
 offset_top = 60.0
-offset_right = 1384.0
-offset_bottom = 580.0
+offset_right = 1272.0
+offset_bottom = 812.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
 
-[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Traps/Equipped" unique_id=1209582751]
+[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Traps/Equipped" unique_id=470314207]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -68.0
-offset_top = 16.0
-offset_right = 68.0
-offset_bottom = 152.0
+offset_left = -88.0
+offset_top = 24.0
+offset_right = 88.0
+offset_bottom = 208.0
 grow_horizontal = 2
 texture = SubResource("AtlasTexture_2a3c5")
 
-[node name="Name" type="Label" parent="UI/Inventory/Container/Traps/Equipped" unique_id=1183430413]
+[node name="Name" type="RichTextLabel" parent="UI/Inventory/Container/Traps/Equipped" unique_id=1555716700]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -128.0
-offset_top = 168.0
-offset_right = 128.0
-offset_bottom = 219.0
+offset_left = -148.0
+offset_top = 216.0
+offset_right = 148.0
+offset_bottom = 304.0
 grow_horizontal = 2
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_font_sizes/normal_font_size = 32
 text = "Basic Fishing Rod"
-label_settings = SubResource("LabelSettings_42b1b")
-horizontal_alignment = 1
 autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Traps/Equipped" unique_id=100275167]
+[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Traps/Equipped" unique_id=27393359]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -128.0
-offset_top = 232.0
-offset_right = 128.0
-offset_bottom = 472.0
+offset_left = -148.0
+offset_top = 312.0
+offset_right = 148.0
+offset_bottom = 736.0
 grow_horizontal = 2
-theme_override_constants/line_separation = 4
+theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "The most basic fishing rod ever. You couldn't get more boring than this."
+horizontal_alignment = 1
 
-[node name="Close" type="Button" parent="UI/Inventory/Container/Traps/Equipped" unique_id=177534086]
+[node name="Close" type="Button" parent="UI/Inventory/Container/Traps/Equipped" unique_id=481141281]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.82400006
-anchor_top = -0.108
+anchor_left = 0.851
+anchor_top = -0.096
 anchor_right = 1.0
-anchor_bottom = -0.015000001
-offset_left = 38.87198
-offset_top = -15.84
-offset_right = 47.0
-offset_bottom = -16.2
+anchor_bottom = -0.021000002
+offset_left = 0.22399902
+offset_top = 0.19200134
+offset_right = 0.2000122
+offset_bottom = -0.20799923
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -1373,73 +1381,78 @@ metadata/_tab_index = 3
 
 [node name="GridContainer" type="GridContainer" parent="UI/Inventory/Container/Upgrades" unique_id=2021574264]
 layout_mode = 0
-offset_top = -11.0
-offset_right = 1080.0
+offset_top = -4.0
+offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
 columns = 4
 
-[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Upgrades" unique_id=1228494782]
+[node name="Equipped" type="Panel" parent="UI/Inventory/Container/Upgrades" unique_id=1020864940]
 layout_mode = 0
-offset_left = 1112.0
+offset_left = 896.0
 offset_top = 60.0
-offset_right = 1384.0
-offset_bottom = 580.0
+offset_right = 1272.0
+offset_bottom = 812.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_wnwbv")
 
-[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1930766499]
+[node name="Icon" type="TextureRect" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=160281133]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -68.0
-offset_top = 16.0
-offset_right = 68.0
-offset_bottom = 152.0
+offset_left = -88.0
+offset_top = 24.0
+offset_right = 88.0
+offset_bottom = 208.0
 grow_horizontal = 2
 texture = SubResource("AtlasTexture_2a3c5")
 
-[node name="Name" type="Label" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1307879558]
+[node name="Name" type="RichTextLabel" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=164886284]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -128.0
-offset_top = 168.0
-offset_right = 128.0
-offset_bottom = 219.0
+offset_left = -148.0
+offset_top = 216.0
+offset_right = 148.0
+offset_bottom = 304.0
 grow_horizontal = 2
-text = "Basic Fishing Rod"
-label_settings = SubResource("LabelSettings_42b1b")
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1971914632]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -128.0
-offset_top = 232.0
-offset_right = 128.0
-offset_bottom = 472.0
-grow_horizontal = 2
-theme_override_constants/line_separation = 3
+theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_font_sizes/normal_font_size = 32
+text = "Basic Fishing Rod"
+autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="RichTextLabel" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=626271206]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -148.0
+offset_top = 312.0
+offset_right = 148.0
+offset_bottom = 736.0
+grow_horizontal = 2
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("18_i4ail")
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "The most basic fishing rod ever. You couldn't get more boring than this."
+horizontal_alignment = 1
 
-[node name="Close" type="Button" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1219128021]
+[node name="Close" type="Button" parent="UI/Inventory/Container/Upgrades/Equipped" unique_id=1939507943]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.82400006
-anchor_top = -0.108
+anchor_left = 0.851
+anchor_top = -0.096
 anchor_right = 1.0
-anchor_bottom = -0.015000001
-offset_left = 38.87198
-offset_top = -15.84
-offset_right = 47.0
-offset_bottom = -16.2
+anchor_bottom = -0.021000002
+offset_left = 0.22399902
+offset_top = 0.19200134
+offset_right = 0.2000122
+offset_bottom = -0.20799923
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -1449,7 +1462,6 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="Vendor" type="Control" parent="UI" unique_id=1068774297]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -1464,7 +1476,7 @@ anchor_top = 0.48900002
 anchor_bottom = 0.48900002
 offset_left = 32.0
 offset_top = -408.04004
-offset_right = 656.0
+offset_right = 712.0
 offset_bottom = 407.88
 theme_override_fonts/font = ExtResource("18_i4ail")
 theme_override_font_sizes/font_size = 16
@@ -1701,9 +1713,9 @@ anchor_left = 0.5
 anchor_top = -0.015000001
 anchor_right = 0.5
 anchor_bottom = -0.015000001
-offset_left = -288.0
-offset_top = -0.38119888
-offset_right = 296.0
+offset_left = -308.0
+offset_top = 6.538845
+offset_right = 260.0
 offset_bottom = 56.618805
 grow_horizontal = 2
 text = "Sell"
@@ -1735,9 +1747,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -296.0
+offset_left = -324.0
 offset_top = -294.03998
-offset_right = 296.0
+offset_right = 324.0
 offset_bottom = 209.96002
 grow_horizontal = 2
 grow_vertical = 2
@@ -1798,9 +1810,9 @@ anchor_left = 0.019000001
 anchor_top = 0.51100004
 anchor_right = 0.019000001
 anchor_bottom = 0.51100004
-offset_left = 643.84
+offset_left = 691.84
 offset_top = -359.88007
-offset_right = 1027.52
+offset_right = 1075.52
 offset_bottom = 360.0401
 theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
 
@@ -1932,7 +1944,7 @@ grow_vertical = 2
 layout_mode = 0
 offset_left = 24.0
 offset_top = 204.0
-offset_right = 664.0
+offset_right = 728.0
 offset_bottom = 912.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_31cv2")
 
@@ -1941,7 +1953,7 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -296.0
+offset_left = -312.0
 offset_top = 29.0
 offset_right = 280.0
 offset_bottom = 86.0
@@ -1968,16 +1980,16 @@ vertical_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Bestiary/List" unique_id=953975655]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 100.0
-offset_right = 616.0
-offset_bottom = 588.0
+offset_left = 32.0
+offset_top = 108.0
+offset_right = 680.0
+offset_bottom = 668.0
 
 [node name="GridContainer" type="GridContainer" parent="UI/Bestiary/List/ScrollContainer" unique_id=252941510]
 layout_mode = 2
-theme_override_constants/h_separation = 26
-theme_override_constants/v_separation = 24
-columns = 5
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 26
+columns = 4
 
 [node name="Inventory Button" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=226721162 instance=ExtResource("42_holxr")]
 layout_mode = 2
@@ -2021,10 +2033,10 @@ anchor_left = 0.019000001
 anchor_top = 0.51100004
 anchor_right = 0.019000001
 anchor_bottom = 0.51100004
-offset_left = 647.68
-offset_top = -295.88007
-offset_right = 991.68005
-offset_bottom = 296.0401
+offset_left = 708.68
+offset_top = -319.88007
+offset_right = 1107.52
+offset_bottom = 320.0401
 theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
 
 [node name="Item" type="Control" parent="UI/Bestiary/ItemPreview" unique_id=2109385076]
@@ -2083,9 +2095,9 @@ texture = ExtResource("21_a38lo")
 
 [node name="Name" type="Label" parent="UI/Bestiary/ItemPreview" unique_id=1296117603]
 layout_mode = 0
-offset_left = 16.0
+offset_left = 14.840027
 offset_top = 162.0
-offset_right = 328.0
+offset_right = 382.84003
 offset_bottom = 229.0
 theme_override_font_sizes/font_size = 32
 text = "Flismy Fshing Bod"
@@ -2096,10 +2108,10 @@ autowrap_mode = 2
 
 [node name="Description" type="RichTextLabel" parent="UI/Bestiary/ItemPreview" unique_id=2567063]
 layout_mode = 0
-offset_left = 24.0
+offset_left = 22.840027
 offset_top = 248.0
-offset_right = 320.0
-offset_bottom = 576.0
+offset_right = 374.84003
+offset_bottom = 616.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24

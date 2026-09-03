@@ -41,10 +41,6 @@ window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[editor]
-
-run/main_run_args="--dev"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/limbo_console/plugin.cfg")

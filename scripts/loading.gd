@@ -11,7 +11,7 @@ func _ready():
 
 	$AnimatedSprite2D.play("default")
 	$UI/Control/Label.modulate = Color(0, 0, 0, 0)
-	$AnimatedSprite2D.global_position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2)
+	$AnimatedSprite2D.global_position = Vector2(960.0, 540.0)
 	Fade.fade_in(1.0)
 	await get_tree().process_frame
 	await get_tree().create_timer(3.0).timeout

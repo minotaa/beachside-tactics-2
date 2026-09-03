@@ -34,7 +34,8 @@ modulate_color = Color(1, 1, 1, 0.8745098)
 
 [sub_resource type="LabelSettings" id="LabelSettings_4k8lb"]
 font = ExtResource("7_b2sbn")
-outline_size = 4
+font_size = 24
+outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [node name="Inventory Button" type="Button" unique_id=226721162]
@@ -99,10 +100,9 @@ patch_margin_bottom = 16
 [node name="Label" type="Label" parent="." unique_id=456362561]
 visible = false
 layout_mode = 0
-offset_left = 8.0
 offset_top = 103.0
-offset_right = 120.0
-offset_bottom = 119.0
+offset_right = 128.0
+offset_bottom = 127.0
 text = "x2"
 label_settings = SubResource("LabelSettings_4k8lb")
 horizontal_alignment = 2
