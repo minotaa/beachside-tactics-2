@@ -888,6 +888,24 @@ func _get_spawn_position(id: int) -> Vector2:
 			break
 	return Vector2.ZERO
 
+@rpc("authority", "call_remote", "reliable")
+func send_message(message: String, username: String) -> void:
+	if Game.get_player() != null:
+		Game.get_player().add_message(message, username)
+
+@rpc("any_peer", "call_remote", "reliable")
+func send_message_to_server(message: String) -> void:
+	if multiplayer.get_unique_id() != 1:
+		return
+	var id = multiplayer.get_remote_sender_id()
+	var username = "Player"
+	for p in players:
+		if p["id"] == id:
+			username = p["username"]
+			break
+	for p in players:
+		send_message.rpc_id(p["id"], message, username)
+
 @rpc("authority", "call_local", "reliable")
 func spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
 	if multiplayer.get_unique_id() == 1:

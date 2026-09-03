@@ -1504,7 +1504,7 @@ func _process_ui(delta: float) -> void:
 		debug_text += "\nFish: " + str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
 	$UI/Main/Debug.text = debug_text
 	
-	if Input.is_action_just_released("inventory") and (not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible and not $UI/Leveling.visible):
+	if Input.is_action_just_released("inventory") and (not $UI/Main/ChatBar.has_focus() and not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible and not $UI/Leveling.visible):
 		
 		if not $UI/Inventory.visible:
 			$UI/Main/Combination.hide()
@@ -1833,15 +1833,15 @@ func _on_close_leveling_pressed() -> void:
 	$UI/Leveling.visible = false
 	$UI/Main.visible = true
 
-func add_message(message: String, player_name: String) -> void:
+func add_message(message: String, username: String) -> void:
 	if multiplayer.has_multiplayer_peer():
 		print("[" + str(multiplayer.get_unique_id()) + "] Received message: ", message)
 	var chat_message = load("res://scenes/chat_message.tscn").instantiate()
-	chat_message.text = player_name + ": " + message
+	chat_message.text = username + ": " + message
 	chat_message.visible = true
 	chat_message.modulate = Color(1, 1, 1, 1)
 	$UI/Main/Chat/VBoxContainer.add_child(chat_message, true)
-	_write_chat_log(player_name, message)
+	_write_chat_log(username, message)
 	await get_tree().process_frame
 	$UI/Main/Chat.scroll_vertical = $UI/Main/Chat.get_v_scroll_bar().max_value
 
@@ -1869,12 +1869,10 @@ func _on_chat_bar_text_submitted(new_text: String) -> void:
 	$UI/Main/ChatBar.release_focus()
 	if new_text == "":
 		return
-
-	var player_name = Network.player_name if Network.player_name != "" else "Player"
 	if multiplayer.has_multiplayer_peer():
-		Network.send_message.rpc(new_text, player_name)
+		Network.send_message_to_server.rpc_id(1, new_text)
 	else:
-		add_message(new_text, player_name)
+		add_message(new_text, Network.player_name)
 
 func _on_chat_bar_focus_entered() -> void:
 	for child in $UI/Main/Chat/VBoxContainer.get_children():
