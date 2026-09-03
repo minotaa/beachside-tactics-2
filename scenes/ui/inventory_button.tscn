@@ -38,11 +38,13 @@ outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [node name="Inventory Button" type="Button" unique_id=226721162]
-custom_minimum_size = Vector2(96, 96)
+custom_minimum_size = Vector2(128, 128)
 anchors_preset = -1
-anchor_right = 0.075
-anchor_bottom = 0.133
-offset_bottom = 0.23999786
+anchor_right = 0.067
+anchor_bottom = 0.11800001
+offset_top = -0.05999756
+offset_right = -0.6399994
+offset_bottom = 0.49999237
 grow_horizontal = 2
 grow_vertical = 2
 offset_transform_enabled = true
@@ -53,8 +55,9 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_b2sbn")
 [node name="Rarity" type="NinePatchRect" parent="." unique_id=509498088]
 modulate = Color(1, 1, 1, 0.68235296)
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 96.0
+offset_top = -0.05999756
+offset_right = 128.0
+offset_bottom = 128.06
 texture = ExtResource("2_p2es3")
 patch_margin_left = 16
 patch_margin_top = 16
@@ -62,11 +65,16 @@ patch_margin_right = 16
 patch_margin_bottom = 16
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1104561669]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 80.0
-offset_bottom = 80.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.11100001
+anchor_top = 0.11100001
+anchor_right = 0.88900006
+anchor_bottom = 0.89000005
+offset_left = 1.0119991
+offset_top = 1.0119991
+offset_right = 0.42799377
+offset_bottom = 0.29999542
 texture = ExtResource("3_ci7xw")
 
 [node name="Equipped" type="NinePatchRect" parent="." unique_id=136108256]
@@ -76,10 +84,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -55.0
-offset_top = -55.0
-offset_right = 55.0
-offset_bottom = 55.0
+offset_left = -72.0
+offset_top = -72.06
+offset_right = 72.0
+offset_bottom = 72.06
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("6_o4de1")
@@ -91,9 +99,10 @@ patch_margin_bottom = 16
 [node name="Label" type="Label" parent="." unique_id=456362561]
 visible = false
 layout_mode = 0
-offset_top = 75.999985
-offset_right = 96.0
-offset_bottom = 91.999985
+offset_left = 8.0
+offset_top = 103.0
+offset_right = 120.0
+offset_bottom = 119.0
 text = "x2"
 label_settings = SubResource("LabelSettings_4k8lb")
 horizontal_alignment = 2
