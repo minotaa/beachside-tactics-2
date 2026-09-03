@@ -65,7 +65,7 @@ func join_server(address: String, username: String = "Player") -> bool:
 	if multiplayer.multiplayer_peer == null:
 		return false
 
-	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, Game.get_save_data())
+	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, username, Game.get_save_data())
 
 	print("[" + str(multiplayer.get_unique_id()) + "] Connected to the server")
 	return true
@@ -739,14 +739,19 @@ func stop_fishing_for_player() -> void:
 	player.state = player.FishState.INACTIVE
 	player.bobber_safe = true
 	player.play_idle_animation()
-	Toast.add("The fish got away!")
+	#Toast.add("The fish got away!")
 	print("Stopped fishing for " + str(multiplayer.get_unique_id()) + ".")
 
 @rpc("any_peer", "call_remote", "reliable")
 func client_scene_ready() -> void:
 	var id = multiplayer.get_remote_sender_id()
 	var new_player_pos = _get_spawn_position(id)
-	spawn_player.rpc(id, new_player_pos)
+	var username = "Player"
+	for player in players:
+		if player["id"] == id:
+			username = player["username"]
+			break
+	spawn_player.rpc(id, new_player_pos, username)
 	
 	var save_data = get_player_save_data(id)
 	var traps = []
@@ -771,7 +776,7 @@ func client_scene_ready() -> void:
 	for player in players:
 		if player["id"] != id:
 			var pos = _get_spawn_position(player["id"])
-			spawn_player.rpc_id(id, player["id"], pos)
+			spawn_player.rpc_id(id, player["id"], pos, player["username"])
 
 var bestiary_money_table := {
 	Game.Rarity.COMMON:    50.0,
@@ -884,13 +889,14 @@ func _get_spawn_position(id: int) -> Vector2:
 	return Vector2.ZERO
 
 @rpc("authority", "call_local", "reliable")
-func spawn_player(id: int, spawn_position: Vector2) -> void:
+func spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
 	if multiplayer.get_unique_id() == 1:
 		return
 	if spawned_players.has(id):
 		return
 	var instance = PLAYER_SCENE.instantiate()
 	instance.name = str(id)
+	instance.get_node("Username").text = username
 	instance.position = spawn_position
 	get_tree().current_scene.add_child(instance, true)
 	instance.set_multiplayer_authority(id)
@@ -898,6 +904,7 @@ func spawn_player(id: int, spawn_position: Vector2) -> void:
 	
 	if id == multiplayer.get_unique_id():
 		local_player_spawned.emit()
+		instance.get_node("Username").visible = false
 
 @rpc("authority", "call_local", "reliable")
 func despawn_player(id: int) -> void:
@@ -922,8 +929,9 @@ func _player_quit(id: int) -> void:
 			Toast.add.rpc(player["username"] + " left the server!")
 
 @rpc("any_peer", "call_remote", "reliable")
-func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(save_data: Dictionary) -> void:
+func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary) -> void:
 	players.append({
+		"username": username,
 		"id": multiplayer.get_remote_sender_id(),
 		"save_data": save_data
 	})
@@ -1080,6 +1088,7 @@ func minigame_result(success: bool) -> void:
 				save_data["whiffs"] = save_data.get("whiffs", 0) + 1
 				sync_save_data.rpc_id(id, save_data)
 				stop_fishing_for_player.rpc_id(id)
+				Toast.add.rpc_id(id, "The fish got away!")
 			fishing_players = fishing_players.filter(func(p): return p["id"] != player["id"])
 			return
 	if not found_player:

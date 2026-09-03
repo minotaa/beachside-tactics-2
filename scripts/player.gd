@@ -12,8 +12,8 @@ const DIRECTIONS = {
 var nailed_it: bool = false
 var charging_cast: bool = false
 var current_log_path: String
-var original_zoom := Vector2(3.25, 3.25)
-var intended_zoom := Vector2(3.25, 3.25)
+var original_zoom := Vector2(4.25, 4.25)
+var intended_zoom := Vector2(4.25, 4.25)
 var hantenjutsushiki: bool = false
 var last_direction: String = "down"
 var body_type: String = "cat0"
@@ -45,6 +45,7 @@ var line_stiffness = 0.5  # How much line resists bending (increased from 0.3 fo
 
 # NETWORKING VARIABLES
 var network_target_position: Vector2
+var network_name: String = "Player"
 var network_animation: String = "idle"
 var network_direction: String = "down"
 var network_moving: bool = false
@@ -675,19 +676,37 @@ func collect_from_trap(item: ItemType, amount: int) -> void:
 func pickup_trap() -> void:
 	Network.request_pickup_trap.rpc_id(1, open_trap_id)
 	
+func _unhandled_input(event: InputEvent) -> void:
+	if not _is_ui_blocking():
+		if event is InputEventKey and event.pressed and event.keycode == KEY_ENTER:
+			$UI/Main/ChatBar.grab_focus()
+			await get_tree().create_timer(0.5).timeout
+			$FishPowerBar.hide()
+	
+func _is_mouse_over_chat_bar() -> bool:
+	if not $UI/Main/ChatBar.visible:
+		return false
+	var local_mouse_pos = $UI/Main/ChatBar.get_local_mouse_position()
+	return $UI/Main/ChatBar.get_rect().has_point(local_mouse_pos)
+	
 func _input(event: InputEvent) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
 		return
+	
+	if $UI/Main/ChatBar.has_focus() and state == FishState.INACTIVE:
+		play_idle_animation()
+		return
+		
 	# Zoom
 	if event.is_action_pressed("zoom_in"):
 		intended_zoom = Vector2(
-			clamp(intended_zoom.x + 0.75, 1, 4.5),
-			clamp(intended_zoom.y + 0.75, 1, 4.5)
+			clamp(intended_zoom.x + 0.75, 2.0, 6.0),
+			clamp(intended_zoom.y + 0.75, 2.0, 6.0)
 		)
 	elif event.is_action_pressed("zoom_out"):
 		intended_zoom = Vector2(
-			clamp(intended_zoom.x - 0.75, 1, 4.5),
-			clamp(intended_zoom.y - 0.75, 1, 4.5)
+			clamp(intended_zoom.x - 0.75, 2.0, 6.0),
+			clamp(intended_zoom.y - 0.75, 2.0, 6.0)
 		)
 
 	# Shop interaction toggle
@@ -818,9 +837,13 @@ func _input(event: InputEvent) -> void:
 	# Allow fishing again after any fish button release (prevents accidental re-cast)
 	if event.is_action_released("fish"):
 		fish_control_safe = true
+		$FishPowerBar.visible = false
 
 ## Continuous per-frame logic: movement, physics, hold-to-reel, power bar charge.
 func _process_input(delta: float) -> void:
+	if $UI/Main/ChatBar.has_focus() and state == FishState.INACTIVE:
+		play_idle_animation()
+	
 	# Movement
 	velocity = Vector2.ZERO if _is_ui_blocking() else Input.get_vector("left", "right", "up", "down", 0.1)
 	var velocity_length := velocity.length_squared()
@@ -1044,6 +1067,7 @@ func _is_ui_blocking() -> bool:
 		or $UI/Inventory.visible
 		or $UI/Trap.visible
 		or $UI/Leveling.visible
+		or $UI/Main/ChatBar.has_focus()
 		or immersive_interact != null
 	)
 
@@ -1364,6 +1388,13 @@ func _process_ui(delta: float) -> void:
 		$UI/Main/Bait/HBoxContainer/Label.text = "x" + str(Game.inventory.get_item_stack(Game.equipped_bait).amount)
 	else:
 		$UI/Main/Bait.visible = false
+	var focused = $UI/Main/ChatBar.has_focus()
+	var hovered := _is_mouse_over_chat_bar()
+	if focused or hovered:
+		$UI/Main/ChatBar.modulate.a = lerp($UI/Main/ChatBar.modulate.a, 1.0, 5.0 * delta)
+		$FishPowerBar.hide()
+	else:
+		$UI/Main/ChatBar.modulate.a = lerp($UI/Main/ChatBar.modulate.a, 0.0, 5.0 * delta)
 	if $UI/Vendor.visible:
 		var panel_width = -$UI/Vendor/TabContainer.size.x
 		var offset = (panel_width / 2.0) / $Camera2D.zoom.x
@@ -1468,8 +1499,6 @@ func _process_ui(delta: float) -> void:
 		debug_text += "MP ID: " + str(multiplayer.get_unique_id()) + "\n"
 	if state == FishState.FISHING:
 		debug_text += "\n"
-		debug_text += "Num until catch: " + str(odds) + "\n"
-		debug_text += "Your num: " + str(your_odds) + "\n"
 		debug_text += "Fishing Power: " + str(Game.get_fishing_power(Game.get_save_data())) + "\n"
 	if state == FishState.REELING and bobber != null and bobber.has_node("Bobber Fish"):
 		debug_text += "\nFish: " + str(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")))
@@ -1481,6 +1510,7 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/Combination.hide()
 			$UI/Main/LevelBar.hide()
 			$UI/Main/InventoryButton.hide()
+			$UI/Main/LevelingButton.hide()
 			$UI/Inventory.show()
 			Game.play_sfx("res://assets/sounds/open.ogg", 5.0)
 			update_inventory()
@@ -1488,6 +1518,7 @@ func _process_ui(delta: float) -> void:
 			$UI/Main/Combination.show()
 			$UI/Main/LevelBar.show()
 			$UI/Main/InventoryButton.show()
+			$UI/Main/LevelingButton.show()
 			$UI/Inventory.hide()
 	
 	if Input.is_action_just_released("inventory") and $UI/Leveling.visible:
@@ -1565,101 +1596,7 @@ func _process_ui(delta: float) -> void:
 	else:
 		$Camera2D.global_position = lerp($Camera2D.global_position, global_position, 0.05)
 		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(3.5, 3.5), 0.05)
-	 
-var odds: int
-var your_odds: int
 	
-func _fishing_timer(location: Game.Location) -> void:
-	odds = randi_range(250, 1100)
-	your_odds = 0
-	state = FishState.FISHING
-	if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
-		Toast.add("Your tackle box is full, you will release anything you catch.")
-	
-	var rod_power = Game.get_fishing_power(Game.get_save_data())
-
-	while (state == FishState.FISHING):
-		if bobber != null:
-			if not bobber.get_node("Ripple").emitting:
-				bobber.get_node("Ripple").restart()
-		if randf() < 0.2:
-			Game.play_sfx_briefly("res://assets/sounds/ripples.ogg", 1.3, -20)
-		
-		print("Odds: " + str(odds) + " | Your Odds: " + str(your_odds))
-		if your_odds >= odds:	
-			var fish = Catalog.get_fish_drop(location, rod_power, Game.get_save_data())
-			print(fish)
-			var bobber_fish = preload("res://scenes/ui/bobber_fish.tscn").instantiate()
-			bobber_fish.set_meta("fish_id", fish.id)
-			bobber_fish.get_node("Sprite2D").texture = fish.texture
-			bobber_fish.get_node("Sprite2D").visible = false
-			if bobber != null:
-				bobber.add_child(bobber_fish)
-			if fish is Junk or rod_power >= fish.threshold:
-				Game.add_xp(3)
-				state = FishState.REELING_BACK
-				if bobber != null:
-					if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
-						Game.inventory.take_item(Game.equipped_bait, 1)
-						if not Game.inventory.has_item(Game.equipped_bait):
-							Game.equipped_bait = null
-							Toast.add("You ran out of bait!")
-					bobber.get_node("Splashes").amount = 64
-					var stack = ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
-					stack.data["stars"] = Game.roll_stars()
-					if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
-						Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-					else:
-						Game.bag.add_item(stack)
-						var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
-						add_child(speech_bubble)
-						var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
-						var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
-						speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
-						#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-						Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
-						Game.highest_star[str(stack.type.id)] = max(
-							Game.highest_star.get(str(stack.type.id), 0),
-							stack.data.get("stars", 0)
-						)
-						Game.play_sfx("res://assets/sounds/catch.ogg", 2)
-				return
-			else:
-				Game.play_sfx("res://assets/sounds/oh.ogg", 2.0)
-				bobber.get_node("Exclaim").emitting = true
-				if fish.rarity == Game.Rarity.COMMON:
-					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-common.png")
-				if fish.rarity == Game.Rarity.UNCOMMON:
-					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-uncommon.png")
-				if fish.rarity == Game.Rarity.RARE:
-					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-rare.png")
-				if fish.rarity == Game.Rarity.EPIC:
-					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-epic.png")
-				if fish.rarity == Game.Rarity.LEGENDARY:
-					bobber.get_node("Exclaim").texture = preload("res://assets/sprites/caught-fish-legendary.png")
-				state = FishState.FOUND_FISH
-			await get_tree().create_timer(1.5).timeout
-			if state == FishState.FOUND_FISH:
-				if bobber != null and bobber_fish != null:
-					bobber_fish.queue_free()
-				state = FishState.FISHING
-				print("Player decided not to catch fish, continuing loop.")
-				your_odds = 0
-				odds = randi_range(250, 1000)
-			else:
-				if Game.equipped_bait != null and Game.equipped_fishing_rod.baitable:
-					Game.inventory.take_item(Game.equipped_bait, 1)
-					if not Game.inventory.has_item(Game.equipped_bait):
-						Game.equipped_bait = null
-						Toast.add("You ran out of bait!")
-				print("Player decided to catch fish, ending loop.")
-				return
-		var tick_interval = max(0.2, 0.75 - (sqrt(Game.get_quick_bite(Game.get_save_data())) * 0.025))
-		await get_tree().create_timer(tick_interval).timeout
-		var tick_bonus = sqrt(Game.get_fishing_speed(Game.get_save_data())) * 3.5
-		var fish_power_bonus = $FishPowerBar.value * 0.3 if nailed_it else $FishPowerBar.value * 0.25
-		your_odds += randi_range(15, 25) + fish_power_bonus + tick_bonus
-
 func _process_network_send(delta: float) -> void:
 	_network_send_timer -= delta
 	if _network_send_timer > 0.0:
@@ -1676,6 +1613,9 @@ func apply_network_state(pos: Vector2, direction: String, animation: String, mov
 
 func _process_multiplayer(delta: float) -> void:
 	global_position = global_position.lerp(network_target_position, clampf(NETWORK_INTERP_SPEED * delta, 0.0, 1.0))
+	
+	if Game.get_player() == null:
+		return
 	
 	var distance_to_authority = Game.get_player().global_position.distance_to(global_position)
 	var opacity_factor = clampf(inverse_lerp(100.0, 250.0, distance_to_authority), 0.0, 1.0)
@@ -1892,3 +1832,67 @@ func _on_leveling_button_pressed() -> void:
 func _on_close_leveling_pressed() -> void:
 	$UI/Leveling.visible = false
 	$UI/Main.visible = true
+
+func add_message(message: String, player_name: String) -> void:
+	if multiplayer.has_multiplayer_peer():
+		print("[" + str(multiplayer.get_unique_id()) + "] Received message: ", message)
+	var chat_message = load("res://scenes/chat_message.tscn").instantiate()
+	chat_message.text = player_name + ": " + message
+	chat_message.visible = true
+	chat_message.modulate = Color(1, 1, 1, 1)
+	$UI/Main/Chat/VBoxContainer.add_child(chat_message, true)
+	_write_chat_log(player_name, message)
+	await get_tree().process_frame
+	$UI/Main/Chat.scroll_vertical = $UI/Main/Chat.get_v_scroll_bar().max_value
+
+func _write_chat_log(player_name: String, message: String) -> void:
+	var log_line = "[%s] %s: %s" % [
+		Time.get_datetime_string_from_system(),
+		player_name,
+		message
+	]
+	var file = FileAccess.open(current_log_path, FileAccess.READ_WRITE)
+	if file:
+		file.seek_end()
+		file.store_line(log_line)
+		file.close()
+		
+func _on_chat_bar_gui_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if $UI/Main/ChatBar.has_focus():
+			$UI/Main/ChatBar.text = ""
+			$UI/Main/ChatBar.release_focus()
+			get_viewport().set_input_as_handled()	
+	
+func _on_chat_bar_text_submitted(new_text: String) -> void:
+	$UI/Main/ChatBar.text = ""
+	$UI/Main/ChatBar.release_focus()
+	if new_text == "":
+		return
+
+	var player_name = Network.player_name if Network.player_name != "" else "Player"
+	if multiplayer.has_multiplayer_peer():
+		Network.send_message.rpc(new_text, player_name)
+	else:
+		add_message(new_text, player_name)
+
+func _on_chat_bar_focus_entered() -> void:
+	for child in $UI/Main/Chat/VBoxContainer.get_children():
+		child.visible = true
+		child.modulate = Color(1, 1, 1, 1)
+		for node in child.get_children():
+			if node is Timer:
+				node.stop()
+	await get_tree().process_frame
+	$UI/Main/Chat.scroll_vertical = $UI/Main/Chat.get_v_scroll_bar().max_value
+
+func _on_chat_bar_focus_exited() -> void:
+	for child in $UI/Main/Chat/VBoxContainer.get_children():
+		if child.should_fade:
+			child.visible = true
+			child.modulate = Color(1, 1, 1, 1)
+			for node in child.get_children():
+				if node is Timer:
+					node.start()
+		else:
+			child.visible = false

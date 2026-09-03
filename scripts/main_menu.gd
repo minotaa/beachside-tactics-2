@@ -3,7 +3,8 @@ extends Node2D
 func _on_play_pressed() -> void:
 	var res = await Network.host_server(6466)
 	if not res:
-		await Network.join_server("10.10.20.2", "miboba")
+		var username = $UI/Main/Username.text
+		await Network.join_server("localhost", username)
 		
 	else:
 		Game.start_game()
