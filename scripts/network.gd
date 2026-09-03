@@ -1080,11 +1080,11 @@ func minigame_result(success: bool) -> void:
 				save_data["whiffs"] = save_data.get("whiffs", 0) + 1
 				sync_save_data.rpc_id(id, save_data)
 				stop_fishing_for_player.rpc_id(id)
-			fishing_players.remove_at(i)
+			fishing_players = fishing_players.filter(func(p): return p["id"] != player["id"])
 			return
 	if not found_player:
 		var save_data = get_player_save_data(id)
-		stop_fishing_for_player.rpc_id(id, save_data)
+		stop_fishing_for_player.rpc_id(id)
 	
 
 @rpc("authority", "call_remote", "reliable")
