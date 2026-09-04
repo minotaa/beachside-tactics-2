@@ -42,7 +42,6 @@ tile_map_data = PackedByteArray("AADz//z/AAANAAwAAADt//z/AAADAAIAAADz//7/AAALAAQ
 tile_set = ExtResource("2_m4cne")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1465685631]
-visible = false
 color = Color(0.19215687, 0.14901961, 0.5019608, 1)
 
 [node name="Sheldon" parent="." unique_id=804101878 instance=ExtResource("4_wvdod")]

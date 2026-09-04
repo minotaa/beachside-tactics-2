@@ -664,6 +664,9 @@ variation_transform = Transform2D(1, 0.1, 0, 1, 0, 0)
 [sub_resource type="CircleShape2D" id="CircleShape2D_4r5pv"]
 radius = 23.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ha2mi"]
+light_mode = 1
+
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lxlsd"]
 light_mode = 1
 
@@ -1462,6 +1465,7 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="Vendor" type="Control" parent="UI" unique_id=1068774297]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -1531,10 +1535,10 @@ anchor_left = 0.929
 anchor_top = -0.017
 anchor_right = 1.029
 anchor_bottom = 0.062000003
-offset_left = -0.23999023
-offset_top = -0.04531479
-offset_right = -0.24005127
-offset_bottom = 0.028999329
+offset_left = 3.735962
+offset_top = -0.045358658
+offset_right = -1.8640137
+offset_bottom = 0.028953552
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -1715,8 +1719,8 @@ anchor_right = 0.5
 anchor_bottom = -0.015000001
 offset_left = -308.0
 offset_top = 6.538845
-offset_right = 260.0
-offset_bottom = 56.618805
+offset_right = 268.0
+offset_bottom = 63.538845
 grow_horizontal = 2
 text = "Sell"
 label_settings = SubResource("LabelSettings_a38lo")
@@ -1813,7 +1817,7 @@ anchor_right = 0.019000001
 anchor_bottom = 0.51100004
 offset_left = 691.84
 offset_top = -359.88007
-offset_right = 1075.52
+offset_right = 1107.52
 offset_bottom = 360.0401
 theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
 
@@ -1871,8 +1875,8 @@ texture = ExtResource("21_a38lo")
 layout_mode = 0
 offset_left = 16.0
 offset_top = 159.0
-offset_right = 367.68
-offset_bottom = 207.0
+offset_right = 399.68
+offset_bottom = 235.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 32
@@ -1884,10 +1888,10 @@ vertical_alignment = 1
 
 [node name="Description" type="RichTextLabel" parent="UI/Vendor/ItemPreview" unique_id=1965472761]
 layout_mode = 0
-offset_left = 16.0
+offset_left = 23.679993
 offset_top = 248.0
-offset_right = 367.68
-offset_bottom = 616.0
+offset_right = 399.68
+offset_bottom = 600.0
 theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
@@ -1903,9 +1907,9 @@ anchor_top = 0.88600004
 anchor_right = 0.5
 anchor_bottom = 0.88600004
 offset_left = -176.16003
-offset_top = -16.160034
+offset_top = -24.160034
 offset_right = 175.83997
-offset_bottom = 7.839966
+offset_bottom = -0.16003418
 text = "Price: $200"
 label_settings = SubResource("LabelSettings_hhpqf")
 horizontal_alignment = 1
@@ -1919,7 +1923,7 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -176.16003
-offset_top = -63.920166
+offset_top = -71.920166
 offset_right = 176.16003
 offset_bottom = -16.0
 grow_horizontal = 2
@@ -2040,10 +2044,10 @@ anchor_left = 0.019000001
 anchor_top = 0.51100004
 anchor_right = 0.019000001
 anchor_bottom = 0.51100004
-offset_left = 708.68
-offset_top = -319.88007
-offset_right = 1107.52
-offset_bottom = 320.0401
+offset_left = 699.52
+offset_top = -343.88007
+offset_right = 1115.52
+offset_bottom = 360.11993
 theme_override_styles/panel = SubResource("StyleBoxTexture_cs1tg")
 
 [node name="Item" type="Control" parent="UI/Bestiary/ItemPreview" unique_id=2109385076]
@@ -2118,7 +2122,7 @@ layout_mode = 0
 offset_left = 22.840027
 offset_top = 248.0
 offset_right = 374.84003
-offset_bottom = 616.0
+offset_bottom = 680.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
@@ -2449,7 +2453,10 @@ position = Vector2(0, 8)
 shape = SubResource("CircleShape2D_4r5pv")
 
 [node name="InteractionMark" type="TextureRect" parent="." unique_id=1540127431]
+light_mask = 3
+visibility_layer = 3
 z_index = 1289
+material = SubResource("CanvasItemMaterial_ha2mi")
 offset_left = -8.0
 offset_top = -23.0
 offset_right = 8.0
