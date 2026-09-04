@@ -555,8 +555,8 @@ func update_catalog() -> void:
 			var stars_str = star_icon.repeat(item.data.get("stars", 0))
 			var sell_entry = preload("res://scenes/ui/sell_entry.tscn").instantiate()
 			var separator = " " if item.data.get("stars", 0) > 0 else ""
-			sell_entry.get_node("HBoxContainer/Label").text = stars_str + separator + str(item) + ": $" + str(roundi(unit_price)) + " = $" + str(roundi(stack_price))
-			sell_entry.get_node("HBoxContainer/TextureRect").texture = item.type.texture
+			sell_entry.get_node("Label").text = stars_str + separator + str(item) + ": $" + str(roundi(unit_price)) + " = $" + str(roundi(stack_price))
+			sell_entry.get_node("TextureRect").texture = item.type.texture
 			sell_entry.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			$UI/Vendor/TabContainer/Sell/ScrollContainer/HBoxContainer.add_child(sell_entry)
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))

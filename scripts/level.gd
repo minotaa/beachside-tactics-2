@@ -47,4 +47,5 @@ func _process(_delta: float) -> void:
 	$CanvasModulate.color = Game.get_sky_color()
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	Toast.add("don't walk here")
+	#Toast.add("don't walk here")
+	pass

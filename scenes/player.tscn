@@ -1486,10 +1486,9 @@ theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
 theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_bj30b")
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="Shop" type="Control" parent="UI/Vendor/TabContainer" unique_id=1574313464]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -1498,10 +1497,10 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -288.0
-offset_top = -11.0
-offset_right = 288.0
-offset_bottom = 46.0
+offset_left = -308.0
+offset_top = -4.08
+offset_right = 268.0
+offset_bottom = 52.92
 grow_horizontal = 2
 text = "Shop"
 label_settings = SubResource("LabelSettings_a38lo")
@@ -1703,6 +1702,7 @@ alignment = 1
 layout_mode = 2
 
 [node name="Sell" type="Control" parent="UI/Vendor/TabContainer" unique_id=1504702216]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -1742,22 +1742,23 @@ vertical_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/Vendor/TabContainer/Sell" unique_id=872342220]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -324.0
-offset_top = -294.03998
-offset_right = 324.0
-offset_bottom = 209.96002
+anchors_preset = -1
+anchor_left = -0.026
+anchor_top = 0.085
+anchor_right = 1.026
+anchor_bottom = 0.79700005
+offset_left = 0.016000748
+offset_top = -0.25315857
+offset_right = -0.015991211
+offset_bottom = -0.29229736
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="HBoxContainer" type="VBoxContainer" parent="UI/Vendor/TabContainer/Sell/ScrollContainer" unique_id=595347477]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 12
-alignment = 1
 
 [node name="Sell" type="Button" parent="UI/Vendor/TabContainer/Sell" unique_id=1349391696]
 layout_mode = 1
@@ -1992,21 +1993,27 @@ theme_override_constants/v_separation = 26
 columns = 4
 
 [node name="Inventory Button" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=226721162 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Inventory Button2" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1479168288 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Inventory Button3" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1852921647 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Inventory Button4" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1290854203 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Inventory Button5" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=1244824440 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Inventory Button6" parent="UI/Bestiary/List/ScrollContainer/GridContainer" unique_id=900256957 instance=ExtResource("42_holxr")]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 
 [node name="Close" type="Button" parent="UI/Bestiary/List" unique_id=1354063106]
