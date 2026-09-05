@@ -607,7 +607,6 @@ texture_margin_bottom = 32.0
 [sub_resource type="LabelSettings" id="LabelSettings_hhpqf"]
 line_spacing = 8.0
 font = ExtResource("18_i4ail")
-font_size = 24
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_g5jhy"]
 texture = ExtResource("25_wqfne")
@@ -1907,9 +1906,9 @@ anchor_top = 0.88600004
 anchor_right = 0.5
 anchor_bottom = 0.88600004
 offset_left = -176.16003
-offset_top = -24.160034
+offset_top = -17.160034
 offset_right = 175.83997
-offset_bottom = -0.16003418
+offset_bottom = 6.839966
 text = "Price: $200"
 label_settings = SubResource("LabelSettings_hhpqf")
 horizontal_alignment = 1

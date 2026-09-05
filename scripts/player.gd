@@ -25,6 +25,7 @@ var holding_trap: bool = true
 var selected_tile: Vector2i
 var interacting: bool = false
 var immersive_interact: NPC
+var not_sent_minigame_result_already: bool = true
 var step_timer = 0.0
 var step_interval = 0.4
 
@@ -901,14 +902,16 @@ func _process_input(delta: float) -> void:
 			$Minigame/Column.get_children()[0].set_vibrate(true)
 			Input.vibrate_handheld(10)
 			Game.play_sfx_briefly("res://assets/sounds/squeak.ogg", 0.2, 1, -1, true, true)
-			if $Minigame/Progress.value >= $Minigame/Progress.max_value:
+			if $Minigame/Progress.value >= $Minigame/Progress.max_value and not_sent_minigame_result_already:
 				Network.minigame_result.rpc_id(1, true)
+				not_sent_minigame_result_already = false
 		else:
 			$Minigame/Column.get_children()[0].set_vibrate(false)
 			$Minigame/Progress.value -= 85 * delta
 			Game.play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, 1.5, -1, true, true)
-			if $Minigame/Progress.value <= 0:
+			if $Minigame/Progress.value <= 0 and not_sent_minigame_result_already:
 				Network.minigame_result.rpc_id(1, false)
+				not_sent_minigame_result_already = false
 	else:
 		$Minigame.visible = false
 		for child in $Minigame/Column.get_children():
@@ -1186,6 +1189,8 @@ func set_fishing_rod(id: int) -> void:
 		Network.request_equip.rpc_id(1, "equipped_fishing_rod", null)
 	update_inventory()
 
+var selected_upgrade = null
+
 func update_inventory() -> void:
 	for child in $UI/Inventory/ScrollContainer/VBoxContainer.get_children():
 		child.queue_free()
@@ -1238,6 +1243,18 @@ func update_inventory() -> void:
 	inventory_button.connect("pressed", Callable(self, "set_trap").bind(-1))
 	$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
 
+	if selected_upgrade == null:
+		$"UI/Inventory/Container/Upgrades/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
+		$"UI/Inventory/Container/Upgrades/Equipped/Name".text = "Nothing"
+		$"UI/Inventory/Container/Upgrades/Equipped/Description".text = "Buying an upgrade would let you select something, wouldn't it?"
+		$"UI/Inventory/Container/Upgrades/Equipped/Description".text += "\n\nNothing: +0"
+	else:
+		var level = Game.upgrades.get_item_stack(selected_upgrade).data["level"]
+		$UI/Inventory/Container/Upgrades/Equipped/Icon.texture = selected_upgrade.texture
+		$UI/Inventory/Container/Upgrades/Equipped/Name.text = selected_upgrade.name
+		$UI/Inventory/Container/Upgrades/Equipped/Description.text = selected_upgrade.description
+		$"UI/Inventory/Container/Upgrades/Equipped/Description".text += "\n\n" + selected_upgrade.get_benefits.call(level)
+				
 	if Game.equipped_bait == null:
 		$"UI/Inventory/Container/Bait/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Bait/Equipped/Name".text = "Nothing"
@@ -1320,7 +1337,7 @@ func update_inventory() -> void:
 		inventory_button.get_node("TextureRect").texture = upgrade.type.texture
 		inventory_button.get_node("Equipped").hide()
 		inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(upgrade.type.rarity).to_lower() + ".png")
-		#inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(upgrade.type.id))
+		inventory_button.connect("pressed", Callable(self, "select_upgrade").bind(upgrade.type))
 		$"UI/Inventory/Container/Upgrades/GridContainer".add_child(inventory_button)
 
 	var inventory = Game.inventory.list.duplicate()
@@ -1360,6 +1377,13 @@ func update_inventory() -> void:
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_trap").bind(item.type.id))
 			$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
+
+func select_upgrade(upgrade: ItemType) -> void:
+	selected_upgrade = upgrade
+	$UI/Inventory/Container/Upgrades/Equipped/Icon.visible = true
+	$UI/Inventory/Container/Upgrades/Equipped/Name.visible = true
+	$UI/Inventory/Container/Upgrades/Equipped/Description.visible = true
+	update_inventory()
 
 func near_npc() -> bool:
 	for body in $Interaction.get_overlapping_areas():
@@ -1787,6 +1811,7 @@ func _on_base_animation_finished() -> void:
 					
 				Network.start_fishing_timer.rpc_id(1, Game.Location.get(data.get_custom_data("location")), $FishPowerBar.value, nailed_it)
 				state = FishState.FISHING
+				not_sent_minigame_result_already = true
 				if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()): # TODO: Should be accurate to player's actual inventory, who cares though.
 					Toast.add("Your tackle box is full, you will release anything you catch.")
 				Game.play_sfx("res://assets/sounds/bobberland.ogg", 1)
@@ -1794,6 +1819,7 @@ func _on_base_animation_finished() -> void:
 				print("Invalid tile to fish on, stopping fishing")
 				state = FishState.INACTIVE
 				bobber_safe = true
+				not_sent_minigame_result_already = true
 				Network.stop_fishing_timer.rpc_id(1)
 				if bobber != null:
 					bobber.queue_free()

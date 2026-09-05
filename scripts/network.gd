@@ -739,6 +739,7 @@ func stop_fishing_for_player() -> void:
 	player.state = player.FishState.INACTIVE
 	player.bobber_safe = true
 	player.play_idle_animation()
+	player.not_sent_minigame_result_already = true
 	#Toast.add("The fish got away!")
 	print("Stopped fishing for " + str(multiplayer.get_unique_id()) + ".")
 
@@ -1105,8 +1106,8 @@ func minigame_result(success: bool) -> void:
 				var save_data = get_player_save_data(id)
 				save_data["whiffs"] = save_data.get("whiffs", 0) + 1
 				sync_save_data.rpc_id(id, save_data)
-				stop_fishing_for_player.rpc_id(id)
 				Toast.add.rpc_id(id, "The fish got away!")
+				stop_fishing_for_player.rpc_id(id)
 			fishing_players = fishing_players.filter(func(p): return p["id"] != player["id"])
 			return
 	if not found_player:

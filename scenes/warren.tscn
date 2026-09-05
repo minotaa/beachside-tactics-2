@@ -80,3 +80,6 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NPC" unique_id=309900125]
 position = Vector2(0, -6)
 shape = SubResource("RectangleShape2D_popqq")
+
+[node name="Marker" type="Marker2D" parent="." unique_id=1667444639]
+position = Vector2(0, -12)

@@ -45,7 +45,7 @@ func sells(item: ItemType) -> bool:
 
 func _ready() -> void:
 	$AnimatedSprite2D.play("idle")
-	marker = Vector2(global_position.x, global_position.y - 9)
+	marker = $Marker.global_position
 
 func _process(delta: float) -> void:
 	if not is_in_dialogue:
