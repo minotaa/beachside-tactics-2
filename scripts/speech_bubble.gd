@@ -8,15 +8,21 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
-	
+
 	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
 
 	var i = 0
 	while i < line.length():
-		if Input.is_action_just_pressed("interact"):
+		if not immersive and Input.is_action_just_pressed("interact"):
 			$MarginContainer/Label.text = line
+			await get_tree().process_frame
+			global_position = Vector2(
+				marker.x - (size.x * 0.1166),
+				marker.y - (size.y * 0.25)
+			)
+			visible = true
 			break
 
 		if line[i] == "[":
@@ -24,7 +30,6 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 			if close != -1:
 				var tag = line.substr(i + 1, close - i - 1).strip_edges()
 				if tag.begins_with("img"):
-					# Skip the entire [img...]...[/img] block
 					var end_tag = line.find("[/img]", close)
 					if end_tag != -1:
 						i = end_tag + 6
@@ -60,8 +65,13 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 		var timer := get_tree().create_timer(1.0 / text_speed)
 
 		while timer.time_left > 0:
-			if Input.is_action_just_pressed("interact"):
+			if not immersive and Input.is_action_just_pressed("interact"):
 				$MarginContainer/Label.text = line
+				await get_tree().process_frame
+				global_position = Vector2(
+					marker.x - (size.x * 0.1166),
+					marker.y - (size.y * 0.25)
+				)
 				i = line.length()
 				break
 

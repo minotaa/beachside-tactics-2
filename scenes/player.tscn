@@ -551,21 +551,21 @@ texture = ExtResource("33_hax0n")
 texture_margin_left = 20.0
 texture_margin_top = 20.0
 texture_margin_right = 20.0
-texture_margin_bottom = 7.0
+texture_margin_bottom = 9.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j2b1d"]
 texture = ExtResource("33_hax0n")
 texture_margin_left = 20.0
 texture_margin_top = 20.0
 texture_margin_right = 20.0
-texture_margin_bottom = 7.0
+texture_margin_bottom = 9.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wqfne"]
 texture = ExtResource("22_31cv2")
 texture_margin_left = 20.0
 texture_margin_top = 20.0
 texture_margin_right = 20.0
-texture_margin_bottom = 7.0
+texture_margin_bottom = 9.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fdfoy"]
 
@@ -1464,6 +1464,7 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="Vendor" type="Control" parent="UI" unique_id=1068774297]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

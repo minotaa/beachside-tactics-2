@@ -1531,18 +1531,12 @@ func _process_ui(delta: float) -> void:
 	if Input.is_action_just_released("inventory") and (not $UI/Main/ChatBar.has_focus() and not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible and not $UI/Leveling.visible):
 		
 		if not $UI/Inventory.visible:
-			$UI/Main/Combination.hide()
-			$UI/Main/LevelBar.hide()
-			$UI/Main/InventoryButton.hide()
-			$UI/Main/LevelingButton.hide()
+			$UI/Main.hide()
 			$UI/Inventory.show()
 			Game.play_sfx("res://assets/sounds/open.ogg", 5.0)
 			update_inventory()
 		else:
-			$UI/Main/Combination.show()
-			$UI/Main/LevelBar.show()
-			$UI/Main/InventoryButton.show()
-			$UI/Main/LevelingButton.show()
+			$UI/Main.show()
 			$UI/Inventory.hide()
 	
 	if Input.is_action_just_released("inventory") and $UI/Leveling.visible:
