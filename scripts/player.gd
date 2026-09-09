@@ -45,6 +45,12 @@ var line_damping = 0.92  # How quickly line settles
 var line_stiffness = 0.5  # How much line resists bending (increased from 0.3 for less sag)
 
 # NETWORKING VARIABLES
+var remote_casting: bool = false
+var remote_cast_direction: String = ""
+var remote_cast_arc_offset: Vector2 = Vector2.ZERO
+var remote_bobber_base: Vector2
+var network_has_bobber: bool = false
+var network_bobber_position: Vector2
 var network_target_position: Vector2
 var network_name: String = "Player"
 var network_animation: String = "idle"
@@ -125,24 +131,71 @@ func _ready() -> void:
 			file.store_line("--- Chat session started at %s ---" % timestamp)
 		file.close()
 
-func update_fishing_line(delta):
+func play_remote_cast(fishing_dir: String, power_normalized: float) -> void:
+	if bobber == null:
+		bobber = preload("res://scenes/bobber.tscn").instantiate()
+		bobber.freeze = true
+		bobber.collision_layer = 0
+		bobber.collision_mask = 0
+		bobber.global_position = get_rod_tip(fishing_dir)
+		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
+		add_child(bobber)
+		line_points.clear()
+		line_velocities.clear()
+		remote_bobber_base = bobber.global_position
+
+	remote_casting = true
+	remote_cast_direction = fishing_dir
+
+	var is_sideways = (fishing_dir == "left" or fishing_dir == "right")
+	var cast_duration = (0.7 + power_normalized * 0.4) if is_sideways else (0.8 + power_normalized * 0.3)
+	var arc_height = (15 + power_normalized * 20) if is_sideways else (25 + power_normalized * 35)
+
+	var arc_tween = create_tween()
+	arc_tween.tween_method(
+		func(t):
+			remote_cast_arc_offset = Vector2(0, (-sin(t * PI) * arc_height))
+	, 0.0, 1.0, cast_duration)
+
+	var rotation_impulse = (15 + power_normalized * 25) * (-1 if DIRECTIONS[fishing_dir].x > 0 else 1)
+	bobber.rotation = 0
+	bobber.angular_velocity = rotation_impulse
+	var rotation_tween = create_tween()
+	rotation_tween.tween_property(bobber, "angular_velocity", 0.0, 0.6).set_ease(Tween.EASE_OUT)
+
+	await arc_tween.finished
+	remote_cast_arc_offset = Vector2.ZERO
+	remote_casting = false
+
+func update_fishing_line(delta, is_remote: bool = false):
 	if bobber == null:
 		return
-	
-	var rod_tip = get_rod_tip(get_fishing_direction())
+
+	var fish_dir: String
+	if is_remote:
+		fish_dir = remote_cast_direction if remote_casting else last_direction
+	else:
+		fish_dir = get_fishing_direction()
+
+	var rod_tip = get_rod_tip(fish_dir)
 	var bobber_pos = bobber.global_position
-	
+
 	if line_points.is_empty():
 		for i in range(line_segments):
 			var t = float(i) / float(line_segments - 1)
 			line_points.append(lerp(rod_tip, bobber_pos, t))
 			line_velocities.append(Vector2.ZERO)
-		
+
 	line_points[0] = rod_tip
 	line_points[line_segments - 1] = bobber_pos
-	
-	if state == FishState.REELING_BACK or (state == FishState.FISHING and Input.is_action_pressed("fish")):
-		# Skip spring physics entirely, snap mid points toward a straight line fast
+
+	var taut: bool
+	if is_remote:
+		taut = remote_casting
+	else:
+		taut = state == FishState.REELING_BACK or (state == FishState.FISHING and Input.is_action_pressed("fish"))
+
+	if taut:
 		for i in range(1, line_segments - 1):
 			var t = float(i) / float(line_segments - 1)
 			var target = lerp(rod_tip, bobber_pos, t)
@@ -150,29 +203,27 @@ func update_fishing_line(delta):
 			line_velocities[i] = Vector2.ZERO
 	else:
 		for i in range(1, line_segments - 1):
-			line_velocities[i].y += line_gravity * delta
+			line_velocities[i].y += (5.1 if is_remote else line_gravity) * delta
 			line_points[i] += line_velocities[i] * delta
 			line_velocities[i] *= line_damping
-	
-	var iterations = 5 if state == FishState.REELING or state == FishState.REELING_BACK else 3
+
+	var iterations = 5 if (not is_remote and (state == FishState.REELING or state == FishState.REELING_BACK)) else 3
 	for iteration in range(iterations):
 		for i in range(line_segments - 1):
 			var segment_length = rod_tip.distance_to(bobber_pos) / (line_segments - 1)
 			var current_point = line_points[i]
 			var next_point = line_points[i + 1]
-			
 			var delta_pos = next_point - current_point
 			var current_distance = delta_pos.length()
 			if current_distance < 0.01:
 				continue
 			var difference = (current_distance - segment_length) / current_distance
-			var offset = delta_pos * difference * line_stiffness
-			
+			var offset = delta_pos * difference * (0.5 if is_remote else line_stiffness)
 			if i > 0:
 				line_points[i] += offset * 0.5
 			if i < line_segments - 2:
 				line_points[i + 1] -= offset * 0.5
-	
+
 	if bobber.has_node("Line2D"):
 		var line = bobber.get_node("Line2D")
 		line.clear_points()
@@ -1018,7 +1069,6 @@ func _process_input(delta: float) -> void:
 		Network.place_trap.rpc_id(1, trap_position.x, trap_position.y, location)
 		
 		Game.play_sfx("res://assets/sounds/dunk.ogg", 8)
-		Toast.add("You placed down a: " + Game.equipped_trap.name + "!")
 		fish_control_safe = false
 
 	if velocity.length() > 0:
@@ -1242,7 +1292,7 @@ func update_inventory() -> void:
 	inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
-	if Game.equipped_bait != null:
+	if Game.equipped_trap != null:
 		inventory_button.get_node("Equipped").hide()
 	inventory_button.connect("pressed", Callable(self, "set_trap").bind(-1))
 	$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
@@ -1280,7 +1330,7 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Traps/Equipped/Name".text = "Nothing"
 		$"UI/Inventory/Container/Traps/Equipped/Description".text = "You have no trap equipped, they're probably all being cast, but if you don't have any, buy one in the shop."
-		$"UI/Inventory/Container/Traps/Equipped/Description".text = "\n\nNothing: +0"
+		$"UI/Inventory/Container/Traps/Equipped/Description".text += "\n\nNothing: +0"
 	else:
 		$"UI/Inventory/Container/Traps/Equipped/Icon".texture = Game.equipped_trap.texture
 		$"UI/Inventory/Container/Traps/Equipped/Name".text = Game.equipped_trap.name
@@ -1299,7 +1349,7 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = load("res://assets/sprites/cross.png")
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = "Nothing"
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "You have no Fishing Rod equipped, buy one in the shop."
-		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text = "\n\nNothing: +0"
+		$"UI/Inventory/Container/Fishing Rods/Equipped/Description".text += "\n\nNothing: +0"
 	else:
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Icon".texture = Game.equipped_fishing_rod.texture
 		$"UI/Inventory/Container/Fishing Rods/Equipped/Name".text = Game.equipped_fishing_rod.name
@@ -1625,23 +1675,23 @@ func _process_network_send(delta: float) -> void:
 		return
 	_network_send_timer = NETWORK_SEND_RATE
 	var moving := velocity.length_squared() > 0
-	Network.relay_player_state.rpc_id(1, global_position, last_direction, $Base.animation, moving)
+	var has_bobber := bobber != null
+	var bobber_pos := bobber.global_position if has_bobber else Vector2.ZERO
+	Network.relay_player_state.rpc_id(1, global_position, last_direction, $Base.animation, moving, has_bobber, bobber_pos)
 
-func apply_network_state(pos: Vector2, direction: String, animation: String, moving: bool) -> void:
+func apply_network_state(pos: Vector2, direction: String, animation: String, moving: bool, has_bobber: bool, bobber_pos: Vector2) -> void:
 	network_target_position = pos
 	network_direction = direction
 	network_animation = animation
 	network_moving = moving
+	network_has_bobber = has_bobber
+	network_bobber_position = bobber_pos
 
 func _process_multiplayer(delta: float) -> void:
 	global_position = global_position.lerp(network_target_position, clampf(NETWORK_INTERP_SPEED * delta, 0.0, 1.0))
-	
-	if Game.get_player() == null:
-		return
-	
+
 	var distance_to_authority = Game.get_player().global_position.distance_to(global_position)
 	var opacity_factor = clampf(inverse_lerp(100.0, 250.0, distance_to_authority), 0.0, 1.0)
-
 	modulate.a = lerp(1.0, 0.4, opacity_factor)
 	$Shadow.modulate.a = 0.9 * lerp(1.0, 0.4, opacity_factor)
 
@@ -1650,13 +1700,38 @@ func _process_multiplayer(delta: float) -> void:
 		if $Base.animation != body_type + "_walk_" + network_direction:
 			play_animation(body_type + "_walk_" + network_direction)
 	else:
-		if $Base.animation.begins_with(body_type + "_walk") and not network_animation.begins_with(body_type + "_fish") :
+		if $Base.animation.begins_with(body_type + "_walk") and not network_animation.begins_with(body_type + "_fish"):
 			last_direction = network_direction
 			play_idle_animation()
 		else:
 			last_direction = network_direction
 			if network_animation.begins_with(body_type + "_fish") and not $Base.animation.begins_with(body_type + "_fish"):
 				play_animation(network_animation)
+
+	_process_remote_bobber(delta)
+
+func _process_remote_bobber(delta: float) -> void:
+	if network_has_bobber and bobber == null:
+		bobber = preload("res://scenes/bobber.tscn").instantiate()
+		bobber.freeze = true
+		bobber.collision_layer = 0
+		bobber.collision_mask = 0
+		bobber.global_position = network_bobber_position
+		bobber.get_node("Line2D").set_point_position(0, Vector2(0.0, -1.5))
+		add_child(bobber)
+		line_points.clear()
+		line_velocities.clear()
+		remote_bobber_base = network_bobber_position
+	elif not network_has_bobber and bobber != null:
+		bobber.queue_free()
+		bobber = null
+		remote_casting = false
+		remote_cast_arc_offset = Vector2.ZERO
+
+	if bobber != null:
+		remote_bobber_base = remote_bobber_base.lerp(network_bobber_position, clampf(NETWORK_INTERP_SPEED * delta, 0.0, 1.0))
+		bobber.global_position = remote_bobber_base + remote_cast_arc_offset
+		update_fishing_line(delta, true)
 
 var glitches = 0 
 
@@ -1692,6 +1767,8 @@ func _on_base_animation_finished() -> void:
 	if $Base.animation.begins_with(prefix):
 		if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
 			return
+		if multiplayer.has_multiplayer_peer():
+			Network.relay_cast.rpc_id(1, get_fishing_direction(), $FishPowerBar.value / 100.0)
 		Game.play_sfx("res://assets/sounds/whoosh.ogg", 1.0)
 		bobber = preload("res://scenes/bobber.tscn").instantiate()
 		bobber.position = to_local(get_rod_tip(get_fishing_direction()))
@@ -1869,7 +1946,7 @@ func _on_close_leveling_pressed() -> void:
 	$UI/Main.visible = true
 
 func add_message(message: String, username: String) -> void:
-	var chat_message = load("res://scenes/chat_message.tscn").instantiate()
+	var chat_message = load("res://scenes/ui/chat_message.tscn").instantiate()
 	chat_message.text = username + ": " + message
 	chat_message.visible = true
 	chat_message.modulate = Color(1, 1, 1, 1)

@@ -16,7 +16,7 @@ radius = 16.0
 script = ExtResource("1_62q8x")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1420046145]
-z_index = 999
+z_index = 131
 texture = SubResource("AtlasTexture_s6527")
 
 [node name="InteractionMark" type="TextureRect" parent="." unique_id=127980685]

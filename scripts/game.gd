@@ -425,6 +425,7 @@ func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
 			trap_object["bait_inventory"] = bait_inventory
 			trap_object["x"] = trap["x"]
 			trap_object["y"] = trap["y"]
+			trap_object["id"] = trap["id"]
 			trap_object["location"] = trap["location"]
 			trap_object["trap"] = Catalog.get_item(trap["trap"])
 			traps.append(trap_object)
@@ -503,6 +504,7 @@ func get_save_data() -> Dictionary:
 		trap_object["inventory"] = trap["inventory"].to_list()
 		trap_object["bait_inventory"] = trap["bait_inventory"].to_list()
 		trap_object["location"] = trap["location"]
+		trap_object["id"] = int(trap["id"])
 		traps_data.append(trap_object)
 	var save_data = {
 		"sfx_volume": sfx_volume,

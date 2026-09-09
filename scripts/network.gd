@@ -356,16 +356,28 @@ func request_equip(slot: String, item_id) -> void:
 	sync_save_data.rpc_id(id, save_data)
 
 @rpc("any_peer", "unreliable_ordered", "call_remote")
-func relay_player_state(pos: Vector2, direction: String, animation: String, moving: bool) -> void:
+func relay_player_state(pos: Vector2, direction: String, animation: String, moving: bool, has_bobber: bool, bobber_pos: Vector2) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	for player in players:
 		if player["id"] != id:
-			_forward_player_state.rpc_id(player["id"], id, pos, direction, animation, moving)
+			_forward_player_state.rpc_id(player["id"], id, pos, direction, animation, moving, has_bobber, bobber_pos)
 
 @rpc("authority", "unreliable_ordered", "call_remote")
-func _forward_player_state(id: int, pos: Vector2, direction: String, animation: String, moving: bool) -> void:
+func _forward_player_state(id: int, pos: Vector2, direction: String, animation: String, moving: bool, has_bobber: bool, bobber_pos: Vector2) -> void:
 	if spawned_players.has(id):
-		spawned_players[id].apply_network_state(pos, direction, animation, moving)
+		spawned_players[id].apply_network_state(pos, direction, animation, moving, has_bobber, bobber_pos)
+
+@rpc("any_peer", "call_remote", "reliable")
+func relay_cast(fishing_dir: String, power_normalized: float) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] != id:
+			_forward_cast.rpc_id(player["id"], id, fishing_dir, power_normalized)
+
+@rpc("authority", "call_remote", "reliable")
+func _forward_cast(id: int, fishing_dir: String, power_normalized: float) -> void:
+	if spawned_players.has(id):
+		spawned_players[id].play_remote_cast(fishing_dir, power_normalized)
 
 func _tick_trap(id: int, save_data: Dictionary, trap_data: Dictionary, delta: float) -> void:
 	var trap := Catalog.get_item(trap_data["trap"]) as Trap
@@ -400,7 +412,7 @@ func request_trap_data(trap_id: int) -> void:
 	for player in players:
 		if player["id"] == id:
 			for trap_data in player["save_data"].get("traps", []):
-				if trap_data["id"] == trap_id:
+				if int(trap_data["id"]) == trap_id:
 					received_trap_data.rpc_id(id, trap_data)
 					return
 	Toast.add.rpc_id(id, "Couldn't find this specific trap.")
@@ -474,16 +486,16 @@ func place_trap(x: float, y: float, location: Game.Location) -> void:
 
 @rpc("authority", "call_remote", "reliable")
 func spawn_trap(trap: Dictionary) -> void:
-	print("spawning trap at x:" + str(trap["x"]) + ", y:" + str(trap["y"]))
+	print("spawning trap at x:" + str(trap["x"]) + ", y:" + str(trap["y"]) + ", id: " + str(trap["id"]))
 	var placed_trap = preload("res://scenes/trap.tscn").instantiate()
 	placed_trap.global_position = Vector2(trap["x"], trap["y"])
-	placed_trap.name = str(trap["id"])
+	placed_trap.name = str(int(trap["id"]))
 	placed_trap.trap = trap["trap"]
 	get_tree().current_scene.add_child(placed_trap)
 
 func _find_trap(save_data: Dictionary, trap_id: int) -> Dictionary:
 	for trap_data in save_data.get("traps", []):
-		if trap_data["id"] == trap_id:
+		if int(trap_data["id"]) == trap_id:
 			return trap_data
 	return {}
 
@@ -920,14 +932,19 @@ func spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
 		return
 	if spawned_players.has(id):
 		return
+	call_deferred("_do_spawn_player", id, spawn_position, username)
+
+func _do_spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
+	if spawned_players.has(id):
+		return
 	var instance = PLAYER_SCENE.instantiate()
 	instance.name = str(id)
 	instance.get_node("Username").text = username
 	instance.position = spawn_position
-	get_tree().current_scene.add_child(instance, true)
+	get_tree().current_scene.add_child(instance)
 	instance.set_multiplayer_authority(id)
 	spawned_players[id] = instance
-	
+
 	if id == multiplayer.get_unique_id():
 		local_player_spawned.emit()
 		instance.get_node("Username").visible = false
@@ -961,6 +978,7 @@ func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: S
 		"id": multiplayer.get_remote_sender_id(),
 		"save_data": save_data
 	})
+	Toast.add.rpc(username + " joined the server!")
 
 func server_disconnected() -> void:
 	print("Disconnected from server")

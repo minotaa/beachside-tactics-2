@@ -2173,10 +2173,9 @@ theme_override_styles/tab_hovered = SubResource("StyleBoxTexture_j2b1d")
 theme_override_styles/tab_selected = SubResource("StyleBoxTexture_wqfne")
 theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_fdfoy")
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="Inventory" type="Control" parent="UI/Trap/Container" unique_id=1702520141]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -2194,14 +2193,13 @@ columns = 5
 [node name="Close" type="Button" parent="UI/Trap/Container/Inventory" unique_id=1933689787]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.95400006
-anchor_top = -0.018000001
-anchor_right = 1.019
-anchor_bottom = 0.075
-offset_left = 0.38397217
-offset_top = -0.047999382
-offset_right = 0.22399902
-offset_bottom = 1.2679977
+anchor_left = 0.94500005
+anchor_top = -0.004
+anchor_right = 1.01
+anchor_bottom = 0.091000006
+offset_left = 0.15997314
+offset_top = -0.28001547
+offset_bottom = -0.045017242
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -2260,15 +2258,16 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -440.0
-offset_top = -12.0
+offset_top = -4.0
 offset_right = 384.0
-offset_bottom = 52.0
+offset_bottom = 53.0
 grow_horizontal = 2
 text = "Trap (0/3)"
 label_settings = SubResource("LabelSettings_a38lo")
 vertical_alignment = 1
 
 [node name="Bait" type="Control" parent="UI/Trap/Container" unique_id=1360505671]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -2281,7 +2280,7 @@ anchor_right = 1.01
 anchor_bottom = 0.091000006
 offset_left = 0.15997314
 offset_top = -0.28001523
-offset_bottom = -0.14001846
+offset_bottom = -0.045017242
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -2296,8 +2295,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -440.0
+offset_top = -4.0
 offset_right = 136.0
-offset_bottom = 57.0
+offset_bottom = 53.0
 grow_horizontal = 2
 text = "Bait (0/10)"
 label_settings = SubResource("LabelSettings_a38lo")
