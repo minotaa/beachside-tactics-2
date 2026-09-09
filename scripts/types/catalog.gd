@@ -757,3 +757,32 @@ func _enter_tree() -> void:
 	turtle_master.description = "It's not that glamorous honestly, it's pretty bland, provides Trophy Fish chance."
 	turtle_master.price = 1250
 	items.append(turtle_master)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(9999.0, 9999.0, 16.0, 16.0)
+	var nothing = Fish.new(37, "nullf", atlas)
+	nothing.description = "You're not even holding anything."
+	nothing.sell_price = 0.0
+	nothing.rarity = Game.Rarity.COMMON
+	nothing.difficulty = Game.Difficulty.EASY
+	nothing.trap_only = false
+	nothing.location = Game.Location.Crystalwater_Void
+	nothing.hour_start = 0.0
+	nothing.hour_end = 0.0
+	nothing.category = Game.Category.FISH
+	nothing.power_needed = 0.0
+	nothing.threshold = 0.0
+	items.append(nothing)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(9999.0, 9999.0, 16.0, 16.0)
+	var not_junk = Junk.new(38, "nullj", atlas)
+	not_junk.description = "You're not even holding anything."
+	not_junk.sell_price = 0.0
+	not_junk.category = Game.Category.JUNK
+	not_junk.power_needed = 0.0
+	not_junk.rarity = Game.Rarity.COMMON
+	not_junk.location = Game.Location.Crystalwater_Void
+	items.append(not_junk)

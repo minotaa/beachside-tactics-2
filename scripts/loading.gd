@@ -1,22 +1,18 @@
 extends Node2D
 
 func _ready():
-	if DisplayServer.get_name() == "headless":
+	if DisplayServer.get_name() == "headless" or Game.dev_mode:
 		get_tree().call_deferred("change_scene_to_file", "res://scenes/main.tscn")
-		return
-	if Game.dev_mode:
-		$UI/Control/Label.visible = false
-		await Fade.fade_to_scene("res://scenes/main.tscn", 1.0)
 		return
 
 	$AnimatedSprite2D.play("default")
 	$UI/Control/Label.modulate = Color(0, 0, 0, 0)
-	$AnimatedSprite2D.global_position = Vector2(960.0, 540.0)
+	$AnimatedSprite2D.global_position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2)
 	Fade.fade_in(1.0)
 	await get_tree().process_frame
 	await get_tree().create_timer(3.0).timeout
 	var tween = get_tree().create_tween()
-	tween.tween_property($AnimatedSprite2D, "position", Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2 - 60), 1.2) \
+	tween.tween_property($AnimatedSprite2D, "position", Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2 - 40), 1.2) \
 		.set_trans(Tween.TRANS_QUINT) \
 		.set_ease(Tween.EASE_OUT)
 	tween = get_tree().create_tween()

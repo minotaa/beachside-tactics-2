@@ -232,10 +232,10 @@ func select_item(id: int, ignore: bool = false) -> void:
 	selected_item = item
 	if Game.inventory.has_item(item):
 		var amount = Game.inventory.get_item_stack(item).amount
-		$UI/Vendor/ItemPreview/Price.text = "Owned: " + str(amount) + "  Price: $" + str(roundi(item.price))
+		$UI/Vendor/ItemPreview/Price.text = "You own: " + str(amount) + "\nPrice: $" + str(roundi(item.price))
 	elif Game.upgrades.has_item(item):
 		var level = Game.upgrades.get_item_stack(item).data["level"]
-		$UI/Vendor/ItemPreview/Price.text = "Level: " + str(int(level)) + "  Price: $" + str(roundi(item.price))
+		$UI/Vendor/ItemPreview/Price.text = "Your level: " + str(int(level)) + "\nPrice: $" + str(roundi(item.price))
 	else:
 		$UI/Vendor/ItemPreview/Price.text = "Price: $" + str(roundi(item.price))
 	$UI/Vendor/ItemPreview/Description.text = item.description + "\n\n"
@@ -282,6 +282,8 @@ func update_bestiary() -> void:
 			not_unlocked_fish.append(item)
 	
 	for id in Game.bestiary.keys():
+		if id == "37" or id == "38":
+			continue
 		var bestiary_item = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 		var item = Catalog.get_item(int(id))
 		if item is Fish:
@@ -431,6 +433,9 @@ func _center_scroll_on_level(level: int) -> void:
 	
 	if index == -1:
 		return
+	if index == children.size() + 1:
+		scroll.scroll_horizontal = 9223372036854775807
+		return
 	
 	var x_offset: float = 12 + index * (96 + 22)
 	var target_center: float = x_offset + 110 / 2.0
@@ -497,8 +502,7 @@ func update_leveling() -> void:
 		if closest != -1:
 			_apply_selection(closest)
 		else:
-			selected_level = -1
-			$UI/Leveling/Container/Label.text = ""
+			_apply_selection(levels[-1])
 			
 func update_catalog() -> void:
 	for children in $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer".get_children():
@@ -1654,6 +1658,17 @@ func _process_multiplayer(delta: float) -> void:
 			if network_animation.begins_with(body_type + "_fish") and not $Base.animation.begins_with(body_type + "_fish"):
 				play_animation(network_animation)
 
+var glitches = 0 
+
+func do_slight_glitch() -> void:
+	if Game.last_island == Game.Island.Crystalwater_Beach:
+		glitches += 1
+		global_position = Vector2(-348, -50)
+		if glitches == 22:
+			glitches = 0
+			global_position = Vector2(-232, -1535)
+			
+
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
 		_process_multiplayer(delta)
@@ -1854,8 +1869,6 @@ func _on_close_leveling_pressed() -> void:
 	$UI/Main.visible = true
 
 func add_message(message: String, username: String) -> void:
-	if multiplayer.has_multiplayer_peer():
-		print("[" + str(multiplayer.get_unique_id()) + "] Received message: ", message)
 	var chat_message = load("res://scenes/chat_message.tscn").instantiate()
 	chat_message.text = username + ": " + message
 	chat_message.visible = true
@@ -1876,6 +1889,7 @@ func _write_chat_log(player_name: String, message: String) -> void:
 		file.seek_end()
 		file.store_line(log_line)
 		file.close()
+	print(log_line)
 		
 func _on_chat_bar_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:

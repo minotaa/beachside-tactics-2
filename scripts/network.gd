@@ -904,6 +904,13 @@ func send_message_to_server(message: String) -> void:
 		if p["id"] == id:
 			username = p["username"]
 			break
+	var log_line = "[%s] %s (%s): %s" % [
+		Time.get_datetime_string_from_system(),
+		username,
+		str(id),
+		message
+	]
+	print(log_line)
 	for p in players:
 		send_message.rpc_id(p["id"], message, username)
 

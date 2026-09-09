@@ -67,16 +67,19 @@ patch_margin_bottom = 16
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1104561669]
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.11100001
-anchor_top = 0.11100001
-anchor_right = 0.88900006
-anchor_bottom = 0.89000005
-offset_left = 1.0119991
-offset_top = 1.0119991
-offset_right = 0.42799377
-offset_bottom = 0.29999542
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -42.5
+offset_top = -42.5
+offset_right = 42.5
+offset_bottom = 42.5
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("3_ci7xw")
+expand_mode = 3
 
 [node name="Equipped" type="NinePatchRect" parent="." unique_id=136108256]
 layout_mode = 1

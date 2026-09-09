@@ -1,13 +1,9 @@
 extends Node2D
 
 func _on_play_pressed() -> void:
-	var res = await Network.host_server(6466)
-	if not res:
-		var username = $UI/Main/Username.text
-		await Network.join_server("10.10.20.2", username)
-		
-	else:
-		Game.start_game()
+	var username = $UI/Main/Username.text
+	await Network.join_server("localhost", username)
+	# 10.10.20.2
 
 func _connect_button_sfx(button: Button):
 	button.mouse_entered.connect(func():

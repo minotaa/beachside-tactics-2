@@ -607,6 +607,7 @@ texture_margin_bottom = 32.0
 [sub_resource type="LabelSettings" id="LabelSettings_hhpqf"]
 line_spacing = 8.0
 font = ExtResource("18_i4ail")
+font_size = 24
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_g5jhy"]
 texture = ExtResource("25_wqfne")
@@ -799,14 +800,14 @@ vertical_alignment = 1
 [node name="Bait" type="NinePatchRect" parent="UI/Main" unique_id=1596108722]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.994
-anchor_top = 0.989
-anchor_right = 0.994
-anchor_bottom = 0.989
-offset_left = -180.47998
-offset_top = -68.119995
-offset_right = -8.320068
-offset_bottom = -8.079956
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -192.0
+offset_top = -80.0
+offset_right = -19.840088
+offset_bottom = -19.95996
 texture = ExtResource("27_gl8cc")
 region_rect = Rect2(0, 0, 256, 256)
 patch_margin_left = 8
@@ -816,15 +817,17 @@ patch_margin_bottom = 8
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/Main/Bait" unique_id=1828695915]
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.07700001
-anchor_top = 0.125
-anchor_right = 0.92300004
-anchor_bottom = 0.87500006
-offset_left = 0.29599857
-offset_top = 3.0
-offset_right = 0.0079956055
-offset_bottom = -3.0000038
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -73.920044
+offset_top = -17.97998
+offset_right = 73.920044
+offset_bottom = 17.97998
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 6
 alignment = 1
 
@@ -1126,7 +1129,7 @@ offset_top = -4.0
 offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
-columns = 4
+columns = 6
 
 [node name="Equipped" type="Panel" parent="UI/Inventory/Container/Fishing Rods" unique_id=1853744269]
 layout_mode = 0
@@ -1213,7 +1216,7 @@ offset_top = -4.0
 offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
-columns = 4
+columns = 6
 
 [node name="Equipped" type="Panel" parent="UI/Inventory/Container/Bait" unique_id=1832919677]
 layout_mode = 0
@@ -1300,7 +1303,7 @@ offset_top = -4.0
 offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
-columns = 4
+columns = 6
 
 [node name="Equipped" type="Panel" parent="UI/Inventory/Container/Traps" unique_id=529374664]
 layout_mode = 0
@@ -1387,7 +1390,7 @@ offset_top = -4.0
 offset_right = 872.0
 offset_bottom = 819.0
 theme_override_constants/h_separation = 16
-columns = 4
+columns = 6
 
 [node name="Equipped" type="Panel" parent="UI/Inventory/Container/Upgrades" unique_id=1020864940]
 layout_mode = 0
@@ -1890,7 +1893,7 @@ layout_mode = 0
 offset_left = 23.679993
 offset_top = 248.0
 offset_right = 399.68
-offset_bottom = 600.0
+offset_bottom = 584.0
 theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_font_sizes/normal_font_size = 24
@@ -1905,13 +1908,14 @@ anchor_left = 0.5
 anchor_top = 0.88600004
 anchor_right = 0.5
 anchor_bottom = 0.88600004
-offset_left = -176.16003
-offset_top = -17.160034
-offset_right = 175.83997
-offset_bottom = 6.839966
+offset_left = -200.16003
+offset_top = -53.849304
+offset_right = 199.83997
+offset_bottom = -1.1600342
 text = "Price: $200"
 label_settings = SubResource("LabelSettings_hhpqf")
 horizontal_alignment = 1
+vertical_alignment = 2
 autowrap_mode = 2
 
 [node name="Buy" type="Button" parent="UI/Vendor/ItemPreview" unique_id=2025347820]
@@ -2362,8 +2366,8 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -704.0
-offset_top = -240.0
+offset_left = -768.0
+offset_top = -268.0
 offset_right = -16.0
 offset_bottom = 240.0
 grow_horizontal = 0
@@ -2375,8 +2379,8 @@ custom_minimum_size = Vector2(110, 110)
 layout_mode = 0
 offset_left = 32.0
 offset_top = 96.0
-offset_right = 664.0
-offset_bottom = 240.0
+offset_right = 728.0
+offset_bottom = 260.0
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/Leveling/Container/ScrollContainer" unique_id=120717579]
 layout_mode = 2
@@ -2393,9 +2397,9 @@ alignment = 1
 [node name="Label" type="RichTextLabel" parent="UI/Leveling/Container" unique_id=401283430]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 264.0
-offset_right = 664.0
-offset_bottom = 456.0
+offset_top = 268.0
+offset_right = 728.0
+offset_bottom = 488.0
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("18_i4ail")
 theme_override_fonts/bold_font = SubResource("FontVariation_0h5mt")
@@ -2414,14 +2418,14 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.87200004
-anchor_top = 0.063
-anchor_right = 0.95300007
-anchor_bottom = 0.18400002
-offset_left = 16.063965
-offset_top = -1.6640015
-offset_right = 0.3359375
-offset_bottom = -9.12001
+anchor_left = 0.89400005
+anchor_top = 0.046000004
+anchor_right = 0.96800005
+anchor_bottom = 0.157
+offset_left = -0.29608154
+offset_top = -0.0280056
+offset_right = 0.055908203
+offset_bottom = -0.416008
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxTexture_487ah")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_md1ol")
@@ -2435,9 +2439,9 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -312.0
+offset_left = -344.0
 offset_top = 28.0
-offset_right = 256.0
+offset_right = 288.0
 offset_bottom = 85.0
 grow_horizontal = 2
 text = "Leveling "
