@@ -962,14 +962,16 @@ func _player_joined(id: int) -> void:
 
 func _player_quit(id: int) -> void:
 	print("[server] Player quit with ID " + str(id))
+	var username = "Player"
+	for player in players:
+		if player["id"] == id:
+			username = player["username"]
+	send_message.rpc(username + " left the server!", "Server")
 	players = players.filter(func(p): return p["id"] != id)
 	fishing_players = fishing_players.filter(func(p): return p["id"] != id)
 	despawn_player.rpc(id)
 	player_quit.emit(id)
 	server_player_quit.rpc(id)
-	for player in players:
-		if str(player["id"]) == str(id):
-			Toast.add.rpc(player["username"] + " left the server!")
 
 @rpc("any_peer", "call_remote", "reliable")
 func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary) -> void:
@@ -978,7 +980,7 @@ func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: S
 		"id": multiplayer.get_remote_sender_id(),
 		"save_data": save_data
 	})
-	Toast.add.rpc(username + " joined the server!")
+	send_message.rpc(username + " joined the server!", "Server")
 
 func server_disconnected() -> void:
 	print("Disconnected from server")

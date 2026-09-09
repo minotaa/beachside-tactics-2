@@ -79,10 +79,11 @@ func _ready() -> void:
 	network_target_position = global_position
 	
 	# Hook up SFX to buttons
-	for button in find_children("", "Button", true):
-		if button is Button:
-			_connect_button_sfx(button)
-	get_tree().node_added.connect(_node_added)
+	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+		for button in find_children("", "Button", true):
+			if button is Button:
+				_connect_button_sfx(button)
+		get_tree().node_added.connect(_node_added)
 	
 	# Initialize line physics
 	for i in range(line_segments):

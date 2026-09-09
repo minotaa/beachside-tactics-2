@@ -8,11 +8,14 @@ const MAX_SEARCH_TILES := 20
 @export var max_distance: float = 250.0
 @export var min_distance: float = 120.0
 
-var distance_cache := {}
+static var distance_cache := {}
+static var cache_baked := false
 
 func _ready() -> void:
 	stream = load("res://assets/sounds/wavescrashing.ogg")
-	bake_ocean_distances()
+	if not cache_baked:
+		bake_ocean_distances()
+		cache_baked = true
 	play()
 
 func bake_ocean_distances() -> void:
@@ -22,13 +25,11 @@ func bake_ocean_distances() -> void:
 
 	var layers := [ground, above1, above2]
 
-	# Union of every cell that exists on any layer
 	var all_cells := {}
 	for layer in layers:
 		for cell in layer.get_used_cells():
 			all_cells[cell] = true
 
-	# A cell counts as water if ANY layer at that coord is flagged water
 	var water_cells: Array[Vector2i] = []
 	for cell in all_cells.keys():
 		for layer in layers:
