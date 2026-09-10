@@ -97,6 +97,27 @@ offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
 
+[node name="Character" type="HBoxContainer" parent="UI/Main/Settings" unique_id=540701806]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="UI/Main/Settings/Character" unique_id=416286902]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Character"
+
+[node name="CheckButton" type="OptionButton" parent="UI/Main/Settings/Character" unique_id=1376308197]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(-4, 2)
+item_count = 2
+popup/item_0/text = "Cat"
+popup/item_0/id = 0
+popup/item_1/text = "Dog"
+popup/item_1/id = 1
+
 [node name="Fullscreen" type="HBoxContainer" parent="UI/Main/Settings" unique_id=1359813852]
 layout_mode = 2
 

@@ -16,8 +16,8 @@ signal player_quit(peer_id)
 signal local_player_spawned
 
 # conn funcs
-func join_server(address: String, username: String = "Player") -> bool:
-	if not username.is_valid_identifier():
+func join_server(address: String, username: String, body_type: String) -> bool:
+	if username.is_empty() or not username.is_valid_identifier():
 		username = "Player"
 	player_name = username
 	if address == "localhost":
@@ -65,7 +65,7 @@ func join_server(address: String, username: String = "Player") -> bool:
 	if multiplayer.multiplayer_peer == null:
 		return false
 
-	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, username, Game.get_save_data())
+	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, username, Game.get_save_data(), body_type)
 
 	print("[" + str(multiplayer.get_unique_id()) + "] Connected to the server")
 	return true
@@ -760,11 +760,13 @@ func client_scene_ready() -> void:
 	var id = multiplayer.get_remote_sender_id()
 	var new_player_pos = _get_spawn_position(id)
 	var username = "Player"
+	var body_type = "cat0"
 	for player in players:
 		if player["id"] == id:
 			username = player["username"]
+			body_type = player["body_type"]
 			break
-	spawn_player.rpc(id, new_player_pos, username)
+	spawn_player.rpc(id, new_player_pos, username, body_type)
 	
 	var save_data = get_player_save_data(id)
 	var traps = []
@@ -789,7 +791,7 @@ func client_scene_ready() -> void:
 	for player in players:
 		if player["id"] != id:
 			var pos = _get_spawn_position(player["id"])
-			spawn_player.rpc_id(id, player["id"], pos, player["username"])
+			spawn_player.rpc_id(id, player["id"], pos, player["username"], player["body_type"])
 
 var bestiary_money_table := {
 	Game.Rarity.COMMON:    50.0,
@@ -927,18 +929,19 @@ func send_message_to_server(message: String) -> void:
 		send_message.rpc_id(p["id"], message, username)
 
 @rpc("authority", "call_local", "reliable")
-func spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
+func spawn_player(id: int, spawn_position: Vector2, username: String, body_type: String) -> void:
 	if multiplayer.get_unique_id() == 1:
 		return
 	if spawned_players.has(id):
 		return
-	call_deferred("_do_spawn_player", id, spawn_position, username)
+	call_deferred("_do_spawn_player", id, spawn_position, username, body_type)
 
-func _do_spawn_player(id: int, spawn_position: Vector2, username: String) -> void:
+func _do_spawn_player(id: int, spawn_position: Vector2, username: String, body_type: String) -> void:
 	if spawned_players.has(id):
 		return
 	var instance = PLAYER_SCENE.instantiate()
 	instance.name = str(id)
+	instance.body_type = body_type
 	instance.get_node("Username").text = username
 	instance.position = spawn_position
 	get_tree().current_scene.add_child(instance)
@@ -974,9 +977,10 @@ func _player_quit(id: int) -> void:
 	server_player_quit.rpc(id)
 
 @rpc("any_peer", "call_remote", "reliable")
-func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary) -> void:
+func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary, body_type: String) -> void:
 	players.append({
 		"username": username,
+		"body_type": body_type,
 		"id": multiplayer.get_remote_sender_id(),
 		"save_data": save_data
 	})

@@ -1,8 +1,14 @@
 extends Node2D
 
+var selected_character = "cat0"
+
 func _on_play_pressed() -> void:
 	var username = $UI/Main/Username.text
-	await Network.join_server("localhost", username)
+	print($UI/Main/Settings/Character/CheckButton.selected)
+	if $UI/Main/Settings/Character/CheckButton.selected == -1 or $UI/Main/Settings/Character/CheckButton.selected == 0:
+		await Network.join_server("localhost", username, "cat0")
+	else:
+		await Network.join_server("localhost", username, "dog0")
 	# 10.10.20.2
 
 func _connect_button_sfx(button: Button):
