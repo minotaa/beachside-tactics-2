@@ -99,6 +99,7 @@ var traps = []
 var inventory_upgrade_bestiary_bonus = 0
 var last_island: Island = Island.Crystalwater_Beach
 var _sfx_in_progress: Dictionary = {}
+var _music_player: AudioStreamPlayer = null
 
 var game_scene = preload("res://scenes/levels/beach.tscn")
 var main_menu_scene = preload("res://scenes/main_menu.tscn")
@@ -123,6 +124,35 @@ func to_roman(n: int) -> String:
 			n -= values[i]
 			result += romans[i]
 	return result
+
+func play_music(path: String, volume: float = -18.0, fade_in: float = 2.0) -> void:
+	if _music_player and is_instance_valid(_music_player):
+		if _music_player.get_meta("music_path", "") == path:
+			return
+		stop_music()
+	var player := AudioStreamPlayer.new()
+	add_child(player)
+	player.bus = "Music"
+	player.set_meta("music_path", path)
+	player.stream = load(path)
+	if player.stream is AudioStreamOggVorbis or player.stream is AudioStreamMP3:
+		player.stream.loop = true
+	player.volume_db = -80.0
+	player.play()
+	_music_player = player
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", volume, fade_in)
+
+func stop_music(fade_out: float = 2.0) -> void:
+	if not _music_player or not is_instance_valid(_music_player):
+		return
+	var player := _music_player
+	_music_player = null
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -80.0, fade_out)
+	await tween.finished
+	if is_instance_valid(player):
+		player.queue_free()
 
 func stop_sfx(path: String) -> void:
 	for child in get_children():
