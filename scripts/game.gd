@@ -74,6 +74,8 @@ const DAY_COLOR := Color.WHITE
 const NIGHT_COLOR := Color(0.192, 0.149, 0.502, 1.0)
 const TIME_IN_DAY = 1200 
 
+var close_shop_upon_sell: bool = true
+var body_type: String = "cat0"
 var sfx_volume: float = 100.0
 var fullscreen: bool = false
 var dev_mode: bool = false
@@ -463,6 +465,10 @@ func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
 		inventory_upgrade_bestiary_bonus = data["inventory_upgrade_bestiary_bonus"]
 	if data.has("last_island"):
 		last_island = data["last_island"]
+	if data.has("body_type"):
+		body_type = data["body_type"]
+	if data.has("close_shop_upon_sell"):
+		close_shop_upon_sell = data["close_shop_upon_sell"]
 	if data.has("equipped_bait"):
 		var bait_id = data["equipped_bait"]
 		equipped_bait = Catalog.get_item(bait_id) if bait_id != null else null
@@ -558,7 +564,9 @@ func get_save_data() -> Dictionary:
 		"highest_star": highest_star,
 		"traps": traps_data,
 		"last_island": last_island,
-		"upgrades": upgrades.to_list()
+		"upgrades": upgrades.to_list(),
+		"body_type": body_type,
+		"close_shop_upon_sell": close_shop_upon_sell
 	}
 	return save_data
 

@@ -1915,7 +1915,8 @@ func _on_base_animation_finished() -> void:
 
 func _on_sell_pressed() -> void:
 	Network.request_sell_all.rpc_id(1)
-	_on_close_shop_pressed()
+	if Game.close_shop_upon_sell:
+		_on_close_shop_pressed()
 
 func _on_close_shop_pressed() -> void:
 	var release_interact = InputEventAction.new()

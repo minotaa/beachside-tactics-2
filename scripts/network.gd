@@ -16,7 +16,7 @@ signal player_quit(peer_id)
 signal local_player_spawned
 
 # conn funcs
-func join_server(address: String, username: String, body_type: String) -> bool:
+func join_server(address: String, username: String) -> bool:
 	if username.is_empty() or not username.is_valid_identifier():
 		username = "Player"
 	player_name = username
@@ -65,7 +65,9 @@ func join_server(address: String, username: String, body_type: String) -> bool:
 	if multiplayer.multiplayer_peer == null:
 		return false
 
-	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, username, Game.get_save_data(), body_type)
+	temporary_save_data_sending_mechanic_probably_shouldnt_use_this.rpc_id(1, username, Game.get_save_data())
+	await get_tree().process_frame
+	send_cosmetics.rpc_id(1, Game.body_type)
 
 	print("[" + str(multiplayer.get_unique_id()) + "] Connected to the server")
 	return true
@@ -764,7 +766,7 @@ func client_scene_ready() -> void:
 	for player in players:
 		if player["id"] == id:
 			username = player["username"]
-			body_type = player["body_type"]
+			body_type = player.get("body_type", "cat0")
 			break
 	spawn_player.rpc(id, new_player_pos, username, body_type)
 	
@@ -791,7 +793,7 @@ func client_scene_ready() -> void:
 	for player in players:
 		if player["id"] != id:
 			var pos = _get_spawn_position(player["id"])
-			spawn_player.rpc_id(id, player["id"], pos, player["username"], player["body_type"])
+			spawn_player.rpc_id(id, player["id"], pos, player["username"], player.get("body_type", "cat0"))
 
 var bestiary_money_table := {
 	Game.Rarity.COMMON:    50.0,
@@ -977,10 +979,23 @@ func _player_quit(id: int) -> void:
 	server_player_quit.rpc(id)
 
 @rpc("any_peer", "call_remote", "reliable")
-func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary, body_type: String) -> void:
+func send_cosmetics(body_type: String) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	for player in players:
+		if player["id"] == id:
+			player["body_type"] = body_type
+			break
+	update_cosmetics.rpc(id, body_type)
+
+@rpc("authority", "call_local", "reliable")
+func update_cosmetics(id: int, body_type: String) -> void:
+	if spawned_players.has(id):
+		spawned_players[id].body_type = body_type
+
+@rpc("any_peer", "call_remote", "reliable")
+func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary) -> void:
 	players.append({
 		"username": username,
-		"body_type": body_type,
 		"id": multiplayer.get_remote_sender_id(),
 		"save_data": save_data
 	})

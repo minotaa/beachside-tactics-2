@@ -5,10 +5,7 @@ var selected_character = "cat0"
 func _on_play_pressed() -> void:
 	var username = $UI/Main/Username.text
 	print($UI/Main/Settings/Character/CheckButton.selected)
-	if $UI/Main/Settings/Character/CheckButton.selected == -1 or $UI/Main/Settings/Character/CheckButton.selected == 0:
-		await Network.join_server("localhost", username, "cat0")
-	else:
-		await Network.join_server("localhost", username, "dog0")
+	await Network.join_server("localhost", username)
 	# 10.10.20.2
 
 func _connect_button_sfx(button: Button):
@@ -23,7 +20,9 @@ func _ready() -> void:
 	for button in find_children("", "Button", true):
 		if button is Button:
 			_connect_button_sfx(button)
-	
+	for i in range($UI/Main/Settings/Character/CheckButton.item_count):
+		if $UI/Main/Settings/Character/CheckButton.get_item_text(i) == Game.body_type:
+			$UI/Main/Settings/Character/CheckButton.select(i)
 	$UI/Main/Settings/Fullscreen/CheckButton.button_pressed = Game.fullscreen
 	$UI/Main/Settings/SFX/Slider.value = Game.sfx_volume
 
@@ -46,3 +45,9 @@ func _on_fullscreen_toggled(toggled_on: bool) -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+
+func _on_close_shop_button_toggled(toggled_on: bool) -> void:
+	Game.close_shop_upon_sell = toggled_on
+
+func _on_check_button_item_selected(index: int) -> void:
+	Game.body_type = $UI/Main/Settings/Character/CheckButton.get_item_text($UI/Main/Settings/Character/CheckButton.selected)
