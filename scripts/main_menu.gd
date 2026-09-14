@@ -23,6 +23,7 @@ func _ready() -> void:
 	for i in range($UI/Main/Settings/Character/CheckButton.item_count):
 		if $UI/Main/Settings/Character/CheckButton.get_item_text(i) == Game.body_type:
 			$UI/Main/Settings/Character/CheckButton.select(i)
+	$"UI/Main/Settings/Close Shop/CheckButton".button_pressed = Game.close_shop_upon_sell
 	$UI/Main/Settings/Fullscreen/CheckButton.button_pressed = Game.fullscreen
 	$UI/Main/Settings/SFX/Slider.value = Game.sfx_volume
 
