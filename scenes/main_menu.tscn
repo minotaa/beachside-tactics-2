@@ -96,6 +96,7 @@ offset_right = -16.0
 offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
+theme_override_constants/separation = 6
 
 [node name="Character" type="HBoxContainer" parent="UI/Main/Settings" unique_id=540701806]
 layout_mode = 2

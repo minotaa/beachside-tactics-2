@@ -637,7 +637,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 	await get_tree().create_timer(0.5).timeout
 	interacting = false
 	immersive_interact = null
-	if npc.npc_name == "Sheldon":
+	if npc.action == NPC.Action.OPEN_SHOP and not npc.selling.is_empty():
 		if not $UI/Vendor.visible:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
@@ -646,16 +646,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			$UI/Leveling.visible = false
 			update_catalog()
-	if npc.npc_name == "Warren":
-		if not $UI/Vendor.visible and Game.level >= 10:
-			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
-			$UI/Vendor.visible = true
-			$UI/Vendor/ItemPreview.visible = false
-			$UI/Inventory.visible = false
-			$UI/Main.visible = false
-			$UI/Leveling.visible = false
-			update_catalog()
-	if npc.npc_name == "Shelly":
+	if npc.action == NPC.Action.OPEN_BESTIARY:
 		if not $UI/Bestiary.visible: 
 			Game.play_sfx("res://assets/sounds/bookopen.ogg", -1)
 			$UI/Bestiary.visible = true
@@ -766,6 +757,15 @@ func _input(event: InputEvent) -> void:
 			clamp(intended_zoom.y - 0.75, 2.0, 6.0)
 		)
 
+	if event.is_action_pressed("open_leveling"):
+		if not $UI/Leveling.visible:
+			$UI/Leveling.visible = true
+			$UI/Main.visible = false
+			update_leveling()
+		else:
+			$UI/Leveling.visible = false
+			$UI/Main.visible = true
+			
 	# Shop interaction toggle
 	if event.is_action_released("interact") and not interacting:
 		if state == FishState.INACTIVE and not $UI/Inventory.visible and not $UI/Leveling.visible:
@@ -1496,7 +1496,7 @@ func _process_ui(delta: float) -> void:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(target_pos, 5.0 * delta)
 	elif immersive_interact != null:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(immersive_interact.global_position, 5.0 * delta)
-		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(intended_zoom.x + 0.35, intended_zoom.y + 0.35), 0.002)
+		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(intended_zoom.x + 1.2, intended_zoom.y + 1.2), 0.02)
 	else:
 		$Camera2D.global_position = $Camera2D.global_position.lerp(global_position, 5.0 * delta)
 	if $Camera2D.zoom != intended_zoom and immersive_interact == null:
@@ -1647,8 +1647,8 @@ func _process_ui(delta: float) -> void:
 		var z1 = abs(bobber.global_position.x - global_position.x) / (get_viewport_rect().size.x-25)
 		var z2 = abs(bobber.global_position.y - global_position.y) / (get_viewport_rect().size.y-25)
 		var zoom_factor = max(max(z1, z2), intended_zoom.x)
-		$Camera2D.zoom = Vector2(zoom_factor, zoom_factor) 
-	
+		$Camera2D.zoom = Vector2(zoom_factor, zoom_factor)
+		 
 		# Position minigame based on fishing direction
 		var fishing_dir = get_fishing_direction()
 		var minigame_offset = Vector2.ZERO
@@ -1667,8 +1667,9 @@ func _process_ui(delta: float) -> void:
 		$Minigame.global_position = lerp($Minigame.global_position, target_pos, 0.2)
 		$Minigame.scale = lerp($Minigame.scale, Vector2(1, 1), 0.1)
 	else:
-		$Camera2D.global_position = lerp($Camera2D.global_position, global_position, 0.05)
-		$Camera2D.zoom = lerp($Camera2D.zoom, Vector2(3.5, 3.5), 0.05)
+		if immersive_interact == null:
+			$Camera2D.global_position = lerp($Camera2D.global_position, global_position, 0.05)
+			$Camera2D.zoom = lerp($Camera2D.zoom, intended_zoom, 0.05)
 	
 func _process_network_send(delta: float) -> void:
 	_network_send_timer -= delta

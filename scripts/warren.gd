@@ -9,8 +9,8 @@ const TROPHY_TURTLE_IDS = {
 }
 
 func _ready() -> void:
+	action = Action.OPEN_SHOP
 	npc_name = "Warren"
-	selling = [Catalog.get_item(34)]
 	dialogue_trees = {
 		"requirement_not_met": [
 			{
@@ -133,6 +133,8 @@ func _ready() -> void:
 
 func sells(item: ItemType) -> bool:
 	var catalog = selling.duplicate()
+	if Game.level >= 10:
+		catalog.append(Catalog.get_item(34))
 	if _evaluate_condition("received_all_trophies"):
 		catalog.append(Catalog.get_item(36))
 	return catalog.has(item)

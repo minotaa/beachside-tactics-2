@@ -1,7 +1,14 @@
 extends CharacterBody2D
 class_name NPC
 
+enum Action {
+	OPEN_SHOP,
+	OPEN_BESTIARY,
+	NOTHING
+}
+
 # --- CONFIG ---
+var action: Action = Action.NOTHING
 var npc_name: String = ""
 var chars_per_second: float = 30.0
 var line_display_duration: float = 1.5

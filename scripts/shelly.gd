@@ -1,6 +1,7 @@
 extends NPC
 
 func _ready() -> void:
+	action = Action.OPEN_BESTIARY
 	npc_name = "Shelly"
 	dialogue_trees = {
 		"unacknowledged": [

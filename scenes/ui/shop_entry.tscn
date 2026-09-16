@@ -46,12 +46,12 @@ font = ExtResource("1_w1q34")
 font_size = 15
 
 [node name="Shop Entry" type="Control" unique_id=137208026]
-custom_minimum_size = Vector2(96, 96)
+custom_minimum_size = Vector2(140, 140)
 layout_mode = 3
-anchor_right = 0.14400001
-anchor_bottom = 0.3
-offset_right = -88.32001
-offset_bottom = -120.000015
+anchor_right = 0.07300001
+anchor_bottom = 0.13000001
+offset_right = -0.16001892
+offset_bottom = -0.40000916
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -88,10 +88,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -32.0
-offset_top = -32.0
-offset_right = 32.0
-offset_bottom = 32.0
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

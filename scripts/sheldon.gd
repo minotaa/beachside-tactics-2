@@ -1,6 +1,7 @@
 extends NPC
 
 func _ready() -> void:
+	action = Action.OPEN_SHOP
 	npc_name = "Sheldon"
 	selling = [
 		Catalog.get_item(0), 
