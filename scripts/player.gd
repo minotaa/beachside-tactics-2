@@ -1950,7 +1950,8 @@ func _on_close_leveling_pressed() -> void:
 
 func add_message(message: String, username: String) -> void:
 	var chat_message = load("res://scenes/ui/chat_message.tscn").instantiate()
-	chat_message.text = username + ": " + message
+	var safe_message = message.replace("[", "[lb]")
+	chat_message.text = username + ": " + safe_message
 	chat_message.visible = true
 	chat_message.modulate = Color(1, 1, 1, 1)
 	$UI/Main/Chat/VBoxContainer.add_child(chat_message, true)

@@ -59,7 +59,7 @@ func _pick_weighted_fish(pool: Array, current_time: float) -> Fish:
 		current_weight += _get_weighted_rarity(fish, current_time)
 		if random_value < current_weight:
 			return fish
-	return Catalog.get_item(37)
+	return get_item(37)
 
 func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
 	var base = get_rarity_weight(fish.rarity)
@@ -95,7 +95,7 @@ func get_junk(location: Game.Location, rod_power: int) -> ItemType:
 		if random_value < current_weight:
 			return junk
 	
-	return Catalog.get_item(38)
+	return get_item(38)
 
 var items = []
 

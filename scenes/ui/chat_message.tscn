@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://dqdiffuwwg2jx"]
 
 [ext_resource type="Texture2D" uid="uid://3cynwd6ecdea" path="res://assets/sprites/panel.png" id="1_fpeyo"]
-[ext_resource type="FontFile" uid="uid://sx6y78coik8p" path="res://assets/fonts/Kitchen Sink.ttf" id="2_to6vn"]
 [ext_resource type="Script" uid="uid://bnac8qipowijj" path="res://scripts/chat_message.gd" id="2_v31oi"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v31oi"]
@@ -12,12 +11,7 @@ texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 modulate_color = Color(1, 1, 1, 0.752941)
 
-[sub_resource type="LabelSettings" id="LabelSettings_to6vn"]
-font = ExtResource("2_to6vn")
-shadow_color = Color(0, 0, 0, 0.74902)
-shadow_offset = Vector2(2, 2)
-
-[node name="Chat Message" type="Label" unique_id=448513304]
+[node name="Chat Message" type="RichTextLabel" unique_id=849469273]
 custom_minimum_size = Vector2(560, 48)
 anchors_preset = -1
 anchor_right = 0.337
@@ -27,9 +21,9 @@ offset_bottom = 0.47999573
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_v31oi")
+bbcode_enabled = true
 text = "Player: Chat message"
-label_settings = SubResource("LabelSettings_to6vn")
-autowrap_mode = 3
+fit_content = true
 script = ExtResource("2_v31oi")
 
 [node name="Timer" type="Timer" parent="." unique_id=1014455630]
