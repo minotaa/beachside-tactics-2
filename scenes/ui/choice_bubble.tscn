@@ -9,9 +9,6 @@
 [ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="7_r1poc"]
 [ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="8_k324i"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_rtw6t"]
-font = ExtResource("3_u6ocw")
-
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q4paj"]
 texture = ExtResource("5_8vcit")
 texture_margin_left = 16.0
@@ -47,8 +44,9 @@ modulate_color = Color(1, 1, 1, 0.8745098)
 [node name="Choice Bubble" type="MarginContainer" unique_id=1523930421]
 z_index = 132
 custom_minimum_size = Vector2(290, 43)
-offset_right = 290.0
-offset_bottom = 43.0
+custom_maximum_size = Vector2(600, -1)
+offset_right = 512.0
+offset_bottom = 108.0
 scale = Vector2(0.25, 0.25)
 script = ExtResource("1_uapag")
 
@@ -70,10 +68,14 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
-[node name="Label" type="Label" parent="VBoxContainer/MarginContainer" unique_id=982916501]
+[node name="Label" type="RichTextLabel" parent="VBoxContainer/MarginContainer" unique_id=1004467143]
 layout_mode = 2
-text = "little shitling, what do you want today?"
-label_settings = SubResource("LabelSettings_rtw6t")
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("3_u6ocw")
+bbcode_enabled = true
+text = "Only you alone can quench this thirst"
+fit_content = true
+scroll_active = false
 horizontal_alignment = 1
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer" unique_id=1544494715]

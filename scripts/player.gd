@@ -1,6 +1,9 @@
 extends CharacterBody2D
 
-const BASE_WALKING_SPEED := 100.0
+const SWIM_FISH_SPAWN_INTERVAL := 20.0
+const BASE_SWIM_MINIGAME_TIME := 15.0
+const BASE_SWIMMING_SPEED := 60.0
+const BASE_WALKING_SPEED := 120.0
 const BASE_TRAP_PLACE_DISTANCE = 35.0
 const DIRECTIONS = {
 	"left": Vector2.LEFT,
@@ -22,9 +25,19 @@ var bobber: RigidBody2D
 var bobber_safe: bool = true # Makes sure you can spam fish or whatever.
 var fish_control_safe: bool = true # Makes it so that you can't fish until you release the fish keybind.
 var holding_trap: bool = true
+var swimming: bool = false
+var swimming_stamina: float = 0.0
+var swim_fish_spawn_timer: float = 0.0
+var can_deplete_swimming_stamina: bool = false
 var selected_tile: Vector2i
+var swim_minigame_fish: ItemType
+var swim_minigame_time: float = 0.0
+var swim_shadow_node: Node2D
+var swim_shadow_position: Vector2
+var swim_minigame_fish_caught: int = 0
 var interacting: bool = false
 var immersive_interact: NPC
+var interact_cooldown: float = 0.0
 var not_sent_minigame_result_already: bool = true
 var step_timer = 0.0
 var step_interval = 0.4
@@ -109,13 +122,13 @@ func _ready() -> void:
 		if is_multiplayer_authority():
 			$Camera2D.make_current()
 		else:
-			$UI.hide()
-			$InteractionMark.hide()
-			$Trap.hide()
-			$Minigame.hide()
-			$FishPowerBar.hide()
-			$PointLight2D.hide()
-			$PointLight2D2.hide()
+			$UI.visible = false
+			$InteractionMark.visible = false
+			$Trap.visible = false
+			$Minigame.visible = false
+			$FishPowerBar.visible = false
+			$PointLight2D.visible = false
+			$PointLight2D2.visible = false
 	else:
 		#Username.hide()
 		pass
@@ -257,18 +270,93 @@ func get_rod_tip(fish_dir: String) -> Vector2:
 	return global_position
 
 func play_idle_animation() -> void:
-	play_animation(body_type + "_idle_" + last_direction)
+	if swimming:
+		play_animation("diver_swim_" + last_direction)
+	else:
+		play_animation(body_type + "_idle_" + last_direction)
 
 func play_animation(_name: String, backwards: bool = false, speed: float = 1) -> void:
+	if $Base.animation == _name and $Base.is_playing() and $Base.speed_scale == speed:
+		return
 	if backwards == false:
 		$Base.play(_name, speed)
 		if _name == body_type + "_fish_down":
 			$Base.position = Vector2(0, 3)
+		elif _name.begins_with("diver_"):
+			$Base.position = Vector2(0, 5)
 		else:
 			$Base.position = Vector2(0, 0)
 	else:
 		$Base.play(_name, speed * -1, true)
 
+const RARITY_HOOK_SCALES := {
+	Game.Rarity.COMMON: 1.0,
+	Game.Rarity.UNCOMMON: 0.85,
+	Game.Rarity.RARE: 0.7,
+	Game.Rarity.EPIC: 0.55,
+	Game.Rarity.LEGENDARY: 0.4,
+}
+
+func attempt_swim_catch() -> void:
+	var success = false
+	for area in $UI/Swimming/Minigame/Hook/Area2D.get_overlapping_areas():
+		print(area, area.name)
+		if area == $UI/Swimming/Minigame/Marker/Area2D:
+			success = true
+			break
+	if success:
+		swim_minigame_fish_caught += 1
+
+	$UI/Swimming/Minigame/Hook/Timer.stop()
+	$UI/Swimming/Minigame.visible = false
+
+	Network.request_swim_catch.rpc_id(1, swim_shadow_position, success)
+
+	if not success:
+		Toast.add("You missed! The fish got away!")
+
+	if swim_shadow_node != null and is_instance_valid(swim_shadow_node):
+		swim_shadow_node.queue_free()
+	swim_shadow_node = null
+	
+func start_swimming() -> void:
+	$UI/Swimming/Minigame.visible = false
+	can_deplete_swimming_stamina = false
+	await Fade.fade_out()
+	Game.play_sfx("res://assets/sounds/dunk.ogg", 12)
+	global_position = Vector2(144.0, 8.0)
+	swimming_stamina = Game.get_swimming_stamina(Game.get_save_data())
+	swimming = true
+	swim_minigame_fish_caught = 0
+	set_collision_layer_value(2, false)
+	set_collision_layer_value(3, true)
+	set_collision_mask_value(1, false)
+	set_collision_mask_value(3, true)
+	$Shadow.visible = false
+	$UI/Main.visible = false
+	$UI/Swimming.visible = true
+	swim_fish_spawn_timer = SWIM_FISH_SPAWN_INTERVAL
+	play_idle_animation()
+	await get_tree().create_timer(0.5).timeout
+	await Fade.fade_in()
+	can_deplete_swimming_stamina = true
+
+func stop_swimming() -> void:
+	await Fade.fade_out()
+	global_position = Vector2(72.0, 24.0)
+	swimming = false
+	set_collision_layer_value(2, true)
+	set_collision_layer_value(3, false)
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(3, false)
+	$Shadow.visible = true
+	$UI/Main.visible = true
+	$UI/Swimming.visible = false
+	swim_fish_spawn_timer = SWIM_FISH_SPAWN_INTERVAL
+	play_idle_animation()
+	await get_tree().create_timer(0.5).timeout
+	await Fade.fade_in()
+	
 var selected_item
 
 func select_item(id: int, ignore: bool = false) -> void:
@@ -329,11 +417,16 @@ func update_bestiary() -> void:
 	for children in $UI/Bestiary/List/ScrollContainer/GridContainer.get_children():
 		children.queue_free()
 	var not_unlocked_fish = []
-	for item in Catalog.items:
-		if item is Fish:
+	var items = Catalog.items.duplicate()
+	items.sort_custom(func(a, b): return a.rarity < b.rarity)
+	for item in items:
+		if item is Fish and (item.id != 37 or item.id != 38):
 			not_unlocked_fish.append(item)
 	
-	for id in Game.bestiary.keys():
+	var bestiary_keys = Game.bestiary.keys().duplicate()
+	bestiary_keys.sort_custom(func(a, b): return Catalog.get_item(int(a)).rarity < Catalog.get_item(int(b)).rarity)
+	
+	for id in bestiary_keys:
 		if id == "37" or id == "38":
 			continue
 		var bestiary_item = preload("res://scenes/ui/inventory_button.tscn").instantiate()
@@ -619,13 +712,15 @@ func update_catalog() -> void:
 	$UI/Vendor/TabContainer/Sell/Total.text = "Total: $" + str(roundi(total))
 	
 func _on_interaction_started(npc: NPC) -> void:
-	$UI/Main.hide()
+	$UI/Main.visible = false
 	interacting = true
 	immersive_interact = npc
 	print("interaction started")
 	
 func _on_interaction_ended() -> void:
-	$UI/Main.show()
+	interact_cooldown = 1.0
+	if not swimming:
+		$UI/Main.visible = true
 	interacting = false
 	immersive_interact = null
 	print("interaction ended")
@@ -635,9 +730,10 @@ var current_npc
 func _on_dialogue_finished(npc: NPC) -> void:
 	current_npc = npc
 	await get_tree().create_timer(0.5).timeout
+	interact_cooldown = 1.0
 	interacting = false
 	immersive_interact = null
-	if npc.action == NPC.Action.OPEN_SHOP and not npc.selling.is_empty():
+	if npc.action == NPC.Action.OPEN_SHOP and not npc.selling.is_empty() and not swimming and npc.pending_action:
 		if not $UI/Vendor.visible:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
 			$UI/Vendor.visible = true
@@ -646,7 +742,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			$UI/Leveling.visible = false
 			update_catalog()
-	if npc.action == NPC.Action.OPEN_BESTIARY:
+	if npc.action == NPC.Action.OPEN_BESTIARY and npc.pending_action:
 		if not $UI/Bestiary.visible: 
 			Game.play_sfx("res://assets/sounds/bookopen.ogg", -1)
 			$UI/Bestiary.visible = true
@@ -679,8 +775,8 @@ func update_trap() -> void:
 		fish.get_node("TextureRect").texture = item.type.texture
 		fish.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 		fish.connect("pressed", Callable(self, "collect_from_trap").bind(item.type, item.amount))
-		fish.get_node("Equipped").hide()
-		fish.get_node("Label").show()
+		fish.get_node("Equipped").visible = false
+		fish.get_node("Label").visible = true
 		fish.get_node("Label").text = "x" + str(roundi(item.amount))
 		$UI/Trap/Container/Inventory/ScrollContainer/GridContainer.add_child(fish)
 	
@@ -689,8 +785,8 @@ func update_trap() -> void:
 		btn.get_node("TextureRect").texture = item.type.texture
 		btn.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 		btn.connect("pressed", Callable(self, "remove_bait_from_trap").bind(item.type, item.amount))
-		btn.get_node("Equipped").hide()
-		btn.get_node("Label").show()
+		btn.get_node("Equipped").visible = false
+		btn.get_node("Label").visible = true
 		btn.get_node("Label").text = "x" + str(roundi(item.amount))
 		$UI/Trap/Container/Bait/ScrollContainer/GridContainer.add_child(btn)
 
@@ -701,8 +797,8 @@ func update_trap() -> void:
 		btn.get_node("TextureRect").texture = item.type.texture
 		btn.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 		btn.connect("pressed", Callable(self, "insert_bait_into_trap").bind(item.type, item.amount))
-		btn.get_node("Equipped").hide()
-		btn.get_node("Label").show()
+		btn.get_node("Equipped").visible = false
+		btn.get_node("Label").visible = true
 		btn.get_node("Label").text = "x" + str(roundi(item.amount))
 		$UI/Trap/Container/Bait/ScrollContainer2/GridContainer.add_child(btn)
 	
@@ -729,7 +825,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_ENTER:
 			$UI/Main/ChatBar.grab_focus()
 			await get_tree().create_timer(0.5).timeout
-			$FishPowerBar.hide()
+			$FishPowerBar.visible = false
 	
 func _is_mouse_over_chat_bar() -> bool:
 	if not $UI/Main/ChatBar.visible:
@@ -757,7 +853,7 @@ func _input(event: InputEvent) -> void:
 			clamp(intended_zoom.y - 0.75, 2.0, 6.0)
 		)
 
-	if event.is_action_pressed("open_leveling"):
+	if event.is_action_pressed("open_leveling") and not swimming:
 		if not $UI/Leveling.visible:
 			$UI/Leveling.visible = true
 			$UI/Main.visible = false
@@ -766,9 +862,9 @@ func _input(event: InputEvent) -> void:
 			$UI/Leveling.visible = false
 			$UI/Main.visible = true
 			
-	# Shop interaction toggle
-	if event.is_action_released("interact") and not interacting:
-		if state == FishState.INACTIVE and not $UI/Inventory.visible and not $UI/Leveling.visible:
+	# NPC interaction toggle
+	if event.is_action_released("interact") and not interacting and interact_cooldown <= 0.0:
+		if state == FishState.INACTIVE and not $UI/Inventory.visible and not $UI/Leveling.visible and not swimming:
 			if not _is_ui_blocking():
 				for body in $Interaction.get_overlapping_areas():	
 					if body.is_in_group("npc"):
@@ -779,7 +875,7 @@ func _input(event: InputEvent) -> void:
 							npc.interaction_started.connect(_on_interaction_started.bind(npc), CONNECT_ONE_SHOT)
 						if not npc.interaction_ended.is_connected(_on_interaction_ended):
 							npc.interaction_ended.connect(_on_interaction_ended, CONNECT_ONE_SHOT)
-		
+
 						npc.start_dialogue()
 						interacting = true
 			if not $UI/Vendor.visible:
@@ -842,8 +938,12 @@ func _input(event: InputEvent) -> void:
 
 	# --- Fishing actions (blocked if no rod equipped) ---
 	if Game.equipped_fishing_rod == null:
-		if event.is_action_pressed("fish"):
+		if event.is_action_pressed("fish") and not swimming:
 			Toast.add("You can't fish without a [img center region=0,0,16,16 width=16 height=16]res://assets/sprites/items.png[/img] Fishing Rod.")
+		return
+	
+	if event.is_action_pressed("fish") and swimming and $UI/Swimming/Minigame.visible:
+		attempt_swim_catch()
 		return
 
 	if near_npc():
@@ -868,7 +968,7 @@ func _input(event: InputEvent) -> void:
 			print("Unsupported fish difficulty.")
 
 	# Begin charging cast
-	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
+	if event.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null and not swimming:
 		for children in get_children():
 			if children.name.begins_with("Speech Bubble"):
 				children.queue_free()
@@ -877,7 +977,7 @@ func _input(event: InputEvent) -> void:
 		hantenjutsushiki = false
 
 	# Release cast
-	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null:
+	if event.is_action_released("fish") and state == FishState.INACTIVE and fish_control_safe and Game.equipped_trap == null and not swimming:
 		nailed_it = false
 		$FishPowerBar.visible = false
 		hantenjutsushiki = false
@@ -900,9 +1000,10 @@ func _input(event: InputEvent) -> void:
 func _process_input(delta: float) -> void:
 	if $UI/Main/ChatBar.has_focus() and state == FishState.INACTIVE:
 		play_idle_animation()
+	interact_cooldown = max(0.0, interact_cooldown - delta)
 	
 	# Movement
-	velocity = Vector2.ZERO if _is_ui_blocking() else Input.get_vector("left", "right", "up", "down", 0.1)
+	var input_vector = Input.get_vector("left", "right", "up", "down", 0.1)
 	var velocity_length := velocity.length_squared()
 	var is_moving := velocity_length > 0
 
@@ -975,7 +1076,7 @@ func _process_input(delta: float) -> void:
 
 	# Trap placement highlight
 	if Game.equipped_trap != null:
-		$Trap.show()
+		$Trap.visible = true
 		var tilemap := get_parent().get_node("Ground") as TileMapLayer
 		var mouse_tile := tilemap.local_to_map(tilemap.get_local_mouse_position())
 		var data := tilemap.get_cell_tile_data(mouse_tile)
@@ -987,12 +1088,11 @@ func _process_input(delta: float) -> void:
 			$Trap.global_position = tilemap.map_to_local(mouse_tile)
 			selected_tile = mouse_tile
 		else:
-			$Trap.hide()
+			$Trap.visible = false
 			selected_tile = Vector2i(0, 0)
 	else:
-		$Trap.hide()
+		$Trap.visible = false
 		selected_tile = Vector2i(0, 0)
-
 
 	# Movement animations & state reset on move
 	if is_moving:
@@ -1010,15 +1110,46 @@ func _process_input(delta: float) -> void:
 			last_direction = "down" if velocity.y > 0 else "up"
 
 		if $Base.animation != body_type + "_walk_" + last_direction:
-			play_animation(body_type + "_walk_" + last_direction, false, velocity_length * 1.2)
+			if swimming:
+				play_animation("diver_swim_" + last_direction, false, clampf(velocity.length() / 80.0, 0.2, 2.0))
+			else:	
+				play_animation(body_type + "_walk_" + last_direction, false, velocity_length * 1.2)
 	else:
 		if $Base.animation.begins_with(body_type + "_walk"):
 			play_idle_animation()
 
-	velocity = velocity.normalized() * BASE_WALKING_SPEED
+	if swimming:
+		if Input.is_action_just_pressed("fish"):
+			for body in $Interaction.get_overlapping_areas():
+				if body.get_parent().is_in_group("fish_shadow"):
+					if body.get_parent().assigned_item != null:
+						swim_minigame_time = BASE_SWIM_MINIGAME_TIME
+						$UI/Swimming/Minigame/Hook.start_minigame()
+						$UI/Swimming/Minigame.visible = true
+						swim_shadow_position = body.get_parent().global_position
+						swim_shadow_node = body.get_parent()
+						swim_minigame_fish = body.get_parent().assigned_item
+						var hook_scale = RARITY_HOOK_SCALES.get(swim_minigame_fish.rarity, 1.0)
+						$UI/Swimming/Minigame/Hook.scale = Vector2(7.0, 7.0 * hook_scale)
+						$UI/Swimming/Minigame/Hook/Timer.start()
+						body.get_parent().queue_free()
+					else:
+						print("mhm")
+		var target_velocity = input_vector.normalized() * BASE_SWIMMING_SPEED
+		var accel_time = 0.9 if input_vector.length_squared() > 0 else 1.3
+		var accel = BASE_SWIMMING_SPEED / accel_time
+		velocity = velocity.move_toward(target_velocity, accel * delta)
+		$Splashes.rotation = velocity.angle() - PI/2
+		if velocity.length() > 25 and not $Splashes.emitting:
+			$Splashes.restart()
+		if immersive_interact != null or $UI/Swimming/Minigame.visible:
+			velocity = Vector2.ZERO	
+	else:
+		velocity = Vector2.ZERO if _is_ui_blocking() else input_vector
+		velocity = velocity.normalized() * BASE_WALKING_SPEED
 
 	if not near_npc() and not _is_ui_blocking() and Game.equipped_fishing_rod != null:
-		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe:
+		if Input.is_action_pressed("fish") and state == FishState.INACTIVE and fish_control_safe  and not swimming:
 			for children in get_children():
 				if children.name.begins_with("Speech Bubble"):
 					children.queue_free()
@@ -1057,12 +1188,12 @@ func _process_input(delta: float) -> void:
 
 	# Hide power bar if inventory opens mid-charge
 	if $FishPowerBar.visible and (near_npc() or $UI/Leveling.visible or $UI/Inventory.visible or Game.equipped_trap != null or bobber != null):
-		$FishPowerBar.hide()
+		$FishPowerBar.visible = false
 		hantenjutsushiki = false
 		fish_control_safe = false
 
 	# Trap placement
-	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish"):
+	if Game.equipped_trap != null and selected_tile != Vector2i(0, 0) and Input.is_action_just_pressed("fish") and not swimming:
 		var tilemap := get_parent().get_node("Ground") as TileMapLayer
 		var data := tilemap.get_cell_tile_data(selected_tile)
 		var location = Game.Location.get(data.get_custom_data("location"))
@@ -1104,14 +1235,17 @@ func _process_input(delta: float) -> void:
 					"res://assets/sounds/footstep2w.ogg",
 					"res://assets/sounds/footstep3w.ogg"
 				]
-			Game.play_sfx(footsteps.pick_random(), -5)
+			if swimming:
+				Game.play_sfx_briefly("res://assets/sounds/swim.ogg", 0.3, 1.5, -1, true, true)
+			else:
+				Game.play_sfx(footsteps.pick_random(), -5)
 			step_timer = step_interval + randf_range(0.02, 0.08)
 	else:
 		step_timer = 0.0
 
 	move_and_slide()
-	global_position = round(global_position / 2) * 2
-
+	#if not swimming:
+		#global_position = round(global_position / 2) * 2
 
 # --- Helpers ---
 
@@ -1278,7 +1412,7 @@ func update_inventory() -> void:
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
 	if Game.equipped_fishing_rod != null:
-		inventory_button.get_node("Equipped").hide()
+		inventory_button.get_node("Equipped").visible = false
 	inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(-1))
 	$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
 
@@ -1286,7 +1420,7 @@ func update_inventory() -> void:
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
 	if Game.equipped_bait != null:
-		inventory_button.get_node("Equipped").hide()
+		inventory_button.get_node("Equipped").visible = false
 	inventory_button.connect("pressed", Callable(self, "set_bait").bind(-1))
 	$"UI/Inventory/Container/Bait/GridContainer".add_child(inventory_button)
 	
@@ -1294,7 +1428,7 @@ func update_inventory() -> void:
 	inventory_button.get_node("Rarity").texture = null
 	inventory_button.get_node("TextureRect").texture = load("res://assets/sprites/cross.png")
 	if Game.equipped_trap != null:
-		inventory_button.get_node("Equipped").hide()
+		inventory_button.get_node("Equipped").visible = false
 	inventory_button.connect("pressed", Callable(self, "set_trap").bind(-1))
 	$"UI/Inventory/Container/Traps/GridContainer".add_child(inventory_button)
 
@@ -1304,7 +1438,8 @@ func update_inventory() -> void:
 		$"UI/Inventory/Container/Upgrades/Equipped/Description".text = "Buying an upgrade would let you select something, wouldn't it?"
 		$"UI/Inventory/Container/Upgrades/Equipped/Description".text += "\n\nNothing: +0"
 	else:
-		var level = Game.upgrades.get_item_stack(selected_upgrade).data["level"]
+		var stack = Game.upgrades.get_item_stack(selected_upgrade)
+		var level = Game.upgrades.get_item_stack(selected_upgrade).data.get("level", 1)
 		$UI/Inventory/Container/Upgrades/Equipped/Icon.texture = selected_upgrade.texture
 		$UI/Inventory/Container/Upgrades/Equipped/Name.text = selected_upgrade.name
 		$UI/Inventory/Container/Upgrades/Equipped/Description.text = selected_upgrade.description
@@ -1390,7 +1525,7 @@ func update_inventory() -> void:
 	for upgrade in upgrades:
 		inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 		inventory_button.get_node("TextureRect").texture = upgrade.type.texture
-		inventory_button.get_node("Equipped").hide()
+		inventory_button.get_node("Equipped").visible = false
 		inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(upgrade.type.rarity).to_lower() + ".png")
 		inventory_button.connect("pressed", Callable(self, "select_upgrade").bind(upgrade.type))
 		$"UI/Inventory/Container/Upgrades/GridContainer".add_child(inventory_button)
@@ -1402,7 +1537,7 @@ func update_inventory() -> void:
 			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
 			if Game.equipped_fishing_rod != item.type:
-				inventory_button.get_node("Equipped").hide()
+				inventory_button.get_node("Equipped").visible = false
 			inventory_button.get_node("Rarity").texture = load("res://assets/sprites/panel-" + Game.Rarity.find_key(item.type.rarity).to_lower() + ".png")
 			inventory_button.connect("pressed", Callable(self, "set_fishing_rod").bind(item.type.id))
 			$"UI/Inventory/Container/Fishing Rods/GridContainer".add_child(inventory_button)
@@ -1410,7 +1545,7 @@ func update_inventory() -> void:
 			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
 			if Game.equipped_bait != item.type:
-				inventory_button.get_node("Equipped").hide()
+				inventory_button.get_node("Equipped").visible = false
 			if item.amount == 1:
 				inventory_button.get_node("Label").visible = false
 			else:	
@@ -1423,7 +1558,7 @@ func update_inventory() -> void:
 			inventory_button = preload("res://scenes/ui/inventory_button.tscn").instantiate()
 			inventory_button.get_node("TextureRect").texture = item.type.texture
 			if Game.equipped_trap != item.type:
-				inventory_button.get_node("Equipped").hide()
+				inventory_button.get_node("Equipped").visible = false
 			if item.amount == 1:
 				inventory_button.get_node("Label").visible = false
 			else:	
@@ -1446,9 +1581,17 @@ func near_npc() -> bool:
 			return true
 		if body.is_in_group("bestiary"):
 			return true
+		if body.is_in_group("npc"):
+			return true
 	return false
 
+
 func _process_ui(delta: float) -> void:
+	if swimming:
+		$UI/Swimming/Stats/Panel/HBoxContainer/Label.text = "Fish caught: " + str(swim_minigame_fish_caught) + "\nNew fish in " + str(roundi(SWIM_FISH_SPAWN_INTERVAL - swim_fish_spawn_timer)) + "s"
+		$UI/Swimming/Energy/Progress.value = floori((swimming_stamina / Game.get_swimming_stamina(Game.get_save_data())) * 100.0)
+		$Base.rotation = lerp($Base.rotation, deg_to_rad(clamp(velocity.x * 0.05, -8, 8)), 10 * delta)
+		$Camera2D.offset = Vector2(0, sin(i_float_timer * 0.3) * 2.0)
 	$InteractionMark.visible = false
 	var t = Game.time / Game.TIME_IN_DAY
 	var day_factor = sin(t * PI)
@@ -1471,7 +1614,7 @@ func _process_ui(delta: float) -> void:
 	var hovered := _is_mouse_over_chat_bar()
 	if focused or hovered:
 		$UI/Main/ChatBar.modulate.a = lerp($UI/Main/ChatBar.modulate.a, 1.0, 5.0 * delta)
-		$FishPowerBar.hide()
+		$FishPowerBar.visible = false
 	else:
 		$UI/Main/ChatBar.modulate.a = lerp($UI/Main/ChatBar.modulate.a, 0.0, 5.0 * delta)
 	if $UI/Vendor.visible:
@@ -1529,7 +1672,7 @@ func _process_ui(delta: float) -> void:
 			$InteractionMark/Talk.visible = true
 			$InteractionMark/Fish.visible = false
 			$InteractionMark/Book.visible = false
-	if interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
+	if swimming or interacting or $UI/Vendor.visible or $UI/Bestiary.visible:
 		$InteractionMark.visible = false
 	var percentage_filled = (float(Game.bag.total_size()) / float(Game.get_max_inventory_size(Game.get_save_data()))) * 100.0
 	if percentage_filled < 50.0:
@@ -1541,7 +1684,7 @@ func _process_ui(delta: float) -> void:
 	#$UI/Main/InventoryButton.text = "   Inventory (" + str(Game.bag.total_size()) + "/" +  str(Game.get_max_inventory_size()) + ")"
 	i_float_timer += delta * 8.0
 	$InteractionMark.position.y = -24 + (1.2 * sin(i_float_timer))
-	$UI/Main/LevelBar/Label.text = "Lv." + str(Game.level) 
+	$UI/Main/LevelBar/Label.text = "Lvl." + str(Game.level) 
 	$UI/Main/LevelBar.value = roundi(Game.xp)
 	$UI/Main/LevelBar.max_value = roundi(Game.calculate_xp_for_level(Game.level))
 	if Game.equipped_fishing_rod != null:
@@ -1586,13 +1729,13 @@ func _process_ui(delta: float) -> void:
 	if Input.is_action_just_released("inventory") and (not $UI/Main/ChatBar.has_focus() and not $UI/Vendor.visible and not $UI/Bestiary.visible and not $UI/Trap.visible and not $UI/Leveling.visible):
 		
 		if not $UI/Inventory.visible:
-			$UI/Main.hide()
-			$UI/Inventory.show()
+			$UI/Main.visible = false
+			$UI/Inventory.visible = true
 			Game.play_sfx("res://assets/sounds/open.ogg", 5.0)
 			update_inventory()
 		else:
-			$UI/Main.show()
-			$UI/Inventory.hide()
+			$UI/Main.visible = true
+			$UI/Inventory.visible = false
 	
 	if Input.is_action_just_released("inventory") and $UI/Leveling.visible:
 		$UI/Leveling.visible = false
@@ -1744,14 +1887,39 @@ func do_slight_glitch() -> void:
 		if glitches == 22:
 			glitches = 0
 			global_position = Vector2(-232, -1535)
-			
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
 		_process_multiplayer(delta)
 		return
+	if swimming and can_deplete_swimming_stamina and immersive_interact == null:
+		swimming_stamina -= delta
+		if swimming_stamina <= 0.0:
+			swimming = false
+			Toast.add("You're too tired! You got out of the water. You collected " + str(swim_minigame_fish_caught) + " fish!")
+			stop_swimming()
+		if $UI/Swimming/Minigame.visible:
+			swim_minigame_time -= delta
+			$UI/Swimming/Minigame/TimeLeft.value = roundi((swim_minigame_time / BASE_SWIM_MINIGAME_TIME) * 100.0)
+			if swim_minigame_time <= 0.0:
+				if swim_shadow_node != null and is_instance_valid(swim_shadow_node):
+					swim_shadow_node.queue_free()
+				swim_shadow_node = null
+				$UI/Swimming/Minigame.visible = false
+				Toast.add("You took too long! The fish got away.")
+		
+		swim_fish_spawn_timer += delta
+		if swim_fish_spawn_timer >= SWIM_FISH_SPAWN_INTERVAL:
+			swim_fish_spawn_timer = 0.0
+			var level = get_parent()
+			if level != null and level.has_method("spawn_fish_shadows"):
+				level.spawn_fish_shadows(Vector2(0,0), 500.0, 25, 128.0)
+			else:
+				print("nope")
+	
 	_process_ui(delta)
 	_process_input(delta)
+		
 	if multiplayer.has_multiplayer_peer():
 		_process_network_send(delta)
 	
@@ -2009,3 +2177,7 @@ func _on_chat_bar_focus_exited() -> void:
 					node.start()
 		else:
 			child.visible = false
+
+func _on_leave_button_pressed() -> void:
+	Toast.add("You left early! You got out of the water. You collected " + str(swim_minigame_fish_caught) + " fish!")
+	stop_swimming()

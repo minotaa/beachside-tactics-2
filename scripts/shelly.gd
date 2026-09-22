@@ -8,13 +8,14 @@ func _ready() -> void:
 			{
 				"text": "Hey there! You discovered some new species today!",
 				"next": "reward",
-				"condition": "has_unacknowledged_fish"
+				"condition": "has_unacknowledged_fish",
 			}
 		],
 		"reward": [
 			{
 				"text": "Good job! You received a reward for doing so.",
-				"quest_trigger": "give_bestiary_reward"
+				"quest_trigger": "give_bestiary_reward",
+				"trigger_action": true
 			}
 		],
 		"default": [
@@ -28,7 +29,8 @@ func _ready() -> void:
 					"You'd be surprised what's hiding in these waters.",
 					"A good fisherman always checks their bestiary."
 				],
-				"immersive": false
+				"immersive": false,
+				"trigger_action": true
 			}
 		]
 	}
@@ -59,7 +61,7 @@ func calculate_money_earned() -> float:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach:
+			if catchable.location.has(Game.Location.Crystalwater_Beach):
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					total += money_table.get(catchable.rarity)
 	return total
@@ -69,7 +71,7 @@ func calculate_xp_earned() -> float:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach:
+			if catchable.location.has(Game.Location.Crystalwater_Beach):
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					total += xp_table.get(catchable.rarity)
 	return total
@@ -79,7 +81,7 @@ func get_unacknowledged_fish() -> Array:
 	for id in Game.bestiary:
 		var catchable = Catalog.get_item(int(id))
 		if catchable is Fish:
-			if catchable.location == Game.Location.Crystalwater_Beach:
+			if catchable.location.has(Game.Location.Crystalwater_Beach):
 				if Game.acknowledged_bestiary.get(id, null) == null:
 					to_ack.append(catchable)
 	return to_ack

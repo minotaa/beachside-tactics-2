@@ -20,7 +20,7 @@ func show_choices(text: String, choices: Array, marker: Vector2, chars_per_secon
 		await get_tree().process_frame
 		global_position = Vector2(
 			marker.x - (size.x * 0.1166),
-			marker.y - (size.y * 0.60)
+			marker.y - (size.y * 0.30)
 		)
 		Game.play_sfx("res://assets/sounds/a.ogg", 1, true, true, 0.9, 1.0)
 		visible = true

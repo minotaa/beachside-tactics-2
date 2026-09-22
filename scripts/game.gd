@@ -23,7 +23,8 @@ enum Island {
 
 enum Location {
 	Crystalwater_Beach,
-	Crystalwater_Void
+	Crystalwater_Void,
+	Crystalwater_Ocean
 }
 
 enum Difficulty {
@@ -89,6 +90,7 @@ var equipped_bait: Bait
 var equipped_trap: Trap
 var time: float = TIME_IN_DAY * 0.55
 var days: int = 0
+var swims: int = 0
 var upgrades = Inventory.new()
 var bag = Inventory.new()
 var inventory = Inventory.new() # Dumb solution because I don't feel like doing specific logic for permanent/temporary items in your inventory.
@@ -277,6 +279,9 @@ func get_two_star_chance() -> float:
 func get_three_star_chance() -> float:
 	return 10.0
 
+func get_swimming_stamina(save_data: Dictionary) -> float:
+	return 120.0
+
 func roll_stars() -> int:
 	if randf() * 100.0 < get_star_chance():
 		var roll = randf() * 100.0
@@ -445,6 +450,8 @@ func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
 		acknowledged_bestiary = data["acknowledged_bestiary"]
 	if data.has("flags"):
 		flags = data["flags"]
+	if data.has("swims"):
+		swims = data["swims"]
 	if data.has("traps"):
 		traps.clear()
 		for trap in data["traps"]:
@@ -549,6 +556,7 @@ func get_save_data() -> Dictionary:
 		"inventory": inventory.to_list(),
 		"balance": balance,
 		"whiffs": whiffs,
+		"swims": swims,
 		"catches": catches,
 		"equipped_fishing_rod": equipped_fishing_rod.id if equipped_fishing_rod else null,
 		"equipped_bait": equipped_bait.id if equipped_bait else null,

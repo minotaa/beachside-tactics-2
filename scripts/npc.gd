@@ -19,11 +19,20 @@ var line_display_duration: float = 1.5
 #     "text": String or Array (random pick),
 #     "next": String or null,         # tree ID to jump to after this line, null = end
 #     "choices": [                    # optional, replaces auto-advance
-#         { "label": String, "next": String or null, "quest_trigger": String }
+#         {
+#             "label": String,
+#             "next": String or null,       # default target
+#             "condition": String,              # optional, condition name
+#             "next_true": String or null,  # optional, used if check passes
+#             "next_false": String or null, # optional, used if check fails
+#             "quest_trigger": String # optional, fires when the CHOICE is picked
+#         }
 #     ],
 #     "quest_trigger": String,        # optional, fires when this line plays
-#     "condition": String             # optional, tree only available if this condition passes
+#     "condition": String,            # optional, tree only available if this condition passes, this doesn't stop the entry from playing if the entry has no "else" AND is played from a previous dialogue entry that meets the criteria
+#     "else": String                  # optional, fallback tree ID if condition fails
 # }
+
 var dialogue_trees: Dictionary = {}
 var default_trees: Array[String] = ["default"]
 
@@ -36,6 +45,7 @@ var is_in_dialogue: bool = false
 var current_tree: String = ""
 var current_entry_index: int = 0
 var is_immersive: bool = false
+var pending_action: bool = false
 
 signal interaction_started
 signal interaction_ended
@@ -72,9 +82,7 @@ func start_dialogue(tree_id: String = "") -> void:
 		return
 
 	is_in_dialogue = true
-	is_immersive = dialogue_trees[tree_id][0].get("immersive", false)
-	if is_immersive:
-		interaction_started.emit()
+	pending_action = false
 
 	current_tree = tree_id
 	current_entry_index = 0
@@ -84,15 +92,27 @@ func _pick_available_tree() -> String:
 	for key in default_trees:
 		if not dialogue_trees.has(key):
 			continue
-		var tree = dialogue_trees[key]
-		if tree.size() > 0 and tree[0].has("condition"):
-			if not _check_condition(tree[0]):
-				continue
-		print("checking tree: ", key, " result: ", _check_condition(dialogue_trees[key][0]))
+		var entry = dialogue_trees[key][0]
+		if entry.has("condition") and not _check_condition(entry):
+			if entry.has("else") and dialogue_trees.has(entry["else"]):
+				return entry["else"]
+			continue
 		return key
 	return ""
 
+
 func _play_entry(entry: Dictionary) -> void:
+	var entry_immersive: bool = entry.get("immersive", is_immersive)
+	if entry_immersive and not is_immersive:
+		is_immersive = true
+		interaction_started.emit()
+	elif not entry_immersive and is_immersive:
+		is_immersive = false
+		interaction_ended.emit()
+		
+	if entry.get("trigger_action", false):
+		pending_action = true
+		
 	if entry.has("quest_trigger") and entry["quest_trigger"] != "":
 		quest_triggered.emit(entry["quest_trigger"])
 		_on_quest_triggered(entry["quest_trigger"])
@@ -111,19 +131,30 @@ func _play_entry(entry: Dictionary) -> void:
 			return
 		_advance(entry.get("next", null))
 
+func _resolve_next(chosen: Dictionary) -> Variant:
+	if chosen.has("condition"):
+		if _evaluate_condition(chosen["condition"]):
+			return chosen.get("next_true", chosen.get("next"))
+		else:
+			return chosen.get("next_false", chosen.get("next"))
+	return chosen.get("next", null)
+
 func _show_choices(text: String, choices: Array) -> void:
 	var choice_bubble = choice_bubble_scene.instantiate()
 	add_child(choice_bubble)
 	var chosen = await choice_bubble.show_choices(text, choices, marker, chars_per_second)
 	choice_bubble.queue_free()
-
+ 
 	choice_made.emit(chosen)
+ 
+	if chosen.get("trigger_action", false):
+		pending_action = true
 
 	if chosen.has("quest_trigger") and chosen["quest_trigger"] != "":
 		quest_triggered.emit(chosen["quest_trigger"])
 		_on_quest_triggered(chosen["quest_trigger"])
-
-	_advance(chosen.get("next", null))
+ 
+	_advance(_resolve_next(chosen))
 
 func _advance(next) -> void:
 	if not is_in_dialogue:

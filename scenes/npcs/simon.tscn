@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://culsafrc2ew8m"]
+
+[ext_resource type="Script" uid="uid://ddxgyqwiejtti" path="res://scripts/simon.gd" id="1_ockjc"]
+[ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_ntfhx"]
+[ext_resource type="Texture2D" uid="uid://i8it7xn2e5jf" path="res://assets/sprites/simon-blink.png" id="3_upls0"]
+[ext_resource type="Texture2D" uid="uid://dhjqxop4vba78" path="res://assets/sprites/simon-idle.png" id="4_jy650"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7cw6k"]
+atlas = ExtResource("3_upls0")
+region = Rect2(0, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5q548"]
+atlas = ExtResource("3_upls0")
+region = Rect2(16, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k1rj3"]
+atlas = ExtResource("4_jy650")
+region = Rect2(0, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sk3nt"]
+atlas = ExtResource("4_jy650")
+region = Rect2(16, 0, 16, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_d8vte"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7cw6k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5q548")
+}],
+"loop": 1,
+"name": &"blink",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k1rj3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sk3nt")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 1.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rw3ai"]
+size = Vector2(8, 19)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_popqq"]
+size = Vector2(18, 25)
+
+[node name="Simon" type="CharacterBody2D" unique_id=804101878]
+z_index = 1
+y_sort_enabled = true
+script = ExtResource("1_ockjc")
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1368585064]
+z_index = -1
+position = Vector2(0, 11)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("2_ntfhx")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=854247317]
+sprite_frames = SubResource("SpriteFrames_d8vte")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1169953044]
+position = Vector2(0, 6.5)
+shape = SubResource("RectangleShape2D_rw3ai")
+
+[node name="NPC" type="Area2D" parent="." unique_id=145546351 groups=["npc"]]
+position = Vector2(0, 9)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NPC" unique_id=309900125]
+position = Vector2(0, -5.5)
+shape = SubResource("RectangleShape2D_popqq")
+
+[node name="Marker" type="Marker2D" parent="." unique_id=1216186520]
+position = Vector2(0, -10)

@@ -12,6 +12,9 @@ region = Rect2(0, 0, 16, 16)
 [sub_resource type="CircleShape2D" id="CircleShape2D_s6527"]
 radius = 16.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0h5mt"]
+size = Vector2(14, 16)
+
 [node name="Trap" type="Node2D" unique_id=291842965]
 script = ExtResource("1_62q8x")
 
@@ -50,3 +53,10 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=896760516]
 shape = SubResource("CircleShape2D_s6527")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1574891939]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=858139963]
+shape = SubResource("RectangleShape2D_0h5mt")

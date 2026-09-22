@@ -1,4 +1,4 @@
-extends Label
+extends RichTextLabel
 
 var should_fade := true
 

@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://cy3pcgwxqcyw4"]
+
+[ext_resource type="Texture2D" uid="uid://cdv6sl0kdiy6g" path="res://assets/sprites/caught-fish-common.png" id="1_3qyc1"]
+[ext_resource type="Script" uid="uid://hpm5tv4nwepe" path="res://scripts/fish_shadow.gd" id="1_sg6ha"]
+[ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_sg6ha"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0h5mt"]
+radius = 7.0
+
+[sub_resource type="Curve" id="Curve_na02c"]
+_data = [Vector2(0, 0), 0.0, 1.7109706, 0, 0, Vector2(1, 0.7340425), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_jk0s5"]
+curve = SubResource("Curve_na02c")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_wuupf"]
+particle_flag_disable_z = true
+angle_min = -89.99999
+angle_max = 90.000015
+direction = Vector3(0, -20, 0)
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+gravity = Vector3(0, -45, 0)
+damping_min = 10.0
+damping_max = 30.000002
+scale_min = 0.29999998
+scale_max = 0.79999995
+scale_curve = SubResource("CurveTexture_jk0s5")
+
+[node name="Fish Shadow" type="Node2D" unique_id=828506376 groups=["fish_shadow"]]
+script = ExtResource("1_sg6ha")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=660757709 groups=["fish_shadow"]]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1925587356]
+shape = SubResource("CircleShape2D_0h5mt")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1125362731]
+texture = ExtResource("1_3qyc1")
+lifetime = 1.5
+process_material = SubResource("ParticleProcessMaterial_wuupf")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=719179297]
+position = Vector2(0, -4)
+texture = ExtResource("2_sg6ha")

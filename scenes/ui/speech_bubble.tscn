@@ -8,7 +8,7 @@
 [node name="Speech Bubble" type="MarginContainer" unique_id=1523930421]
 z_index = 132
 custom_minimum_size = Vector2(290, 43)
-custom_maximum_size = Vector2(800, -1)
+custom_maximum_size = Vector2(600, -1)
 offset_right = 290.0
 offset_bottom = 43.0
 scale = Vector2(0.25, 0.25)

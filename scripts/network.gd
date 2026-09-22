@@ -175,6 +175,42 @@ func sell_all_confirmed(amount_earned: float) -> void:
 	var player = Game.get_player()
 	if player != null and player.get_node("UI/Vendor").visible:
 		player.update_catalog()
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_give_diving_suit() -> void:
+	var id = multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	var balance = save_data.get("balance", 0.0)
+	if balance >= 1000.0:
+		var upgrades = Inventory.new()
+		upgrades.set_list_from_save(save_data.get("upgrades", []))
+		if upgrades.has_item(Catalog.get_item(39)):
+			Toast.add.rpc_id(id, "You already have the Diving Suit.")
+			return
+		balance -= 1000.0
+		save_data["balance"] = balance
+		upgrades.add_item(ItemStack.new(Catalog.get_item(39), 1))
+		save_data["upgrades"] = upgrades.to_list()
+		purchase_confirmed_upgrade.rpc_id(id, 39, 1)
+		Toast.add.rpc_id(id, "You bought a Diving Suit!")
+		sync_save_data.rpc_id(id, save_data)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_start_swim_session() -> void:
+	var id = multiplayer.get_remote_sender_id()
+	var save_data = get_player_save_data(id)
+	var balance = save_data.get("balance", 0.0)
+	if balance >= 250.0:
+		balance -= 250.0
+		save_data["balance"] = balance
+		Toast.add.rpc_id(id, "You purchased a Swim Session!")
+		sync_save_data.rpc_id(id, save_data)
+		relay_swim_session.rpc_id(id)
+
+@rpc("authority", "call_remote", "reliable")
+func relay_swim_session() -> void:
+	if Game.get_player() != null:
+		Game.get_player().start_swimming()
 		
 @rpc("any_peer", "call_remote", "reliable")
 func request_buy_item(item_id: int) -> void:
@@ -826,7 +862,7 @@ func request_bestiary_reward() -> void:
 	var xp_gain := 0.0
 	for item_id in bestiary:
 		var catchable = Catalog.get_item(int(item_id))
-		if catchable is Fish and catchable.location == Game.Location.Crystalwater_Beach:
+		if catchable is Fish and catchable.location.has(Game.Location.Crystalwater_Beach):
 			if acknowledged.get(item_id, null) == null:
 				to_ack.append(item_id)
 				money_gain += bestiary_money_table.get(catchable.rarity, 0.0)
@@ -1023,6 +1059,97 @@ func connection_failed() -> void:
 		multiplayer.connection_failed.disconnect(connection_failed)
 	multiplayer.connection_failed.connect(connection_failed)
 
+var active_swim_shadows: Dictionary = {}
+
+@rpc("any_peer")
+func request_fish_shadow_items(location: Game.Location, world_positions: Array) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var save_data := get_player_save_data(id)
+	var results := []
+	for pos in world_positions:
+		var item = Catalog.get_fish_drop(location, Game.get_fishing_power(save_data), save_data, true)
+		if item != null:
+			results.append([pos, item.id])
+
+	active_swim_shadows[id] = results.duplicate(true)
+	receive_fish_shadow_items.rpc_id(id, results)
+
+@rpc("any_peer")
+func request_swim_catch(shadow_position: Vector2, success: bool) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	var shadows: Array = active_swim_shadows.get(id, [])
+	var matched_index := -1
+	for i in range(shadows.size()):
+		if shadows[i][0] == shadow_position:
+			matched_index = i
+			break
+	if matched_index == -1:
+		return
+
+	var item_id: int = shadows[matched_index][1]
+	shadows.remove_at(matched_index)
+	active_swim_shadows[id] = shadows
+
+	if not success:
+		return
+
+	var save_data = get_player_save_data(id)
+	var stack = ItemStack.new(Catalog.get_item(item_id), 1)
+	stack.data["stars"] = Game.roll_stars()
+	_resolve_swim_catch(id, save_data, stack)
+
+func _resolve_swim_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
+	var bag = Inventory.new()
+	bag.set_list_from_save(save_data["bag"])
+
+	var released = bag.total_size() > Game.get_max_inventory_size(save_data)
+	if not released:
+		save_data["bestiary"][str(stack.type.id)] = save_data["bestiary"].get(str(stack.type.id), 0) + stack.amount
+		save_data["highest_star"][str(stack.type.id)] = max(
+			save_data["highest_star"].get(str(stack.type.id), 0),
+			stack.data.get("stars", 0)
+		)
+		bag.add_item(stack)
+		save_data["catches"] = save_data.get("catches", 0) + 1
+
+	save_data["bag"] = bag.to_list()
+	var levels_gained = Game.apply_xp(save_data, xp_table.get(stack.type.rarity, 0.0))
+
+	sync_save_data.rpc_id(id, save_data)
+	if levels_gained > 0:
+		notify_level_up.rpc_id(id, save_data["level"])
+	swim_catch_result.rpc_id(id, stack.to_data(), not released)
+
+@rpc("authority", "call_remote", "reliable")
+func swim_catch_result(stack_data: Dictionary, caught_it: bool) -> void:
+	var stack = ItemStack.from_data(stack_data)
+	var player = Game.get_player()
+	if player == null:
+		return
+	if not caught_it:
+		Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
+	else:
+		var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
+		player.add_child(speech_bubble)
+		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
+		speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)
+		Game.play_sfx("res://assets/sounds/catch.ogg", 2)
+
+@rpc("authority")
+func receive_fish_shadow_items(results: Array) -> void:
+	for pair in results:
+		var world_pos: Vector2 = pair[0]
+		var item = Catalog.get_item(pair[1])
+		if item == null:
+			continue
+		var level = get_tree().current_scene
+		var shadow = preload("res://scenes/fish_shadow.tscn").instantiate()
+		shadow.global_position = world_pos
+		level.add_child(shadow)
+		shadow.set_item(item)
+		level.active_fish_shadows.append(shadow)
+	
 @rpc("authority", "call_remote", "reliable")
 func instantly_catch(stack_data: Dictionary, caught_it: bool) -> void:
 	var stack = ItemStack.from_data(stack_data)
@@ -1135,6 +1262,7 @@ func _resolve_catch(id: int, save_data: Dictionary, stack: ItemStack) -> void:
 		notify_level_up.rpc_id(id, save_data["level"])
 	instantly_catch.rpc_id(id, stack.to_data(), not released)
 	fishing_players = fishing_players.filter(func(p): return p["id"] != id)
+
 
 @rpc("any_peer", "call_remote", "reliable")
 func minigame_result(success: bool) -> void:

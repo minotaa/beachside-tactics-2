@@ -17,18 +17,18 @@ modulate_color = Color(1, 1, 1, 0.8745098)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_x0lj2"]
 texture = ExtResource("3_2hk6u")
-texture_margin_left = 32.0
-texture_margin_top = 32.0
-texture_margin_right = 32.0
-texture_margin_bottom = 32.0
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
 modulate_color = Color(1, 1, 1, 0.8745098)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qcbnv"]
 texture = ExtResource("4_ik5ct")
-texture_margin_left = 32.0
-texture_margin_top = 32.0
-texture_margin_right = 32.0
-texture_margin_bottom = 32.0
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
 modulate_color = Color(1, 1, 1, 0.8745098)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f3lip"]

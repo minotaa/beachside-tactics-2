@@ -8,5 +8,6 @@ var difficulty: Game.Difficulty ## The difficulty of the fish in the fishing min
 var hour_start: float
 var hour_end: float ## Defines the range of time at which the fish can appear. Assuming it's Game.time / Game.TIME_IN_DAY
 var trap_only: bool ## Can only be found in a trap.
+var swim_only: bool = false ## Can only be found by swimming.
 var trophy_fish: bool = false ## Is it a trophy fish?
 var can_catch: Callable = func(): return true ## The conditions for catching this fish.

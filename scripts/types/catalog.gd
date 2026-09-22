@@ -14,34 +14,35 @@ func get_rarity_weight(rarity: Game.Rarity) -> float:
 			return 5.0
 	return 100.0  # fallback
 
-func get_fish_drop(location: Game.Location, rod_power: int, save_data: Dictionary) -> ItemType:
+func get_fish_drop(location: Game.Location, rod_power: int, save_data: Dictionary, swimming: bool = false) -> ItemType:
 	# 10% chance to get junk instead of fish
 	if randf() > 0.9 - Game.get_junk_chance(save_data):
-		return get_junk(location, rod_power)
+		return get_junk(location, rod_power, swimming)
 	else:
-		return get_fish(location, rod_power, save_data)
+		return get_fish(location, rod_power, save_data, false, swimming)
 
-func get_fish(location: Game.Location, rod_power: int, save_data: Dictionary, trap: bool = false) -> Fish:
+func get_fish(location: Game.Location, rod_power: int, save_data: Dictionary, trap: bool = false, swimming: bool = false) -> Fish:
 	var current_time := Game.time / Game.TIME_IN_DAY
 	var trophy_chance = Game.get_trophy_fish_chance(save_data)
 
 	if randf() < trophy_chance:
-		var trophy_pool = _get_catchable_fish(location, rod_power, trap, current_time, true)
+		var trophy_pool = _get_catchable_fish(location, rod_power, trap, current_time, true, swimming)
 		if not trophy_pool.is_empty():
 			return _pick_weighted_fish(trophy_pool, current_time)
 
-	var normal_pool = _get_catchable_fish(location, rod_power, trap, current_time, false)
+	var normal_pool = _get_catchable_fish(location, rod_power, trap, current_time, false, swimming)
 	if normal_pool.is_empty():
 		return null
 	return _pick_weighted_fish(normal_pool, current_time)
 
-func _get_catchable_fish(location: Game.Location, rod_power: int, trap: bool, current_time: float, trophy_only: bool) -> Array:
+func _get_catchable_fish(location: Game.Location, rod_power: int, trap: bool, current_time: float, trophy_only: bool, swimming: bool) -> Array:
 	var result = []
 	for item in items:
 		if item is Fish:
 			if item.location.has(location) and rod_power >= item.power_needed \
 			and (trap or not item.trap_only) \
 			and item.trophy_fish == trophy_only \
+			and item.swim_only == swimming \
 			and item.can_catch.call():
 				result.append(item)
 	return result
@@ -72,11 +73,11 @@ func _get_weighted_rarity(fish: Fish, current_time: float) -> float:
 		in_peak = current_time >= fish.hour_start or current_time < fish.hour_end
 	return base * (2.0 if in_peak else 1.0)
 
-func get_junk(location: Game.Location, rod_power: int) -> ItemType:
+func get_junk(location: Game.Location, rod_power: int, swimming: bool = false) -> ItemType:
 	var catchable_junk = []
 	for item in items:
 		if item is Junk:
-			if item.location.has(location) and rod_power >= item.power_needed:
+			if item.location.has(location) and rod_power >= item.power_needed and item.swim_only == swimming:
 				catchable_junk.append(item)
 	
 	if catchable_junk.is_empty():
@@ -786,3 +787,68 @@ func _enter_tree() -> void:
 	not_junk.rarity = Game.Rarity.COMMON
 	not_junk.location = [Game.Location.Crystalwater_Void]
 	items.append(not_junk)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/upgrades.png")
+	atlas.region = Rect2(32.0, 0.0, 16.0, 16.0)
+	var diver_suit = Upgrade.new(39, "Diving Suit", atlas)
+	diver_suit.category = Game.Category.UPGRADES
+	diver_suit.rarity = Game.Rarity.UNCOMMON
+	diver_suit.purchasable = true
+	diver_suit.max_level = 1
+	diver_suit.get_benefits = func(level):
+		return "Grants the ability to dive!"
+	diver_suit.description = "An old-fashioned rustic looking diving suit."
+	diver_suit.price = -1
+	items.append(diver_suit)
+
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(160.0, 16.0, 16.0, 16.0)
+	var sea_cucumber = Fish.new(40, "Sea Cucumber", atlas)
+	sea_cucumber.description = "A leathery skinned invertebrate. Did you know they breathed through their butts?"
+	sea_cucumber.sell_price = 75.0
+	sea_cucumber.rarity = Game.Rarity.UNCOMMON
+	sea_cucumber.difficulty = Game.Difficulty.MEDIUM
+	sea_cucumber.trap_only = false
+	sea_cucumber.swim_only = true
+	sea_cucumber.location = [Game.Location.Crystalwater_Ocean]
+	sea_cucumber.hour_start = 0.0
+	sea_cucumber.hour_end = 0.0
+	sea_cucumber.category = Game.Category.FISH
+	sea_cucumber.power_needed = 0.0
+	sea_cucumber.threshold = 0.0
+	sea_cucumber.trophy_fish = false
+	items.append(sea_cucumber)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(176.0, 16.0, 16.0, 16.0)
+	var cracked_anchor = Junk.new(41, "Cracked Anchor", atlas)
+	cracked_anchor.description = "Surprisingly a very un-rusted anchor. The only problem is that it's immensely fragile due to its cracks."
+	cracked_anchor.sell_price = 25.0
+	cracked_anchor.rarity = Game.Rarity.COMMON
+	cracked_anchor.swim_only = true
+	cracked_anchor.location = [Game.Location.Crystalwater_Ocean]
+	cracked_anchor.category = Game.Category.JUNK
+	cracked_anchor.power_needed = 0.0
+	items.append(cracked_anchor)
+	
+	atlas = AtlasTexture.new()
+	atlas.atlas = preload("res://assets/sprites/fish.png")
+	atlas.region = Rect2(192.0, 16.0, 16.0, 16.0)
+	var rock_crab = Fish.new(42, "Rock Crab", atlas)
+	rock_crab.description = "A crustacean located on the seabed, it's well known for its sharp pincers that are used for defense, scavenging, and breaking hard shells."
+	rock_crab.sell_price = 25.0
+	rock_crab.rarity = Game.Rarity.COMMON
+	rock_crab.difficulty = Game.Difficulty.MEDIUM
+	rock_crab.trap_only = false
+	rock_crab.swim_only = true
+	rock_crab.location = [Game.Location.Crystalwater_Ocean]
+	rock_crab.hour_start = 0.0
+	rock_crab.hour_end = 0.0
+	rock_crab.category = Game.Category.FISH
+	rock_crab.power_needed = 0.0
+	rock_crab.threshold = 0.0
+	rock_crab.trophy_fish = false
+	items.append(rock_crab)
