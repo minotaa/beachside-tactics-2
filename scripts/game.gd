@@ -496,8 +496,6 @@ func apply_save(data: Dictionary, is_initial_load: bool = false) -> void:
 		catches = data["catches"]
 	if data.has("days"):
 		days = data["days"]
-	if data.has("time"):
-		time = data["time"]
 	if data.has("level"):
 		level = data["level"]
 	if data.has("xp"):
@@ -562,7 +560,6 @@ func get_save_data() -> Dictionary:
 		"equipped_bait": equipped_bait.id if equipped_bait else null,
 		"equipped_trap": equipped_trap.id if equipped_trap else null,
 		"days": days,
-		"time": time,
 		"xp": xp,
 		"level": level,
 		"bestiary": bestiary,

@@ -471,7 +471,7 @@ func preview_item(id: int) -> void:
 	var info = ""
 	var best_stars = Game.highest_star.get(str(item.id), 0)
 	if best_stars > 0:
-		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 		info += "Best Catch: " + star_icon.repeat(best_stars) + "\n"
 	info += "Sell Price: $" + str(roundi(item.sell_price)) + "\n"
 	info += "Location: " + location_name + "\n"
@@ -863,9 +863,9 @@ func _input(event: InputEvent) -> void:
 			$UI/Main.visible = true
 			
 	# NPC interaction toggle
-	if event.is_action_released("interact") and not interacting and interact_cooldown <= 0.0:
+	if event.is_action_released("interact") and not interacting:
 		if state == FishState.INACTIVE and not $UI/Inventory.visible and not $UI/Leveling.visible and not swimming:
-			if not _is_ui_blocking():
+			if not _is_ui_blocking() and interact_cooldown <= 0.0:
 				for body in $Interaction.get_overlapping_areas():	
 					if body.is_in_group("npc"):
 						var npc = body.get_node("..") as NPC
@@ -878,7 +878,7 @@ func _input(event: InputEvent) -> void:
 
 						npc.start_dialogue()
 						interacting = true
-			if not $UI/Vendor.visible:
+			if not $UI/Vendor.visible and interact_cooldown <= 0.0:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("shop"):
 						var npc = body.get_node("..") as NPC
@@ -894,7 +894,7 @@ func _input(event: InputEvent) -> void:
 				$UI/Vendor.visible = false
 				$UI/Main.visible = true
 				current_npc = null
-			if not $UI/Bestiary.visible:
+			if not $UI/Bestiary.visible and interact_cooldown <= 0.0:
 				for body in $Interaction.get_overlapping_areas():
 					if body.is_in_group("bestiary"):
 						var npc = body.get_node("..") as NPC
@@ -1286,7 +1286,7 @@ func _on_fish_caught() -> void:
 			Game.bag.add_item(stack)
 			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
 			add_child(speech_bubble, true)
-			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
@@ -1509,7 +1509,7 @@ func update_inventory() -> void:
 			1: mult = 1.25
 			2: mult = 1.5
 			3: mult = 2.0
-		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 		var stars_str = star_icon.repeat(item.data.get("stars", 0))
 		var separator = " " if item.data.get("stars", 0) > 0 else ""
 		var inventory_entry = preload("res://scenes/ui/inventory_entry.tscn").instantiate()

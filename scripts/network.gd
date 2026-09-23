@@ -1,6 +1,8 @@
 extends Node
 
 var PORT: int = 6466
+const MAX_TIME_UPDATE_TICK: float = 10.0 
+var time_update_tick_timer: float = 0.0
 const DEFAULT_SERVER_IP: String = "127.0.0.1"
 const MAX_PLAYERS: int = 9
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
@@ -1028,6 +1030,14 @@ func update_cosmetics(id: int, body_type: String) -> void:
 	if spawned_players.has(id):
 		spawned_players[id].body_type = body_type
 
+@rpc("authority", "call_remote", "reliable")
+func update_time(time: float) -> void:
+	Game.time = time
+
+func send_time() -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_unique_id() == 1:
+		update_time.rpc(Game.time)
+
 @rpc("any_peer", "call_remote", "reliable")
 func temporary_save_data_sending_mechanic_probably_shouldnt_use_this(username: String, save_data: Dictionary) -> void:
 	players.append({
@@ -1129,9 +1139,9 @@ func swim_catch_result(stack_data: Dictionary, caught_it: bool) -> void:
 	if not caught_it:
 		Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 	else:
-		var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
-		player.add_child(speech_bubble)
-		var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+		var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
+		player.add_child(speech_bubble, true)
+		var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 		var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 		speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)
 		Game.play_sfx("res://assets/sounds/catch.ogg", 2)
@@ -1170,9 +1180,9 @@ func instantly_catch(stack_data: Dictionary, caught_it: bool) -> void:
 		if not caught_it:
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
-			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
-			add_child(speech_bubble)
-			var star_icon = "[img width=16 height=16]res://assets/sprites/star.png[/img]"
+			var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
+			add_child(speech_bubble, true)
+			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)
 			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
@@ -1308,9 +1318,14 @@ func ripple_water() -> void:
 		Game.play_sfx_briefly("res://assets/sounds/ripples.ogg", 1.3, -20)
 
 # process
+
 func _process(delta: float) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_unique_id() != 1:
+	if not multiplayer.has_multiplayer_peer() or  multiplayer.get_unique_id() != 1:
 		return
+	time_update_tick_timer -= delta
+	if time_update_tick_timer <= 0.0:
+		time_update_tick_timer = MAX_TIME_UPDATE_TICK
+		send_time()
 	for player in players:
 		var save_data = player["save_data"]
 		if not save_data.has("traps"):

@@ -9,6 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://dkcvibmtmykwr" path="res://assets/sprites/panel4.png" id="7_r1poc"]
 [ext_resource type="Texture2D" uid="uid://b7rsmvpbng0jm" path="res://assets/sprites/panel7.png" id="8_k324i"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nubpm"]
+light_mode = 1
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q4paj"]
 texture = ExtResource("5_8vcit")
 texture_margin_left = 16.0
@@ -43,6 +46,7 @@ modulate_color = Color(1, 1, 1, 0.8745098)
 
 [node name="Choice Bubble" type="MarginContainer" unique_id=1523930421]
 z_index = 132
+material = SubResource("CanvasItemMaterial_nubpm")
 custom_minimum_size = Vector2(290, 43)
 custom_maximum_size = Vector2(600, -1)
 offset_right = 512.0
@@ -51,6 +55,7 @@ scale = Vector2(0.25, 0.25)
 script = ExtResource("1_uapag")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=393397437]
+use_parent_material = true
 layout_mode = 2
 texture = ExtResource("2_ygja3")
 patch_margin_left = 16
@@ -59,9 +64,11 @@ patch_margin_right = 16
 patch_margin_bottom = 16
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=299367050]
+use_parent_material = true
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1273803281]
+use_parent_material = true
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
@@ -69,6 +76,7 @@ theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
 [node name="Label" type="RichTextLabel" parent="VBoxContainer/MarginContainer" unique_id=1004467143]
+use_parent_material = true
 layout_mode = 2
 theme_override_constants/line_separation = 5
 theme_override_fonts/normal_font = ExtResource("3_u6ocw")
@@ -79,12 +87,14 @@ scroll_active = false
 horizontal_alignment = 1
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer" unique_id=1544494715]
+use_parent_material = true
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 12
 
 [node name="Choices" type="HBoxContainer" parent="VBoxContainer/MarginContainer2" unique_id=1076847760]
+use_parent_material = true
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
