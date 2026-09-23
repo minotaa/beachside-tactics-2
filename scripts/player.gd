@@ -1139,9 +1139,10 @@ func _process_input(delta: float) -> void:
 		var accel_time = 0.9 if input_vector.length_squared() > 0 else 1.3
 		var accel = BASE_SWIMMING_SPEED / accel_time
 		velocity = velocity.move_toward(target_velocity, accel * delta)
-		$Splashes.rotation = velocity.angle() - PI/2
-		if velocity.length() > 25 and not $Splashes.emitting:
+		if velocity.length() > 35 and not $Splashes.emitting:
 			$Splashes.restart()
+		if velocity.length() <= 15:
+			$Splashes.rotation = velocity.angle() - PI/2
 		if immersive_interact != null or $UI/Swimming/Minigame.visible:
 			velocity = Vector2.ZERO	
 	else:
@@ -1872,7 +1873,7 @@ func _physics_process(delta: float) -> void:
 			swim_fish_spawn_timer = 0.0
 			var level = get_parent()
 			if level != null and level.has_method("spawn_fish_shadows"):
-				level.spawn_fish_shadows(Vector2(0,0), 500.0, 25, 128.0)
+				level.spawn_fish_shadows(Vector2(0,0), 350.0, 25, 128.0)
 			else:
 				print("nope")
 	
