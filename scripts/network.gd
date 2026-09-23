@@ -204,6 +204,7 @@ func request_start_swim_session() -> void:
 	var balance = save_data.get("balance", 0.0)
 	if balance >= 250.0:
 		balance -= 250.0
+		save_data["swims"] += 1
 		save_data["balance"] = balance
 		Toast.add.rpc_id(id, "You purchased a Swim Session!")
 		sync_save_data.rpc_id(id, save_data)
