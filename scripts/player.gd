@@ -1275,47 +1275,6 @@ func _cancel_bobber(message: String = "") -> void:
 	if bobber != null:
 		bobber.queue_free()
 
-func _on_fish_caught() -> void:
-	print("Caught the fish.")
-	if bobber != null:
-		var stack := ItemStack.new(Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id")), 1)
-		stack.data["stars"] = Game.roll_stars()
-		if Game.bag.total_size() > Game.get_max_inventory_size(Game.get_save_data()):
-			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-		else:
-			Game.bag.add_item(stack)
-			var speech_bubble = load("res://scenes/ui/speech_bubble.tscn").instantiate()
-			add_child(speech_bubble, true)
-			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
-			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
-			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(global_position.x, global_position.y - 8), 30)
-			#Toast.add("You caught a %s %s!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
-			Game.bestiary[str(stack.type.id)] = Game.bestiary.get(str(stack.type.id), 0) + stack.amount
-			Game.highest_star[str(stack.type.id)] = max(
-				Game.highest_star.get(str(stack.type.id), 0),
-				stack.data.get("stars", 0)
-			)
-			Game.play_sfx("res://assets/sounds/catch.ogg", 2)
-	state = FishState.REELING_BACK
-	bobber.get_node("Splashes").amount = 64
-	Game.catches += 1
-
-	var fish := Catalog.get_item(bobber.get_node("Bobber Fish").get_meta("fish_id"))
-	var xp_table := {
-		Game.Rarity.COMMON:    50.0,
-		Game.Rarity.UNCOMMON:  100.0,
-		Game.Rarity.RARE:      750.0,
-		Game.Rarity.EPIC:      2000.0,
-		Game.Rarity.LEGENDARY: 7500.0
-	}
-	Game.add_xp(xp_table.get(fish.rarity, 0.0))
-
-func _on_fish_lost() -> void:
-	state = FishState.INACTIVE
-	bobber_safe = true
-	play_idle_animation()
-	print("Lost the fish.")
-	#Game.whiffs += 1
 var i_float_timer = 0.0
 
 func set_trap(id: int) -> void:
