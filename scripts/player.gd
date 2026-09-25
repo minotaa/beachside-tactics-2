@@ -1861,7 +1861,6 @@ func _physics_process(delta: float) -> void:
 	if swimming and can_deplete_swimming_stamina and immersive_interact == null:
 		swimming_stamina -= delta
 		if swimming_stamina <= 0.0:
-			swimming = false
 			Toast.add("You're too tired! You got out of the water. You collected " + str(swim_minigame_fish_caught) + " fish!")
 			stop_swimming()
 		if $UI/Swimming/Minigame.visible:
