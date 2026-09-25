@@ -194,7 +194,6 @@ func request_give_diving_suit() -> void:
 		upgrades.add_item(ItemStack.new(Catalog.get_item(39), 1))
 		save_data["upgrades"] = upgrades.to_list()
 		purchase_confirmed_upgrade.rpc_id(id, 39, 1)
-		Toast.add.rpc_id(id, "You bought a Diving Suit!")
 		sync_save_data.rpc_id(id, save_data)
 
 @rpc("any_peer", "call_remote", "reliable")

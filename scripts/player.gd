@@ -466,7 +466,7 @@ func preview_item(id: int) -> void:
 
 	var catches = Game.bestiary.get(str(item.id), 0)
 	var rarity_name = Game.Rarity.find_key(item.rarity).capitalize()
-	var location_name = Game.Location.find_key(item.location).replace("_", " ")
+	var location_name = ", ".join(item.location.map(func(i): return Game.Location.find_key(i).replace("_", " ")))
 
 	var info = ""
 	var best_stars = Game.highest_star.get(str(item.id), 0)
@@ -1745,7 +1745,6 @@ func _process_ui(delta: float) -> void:
 					bobber.queue_free()
 				play_idle_animation()
 
-
 		$Camera2D.global_position = (bobber.global_position + global_position) / 2
 		var z1 = abs(bobber.global_position.x - global_position.x) / (get_viewport_rect().size.x-25)
 		var z2 = abs(bobber.global_position.y - global_position.y) / (get_viewport_rect().size.y-25)
@@ -1802,16 +1801,23 @@ func _process_multiplayer(delta: float) -> void:
 
 	if network_moving:
 		last_direction = network_direction
-		if $Base.animation != body_type + "_walk_" + network_direction:
-			play_animation(body_type + "_walk_" + network_direction)
-	else:
-		if $Base.animation.begins_with(body_type + "_walk") and not network_animation.begins_with(body_type + "_fish"):
-			last_direction = network_direction
-			play_idle_animation()
+		if not network_animation.begins_with("diver"):
+			if $Base.animation != body_type + "_walk_" + network_direction:
+				play_animation(body_type + "_walk_" + network_direction)
 		else:
-			last_direction = network_direction
-			if network_animation.begins_with(body_type + "_fish") and not $Base.animation.begins_with(body_type + "_fish"):
-				play_animation(network_animation)
+			if $Base.animation != "diver_swim_" + network_direction:
+				play_animation("diver_swim_" + network_direction)
+	else:
+		if not network_animation.begins_with("diver"):
+			if not $Base.animation.begins_with(body_type + "_idle") and network_animation.begins_with(body_type + "_idle"):
+				last_direction = network_direction
+				play_idle_animation()
+			else:
+				last_direction = network_direction
+				if network_animation.begins_with(body_type + "_fish") and not $Base.animation.begins_with(body_type + "_fish"):
+					play_animation(network_animation)
+		else:
+			play_animation("diver_swim_" + network_direction)
 
 	_process_remote_bobber(delta)
 

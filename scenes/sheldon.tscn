@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://doh8o43cfoq1n"]
+
+[ext_resource type="Script" uid="uid://g7ufpe5yufl4" path="res://scripts/sheldon.gd" id="1_tmlc6"]
+[ext_resource type="Texture2D" uid="uid://ismws60usfo4" path="res://assets/sprites/shadow.png" id="2_kr8rm"]
+[ext_resource type="Texture2D" uid="uid://0p0jk37pqa2v" path="res://assets/sprites/sheldon-blink.png" id="3_popqq"]
+[ext_resource type="Texture2D" uid="uid://cmhloujtbb5nq" path="res://assets/sprites/sheldon-idle.png" id="4_kr8rm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_57hfc"]
+atlas = ExtResource("3_popqq")
+region = Rect2(0, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yi601"]
+atlas = ExtResource("3_popqq")
+region = Rect2(16, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t4id3"]
+atlas = ExtResource("4_kr8rm")
+region = Rect2(0, 0, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ujl5"]
+atlas = ExtResource("4_kr8rm")
+region = Rect2(16, 0, 16, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_d8vte"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_57hfc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yi601")
+}],
+"loop": 1,
+"name": &"blink",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t4id3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ujl5")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 1.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rw3ai"]
+size = Vector2(8, 19)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_popqq"]
+size = Vector2(18, 25)
+
+[node name="Sheldon" type="CharacterBody2D" unique_id=804101878]
+z_index = 1
+y_sort_enabled = true
+script = ExtResource("1_tmlc6")
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1368585064]
+z_index = -1
+position = Vector2(0, 11)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("2_kr8rm")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=854247317]
+sprite_frames = SubResource("SpriteFrames_d8vte")
+animation = &"blink"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1169953044]
+position = Vector2(0, 6.5)
+shape = SubResource("RectangleShape2D_rw3ai")
+
+[node name="Shop" type="Area2D" parent="." unique_id=145546351 groups=["shop"]]
+position = Vector2(0, 9)
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shop" unique_id=309900125]
+position = Vector2(0, -5.5)
+shape = SubResource("RectangleShape2D_popqq")

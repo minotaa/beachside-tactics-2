@@ -71,35 +71,40 @@ func _ready() -> void:
 			{
 				"text": "Okay so- step one. There's a turtle that just... shows up. Regularly. If you fish enough, in the right spot, it's basically guaranteed eventually. That's your baseline. Start there.",
 				"condition": "trophy_regular_not_caught",
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		],
 		"hint_night": [
 			{
 				"text": "Next one only comes out at night. I don't know why. Melatonin, probably. That's a turtle thing too, I think. Just- fish at night. Trust the process.",
 				"condition": "trophy_night_not_caught",
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		],
 		"hint_day": [
 			{
 				"text": "This next one's the opposite- daytime only. Photosynthesis? No wait, that's not- okay, I don't actually know why, but it's a day thing. Go fish during the day.",
 				"condition": "trophy_day_not_caught",
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		],
 		"hint_trap": [
 			{
 				"text": "This one won't bite a line. You need a trap. Patience, see, that's the real secret ingredient. The youth thing doesn't work if you rush it. I read that somewhere.",
 				"condition": "trophy_trap_not_caught",
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		],
 		"hint_glitch": [
 			{
 				"text": "Okay, this one's- don't tell anyone I told you this. There's a spot on the cliffs. You're not supposed to be able to fish there. But if you line it up just right... anyway. I never said anything.",
 				"condition": "trophy_glitch_not_caught",
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		],
 		"trophy_turnin": [
@@ -107,14 +112,16 @@ func _ready() -> void:
 				"text": "Oh- oh wow, you actually- okay. Okay! This is- yes. This is exactly what I needed. Here, take this, don't ask where the money came from.",
 				"next": null,
 				"condition": "has_trophy_turtle_to_turn_in",
-				"quest_trigger": "give_trophy_turtle_reward"
+				"quest_trigger": "give_trophy_turtle_reward",
+				"trigger_action": true
 			}
 		],
 
 		"default": [
 			{
 				"text": ["Still working on it? Good. Good. The research doesn't stop just because it's inconvenient.", "Thanks for letting me have all those turtles, I should have something your troubles."],
-				"next": null
+				"next": null,
+				"trigger_action": true
 			}
 		]
 	}
