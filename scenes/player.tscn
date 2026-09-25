@@ -1543,6 +1543,7 @@ texture = ExtResource("13_f1ej7")
 position = Vector2(22, 0)
 
 [node name="Sprite2D" type="Sprite2D" parent="Minigame/Hook" unique_id=794713038]
+use_parent_material = true
 texture = ExtResource("16_a8ls1")
 
 [node name="Area2D" type="Area2D" parent="Minigame/Hook" unique_id=880474768]

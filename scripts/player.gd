@@ -355,6 +355,8 @@ func stop_swimming() -> void:
 	swim_fish_spawn_timer = SWIM_FISH_SPAWN_INTERVAL
 	play_idle_animation()
 	await get_tree().create_timer(0.5).timeout
+	$Base.rotation = 0.0
+	$Camera2D.offset = Vector2.ZERO
 	await Fade.fade_in()
 	
 var selected_item
