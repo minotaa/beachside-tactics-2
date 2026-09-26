@@ -665,6 +665,8 @@ func update_catalog() -> void:
 		children.queue_free()
 	$UI/Vendor/TabContainer/Shop/Balance.text = "Your balance: $" + str(roundi(Game.balance))
 
+	await get_tree().process_frame
+
 	_populate_category(Game.Category.RODS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Rods/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.BAIT, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Bait/ScrollContainer/HBoxContainer")
 	_populate_category(Game.Category.TRAPS, $"UI/Vendor/TabContainer/Shop/ScrollContainer/VBoxContainer/Traps/ScrollContainer/HBoxContainer")
@@ -730,11 +732,12 @@ func _on_interaction_ended() -> void:
 var current_npc
 
 func _on_dialogue_finished(npc: NPC) -> void:
+	print(npc)
 	current_npc = npc
-	await get_tree().create_timer(0.5).timeout
 	interact_cooldown = 1.0
 	interacting = false
 	immersive_interact = null
+	await get_tree().create_timer(0.5).timeout
 	if npc.action == NPC.Action.OPEN_SHOP and not npc.selling.is_empty() and not swimming and npc.pending_action:
 		if not $UI/Vendor.visible:
 			Game.play_sfx("res://assets/sounds/jingle.ogg", -1)
@@ -744,6 +747,7 @@ func _on_dialogue_finished(npc: NPC) -> void:
 			$UI/Main.visible = false
 			$UI/Leveling.visible = false
 			update_catalog()
+			#print("CATALOG npc=", current_npc, " selling=", current_npc.selling if current_npc else "none", " items=", Catalog.items.size(), " level=", Game.level, " balance=", Game.balance)
 	if npc.action == NPC.Action.OPEN_BESTIARY and npc.pending_action:
 		if not $UI/Bestiary.visible: 
 			Game.play_sfx("res://assets/sounds/bookopen.ogg", -1)
@@ -855,7 +859,7 @@ func _input(event: InputEvent) -> void:
 			clamp(intended_zoom.y - 0.75, 2.0, 6.0)
 		)
 
-	if event.is_action_pressed("open_leveling") and not swimming:
+	if event.is_action_pressed("open_leveling") and not swimming and not _is_ui_blocking():
 		if not $UI/Leveling.visible:
 			$UI/Leveling.visible = true
 			$UI/Main.visible = false
@@ -1010,7 +1014,7 @@ func _process_input(delta: float) -> void:
 	var is_moving := velocity_length > 0
 
 	# Hold fish button to reel bobber back manually
-	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe:
+	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe and not _is_ui_blocking():
 		if bobber != null:
 			Game.play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -2, -1.0, true, true)
 			bobber.global_position = bobber.global_position.move_toward(

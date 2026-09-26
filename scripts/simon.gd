@@ -11,7 +11,7 @@ func _ready() -> void:
 			{
 				"text": "Hey there champ!!! Turtles are AMAZING swimmers you know, and I would know!!! I'm a turtle!",
 				"condition": "suit_not_owned",
-				"else": "offer_swim",
+				"else": "offer_first_swim",
 				"next": "offer_suit2"
 			}
 		],
@@ -35,6 +35,31 @@ func _ready() -> void:
 					{ "label": "Yes", "condition": "has_1000", "next_true": "sold", "next_false": "too_poor" },
 					{ "label": "No", "next": "declined" }
 				]
+			}
+		],
+		"offer_first_swim": [
+			{
+				"text": "Look at you in that suit champ!!! Time for your VERY FIRST SWIM! Rule one: watch your stamina. Rule two: mind the dark spots. Rule three: HAVE FUN!",
+				"condition": "never_swam",
+				"else": "offer_swim",
+				"next": "offer_first_swim2",
+				"immersive": true
+			}
+		],
+		"offer_first_swim2": [
+			{
+				"text": "Every dip costs $250. Cheap for a whole ocean, right?! Ready to jump in?",
+				"choices": [
+					{ "label": "Yes", "condition": "has_250", "next_true": "first_swim_start", "next_false": "swim_too_poor" },
+					{ "label": "No", "next": "swim_declined" }
+				]
+			}
+		],
+		"first_swim_start": [
+			{
+				"text": "THAT'S MY STUDENT! Go make a splash!!!",
+				"next": null,
+				"quest_trigger": "start_swim_session"
 			}
 		],
 		"sold": [
@@ -124,6 +149,8 @@ func _evaluate_condition(condition: String) -> bool:
 			return Game.balance >= 1000
 		"has_250":
 			return Game.balance >= 250
+		"never_swam":
+			return Game.swims <= 0
 		_:
 			return true
 

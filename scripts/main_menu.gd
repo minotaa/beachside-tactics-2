@@ -5,7 +5,7 @@ var selected_character = "cat0"
 func _on_play_pressed() -> void:
 	var username = $UI/Main/Username.text
 	print($UI/Main/Settings/Character/CheckButton.selected)
-	await Network.join_server("10.10.20.2", username)
+	await Network.join_server("localhost", username)
 	# 10.10.20.2
 
 func _connect_button_sfx(button: Button):

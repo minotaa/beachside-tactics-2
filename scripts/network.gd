@@ -1181,7 +1181,7 @@ func instantly_catch(stack_data: Dictionary, caught_it: bool) -> void:
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
 			var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
-			add_child(speech_bubble, true)
+			player.add_child(speech_bubble, true)
 			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)

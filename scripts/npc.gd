@@ -90,16 +90,20 @@ func start_dialogue(tree_id: String = "") -> void:
 
 func _pick_available_tree() -> String:
 	for key in default_trees:
-		if not dialogue_trees.has(key):
-			continue
-		var entry = dialogue_trees[key][0]
-		if entry.has("condition") and not _check_condition(entry):
-			if entry.has("else") and dialogue_trees.has(entry["else"]):
-				return entry["else"]
-			continue
-		return key
+		var resolved := _resolve_tree(key)
+		if resolved != "":
+			return resolved
 	return ""
 
+func _resolve_tree(key: String, depth: int = 0) -> String:
+	if depth > 8 or not dialogue_trees.has(key):
+		return ""
+	var entry = dialogue_trees[key][0]
+	if entry.has("condition") and not _check_condition(entry):
+		if entry.has("else"):
+			return _resolve_tree(entry["else"], depth + 1)
+		return ""
+	return key
 
 func _play_entry(entry: Dictionary) -> void:
 	var entry_immersive: bool = entry.get("immersive", is_immersive)

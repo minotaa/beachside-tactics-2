@@ -61,7 +61,6 @@ func _ready() -> void:
 			{
 				"text": "Take a look. Get the rod. Then go fish.",
 				"next": null,
-				"quest_trigger": "open_shop",
 				"trigger_action": true
 			}
 		],
