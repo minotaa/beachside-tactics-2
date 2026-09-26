@@ -9,6 +9,7 @@
 light_mode = 1
 
 [node name="Speech Bubble" type="MarginContainer" unique_id=1523930421]
+top_level = true
 z_index = 132
 material = SubResource("CanvasItemMaterial_ua5cf")
 custom_minimum_size = Vector2(290, 43)
@@ -16,6 +17,7 @@ custom_maximum_size = Vector2(600, -1)
 offset_right = 290.0
 offset_bottom = 43.0
 scale = Vector2(0.25, 0.25)
+mouse_default_cursor_shape = 2
 script = ExtResource("1_n8tpx")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=393397437]

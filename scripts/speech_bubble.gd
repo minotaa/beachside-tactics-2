@@ -1,27 +1,10 @@
 extends MarginContainer
 
-var _marker: Vector2
-var _tracking: bool = false
-
 func _ready() -> void:
 	$MarginContainer/Label.text = "test"
 
-func _process(_delta: float) -> void:
-	if _tracking:
-		global_position = Vector2(
-			_marker.x - (size.x * 0.1166),
-			_marker.y - (size.y * 0.25)
-		)
-
 func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersive: bool = false, display_duration: float = 1.5, dialogue: bool = false) -> void:
-	_marker = marker
-	_tracking = true
-
 	visible = false
-	$MarginContainer/TextureRect.visible = false
-	$MarginContainer/Label.text = ""
-	await get_tree().process_frame
-
 	$MarginContainer/TextureRect.visible = false
 	$MarginContainer/Label.text = ""
 	await get_tree().process_frame
@@ -31,6 +14,10 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 		if not immersive and Input.is_action_just_pressed("interact"):
 			$MarginContainer/Label.text = line
 			await get_tree().process_frame
+			global_position = Vector2(
+				marker.x - (size.x * 0.1166),
+				marker.y - (size.y * 0.25)
+			)
 			visible = true
 			break
 
@@ -44,17 +31,30 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 						i = end_tag + 6
 						$MarginContainer/Label.text = line.substr(0, i)
 						await get_tree().process_frame
+						global_position = Vector2(
+							marker.x - (size.x * 0.1166),
+							marker.y - (size.y * 0.25)
+						)
 						visible = true
 						continue
 
 				$MarginContainer/Label.text = line.substr(0, close + 1)
 				await get_tree().process_frame
+				global_position = Vector2(
+					marker.x - (size.x * 0.1166),
+					marker.y - (size.y * 0.25)
+				)
 				i = close + 1
 				visible = true
 				continue
 
 		$MarginContainer/Label.text = line.substr(0, i + 1)
 		await get_tree().process_frame
+
+		global_position = Vector2(
+			marker.x - (size.x * 0.1166),
+			marker.y - (size.y * 0.25)
+		)
 
 		visible = true
 
@@ -64,6 +64,10 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 			if not immersive and Input.is_action_just_pressed("interact"):
 				$MarginContainer/Label.text = line
 				await get_tree().process_frame
+				global_position = Vector2(
+					marker.x - (size.x * 0.1166),
+					marker.y - (size.y * 0.25)
+				)
 				i = line.length()
 				break
 
@@ -89,5 +93,4 @@ func play_line(line: String, marker: Vector2, text_speed: float = 20.0, immersiv
 	else:
 		await get_tree().create_timer(display_duration).timeout
 
-	_tracking = false
 	queue_free()

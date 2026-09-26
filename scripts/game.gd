@@ -392,6 +392,9 @@ func set_time(value: Variant) -> void:
 		LimboConsole.info("Time set to: " + get_time_string() + " (" + TimeOfDay.keys()[get_day_time()] + ")")
 
 func _ready() -> void:	
+	Input.set_custom_mouse_cursor(load("res://assets/sprites/pointer.png"), Input.CURSOR_ARROW)
+	Input.set_custom_mouse_cursor(load("res://assets/sprites/pointing.png"), Input.CURSOR_POINTING_HAND)
+	Input.set_custom_mouse_cursor(load("res://assets/sprites/i-cross.png"), Input.CURSOR_IBEAM)
 	var arguments = OS.get_cmdline_args()
 	for arg in arguments:
 		if arg == "--dev":

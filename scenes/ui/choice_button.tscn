@@ -41,6 +41,7 @@ modulate_color = Color(1, 1, 1, 0.8745098)
 
 [node name="Panel" type="Button" unique_id=2006541894]
 use_parent_material = true
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("1_4uoxy")
 theme_override_styles/normal = SubResource("StyleBoxTexture_q4paj")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_x0lj2")

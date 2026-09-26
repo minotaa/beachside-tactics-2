@@ -943,6 +943,14 @@ func _get_spawn_position(id: int) -> Vector2:
 			break
 	return Vector2.ZERO
 
+#@rpc("authority", "call_remote", "reliable")
+#func show_chat_bubble(sender_id: int, message: String) -> void:
+	#var target = spawned_players.get(sender_id)
+	#if target == null and sender_id == multiplayer.get_unique_id():
+		#target = Game.get_player()
+	#if target != null:
+		#target.show_chat_bubble(message)
+
 @rpc("authority", "call_remote", "reliable")
 func send_message(message: String, username: String) -> void:
 	if Game.get_player() != null:
@@ -967,6 +975,7 @@ func send_message_to_server(message: String) -> void:
 	print(log_line)
 	for p in players:
 		send_message.rpc_id(p["id"], message, username)
+		#show_chat_bubble.rpc_id(p["id"], id, message)
 
 @rpc("authority", "call_local", "reliable")
 func spawn_player(id: int, spawn_position: Vector2, username: String, body_type: String) -> void:
@@ -1140,7 +1149,8 @@ func swim_catch_result(stack_data: Dictionary, caught_it: bool) -> void:
 		Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 	else:
 		var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
-		player.add_child(speech_bubble, true)
+		player.get_node("Abovehead").add_child(speech_bubble, true)
+		#player.get_node("Abovehead").move_child(player.get_node("Abovehead/FishPowerBar"), 0)
 		var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 		var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 		speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)
@@ -1181,7 +1191,8 @@ func instantly_catch(stack_data: Dictionary, caught_it: bool) -> void:
 			Toast.add("Your tackle box is full! You released the %s %s back into the water!" % [Game.Rarity.find_key(stack.type.rarity), stack.type.name])
 		else:
 			var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
-			player.add_child(speech_bubble, true)
+			player.get_node("Abovehead").add_child(speech_bubble, true)
+			#player.get_node("Abovehead").move_child(player.get_node("Abovehead/FishPowerBar"), 0)
 			var star_icon = "[img width=24 height=24]res://assets/sprites/star.png[/img]"
 			var stars = star_icon.repeat(stack.data.get("stars", 0)) + " " if stack.data.get("stars", 0) > 0 else ""
 			speech_bubble.play_line("You caught a %s%s%s %s!" % [stars, Game.get_rarity_color(stack.type.rarity), Game.Rarity.find_key(stack.type.rarity), stack.type.name], Vector2(player.global_position.x, player.global_position.y - 8), 30)

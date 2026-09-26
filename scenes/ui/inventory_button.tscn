@@ -49,6 +49,7 @@ offset_bottom = 0.49999237
 grow_horizontal = 2
 grow_vertical = 2
 offset_transform_enabled = true
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxTexture_v1t68")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_o4de1")
 theme_override_styles/hover = SubResource("StyleBoxTexture_b2sbn")

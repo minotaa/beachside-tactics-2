@@ -1014,7 +1014,7 @@ func _process_input(delta: float) -> void:
 	var is_moving := velocity_length > 0
 
 	# Hold fish button to reel bobber back manually
-	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe and not _is_ui_blocking():
+	if Input.is_action_pressed("fish") and state == FishState.FISHING and not bobber_safe and not ($UI/Leveling.visible or $UI/Inventory.visible or $UI/Vendor.visible or $UI/Trap.visible):
 		if bobber != null:
 			Game.play_sfx_briefly("res://assets/sounds/reeling.ogg", 0.2, -2, -1.0, true, true)
 			bobber.global_position = bobber.global_position.move_toward(
@@ -2098,6 +2098,12 @@ func add_message(message: String, username: String) -> void:
 	await get_tree().process_frame
 	$UI/Main/Chat.scroll_vertical = $UI/Main/Chat.get_v_scroll_bar().max_value
 
+#func show_chat_bubble(message: String) -> void:
+	#var speech_bubble = preload("res://scenes/ui/speech_bubble.tscn").instantiate()
+	#$Abovehead.add_child(speech_bubble, true)
+	#speech_bubble.size_flags_horizontal = 1
+	#speech_bubble.play_line(message, Vector2(global_position.x, global_position.y - 8), 30.0, false, 4.0)
+
 func _write_chat_log(player_name: String, message: String) -> void:
 	var log_line = "[%s] %s: %s" % [
 		Time.get_datetime_string_from_system(),
@@ -2127,6 +2133,7 @@ func _on_chat_bar_text_submitted(new_text: String) -> void:
 		Network.send_message_to_server.rpc_id(1, new_text)
 	else:
 		add_message(new_text, Network.player_name)
+		#show_chat_bubble(new_text)
 
 func _on_chat_bar_focus_entered() -> void:
 	for child in $UI/Main/Chat/VBoxContainer.get_children():

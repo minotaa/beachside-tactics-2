@@ -59,6 +59,7 @@ offset_right = 256.0
 offset_bottom = 68.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("1_l6cm7")
 theme_override_font_sizes/font_size = 24
 text = "Play"
@@ -113,6 +114,7 @@ custom_minimum_size = Vector2(256, 0)
 layout_mode = 2
 offset_transform_enabled = true
 offset_transform_position = Vector2(-4, 2)
+mouse_default_cursor_shape = 2
 selected = 0
 item_count = 2
 popup/item_0/text = "cat0"
@@ -132,6 +134,7 @@ text = "Fullscreen"
 layout_mode = 2
 offset_transform_enabled = true
 offset_transform_position = Vector2(-4, 2)
+mouse_default_cursor_shape = 2
 
 [node name="Close Shop" type="HBoxContainer" parent="UI/Main/Settings" unique_id=499521785]
 layout_mode = 2
@@ -145,6 +148,7 @@ text = "Close shop upon selling"
 layout_mode = 2
 offset_transform_enabled = true
 offset_transform_position = Vector2(-4, 2)
+mouse_default_cursor_shape = 2
 
 [node name="SFX" type="HBoxContainer" parent="UI/Main/Settings" unique_id=148001092]
 layout_mode = 2
@@ -159,6 +163,7 @@ custom_minimum_size = Vector2(144, 0)
 layout_mode = 2
 offset_transform_enabled = true
 offset_transform_position = Vector2(1.5, 9)
+mouse_default_cursor_shape = 2
 value = 100.0
 
 [connection signal="pressed" from="UI/Main/Play" to="." method="_on_play_pressed"]
